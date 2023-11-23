@@ -1,12 +1,18 @@
-# Go to Emscripten SDK directory
+#!/bin/bash
+# The above line specifies that this is a Bash script
+
+# Change to the emsdk directory
 cd ./emsdk
-# Temporarily set up the environment variables for the EMCC compiler
+
+# Source the emsdk environment script to set up the necessary variables
 source ./emsdk_env.sh
-# Translate the main CPP file to javascript 
+
+# Compile the main.cpp source file using emcc (Emscripten Compiler)
+# -s WASM=1: Enable WebAssembly output
+# -s USE_SDL=2: Enable SDL2 support
+# -s USE_SDL_IMAGE=2: Enable SDL2_image support
+# -o ../../out/web_build/index.js: Output the compiled JavaScript to the specified path
 emcc ../../src/main.cpp -s WASM=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -o ../../out/web_build/index.js --emrun
 
-# Bypass CORS policies and open the HTML file
-# (you can open index.html manually, although 
-# most modern browsers block loading of certain 
-# files in certain ways with CORS)
+# Use emrun to serve the HTML file and run the compiled JavaScript
 emrun ../../out/web_build/index.html
