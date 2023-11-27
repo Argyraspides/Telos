@@ -12,6 +12,12 @@ source ./emsdk_env.sh
 # -s USE_SDL=2: Enable SDL2 support
 # -s USE_SDL_IMAGE=2: Enable SDL2_image support
 # -o ../../out/web_build/index.js: Output the compiled JavaScript to the specified path
+
+header_file="../../src/BUILD_EMCC.h"
+new_string="#define BUILD_EMCC 1"
+sed -i "1s/.*/$new_string/" "$header_file"
+echo "$header_file definition changed to: $new_string"
+
 emcc ../../src/main.cpp -s WASM=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -o ../../out/web_build/index.js --emrun
 
 # Use emrun to serve the HTML file and run the compiled JavaScript
