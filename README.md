@@ -17,7 +17,7 @@ some boilerplate SDL2 code are provided if you wish to build from source.
 - ### [Emscripten](https://emscripten.org/index.html)
   - Already included in this repo, used to compile C++ to JS and ultimately [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly) (.wasm).
 
-## Building & Running
+## Building & Running (Debian Linux)
 ### The instructions below are for Debian-based Linux systems. Windows and macOS instructions will be added soon.
 
 To install the prerequisites:
