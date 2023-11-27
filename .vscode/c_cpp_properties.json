@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "emcc",
+            "compilerPath": "${workspaceFolder}/build_tools/emsdk/upstream/emscripten/emcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/build_tools/emsdk/upstream/emscripten/system/**"
+            ]
+        },
+        {
+            "name": "gcc",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "includePath": []
+        }
+    ],
+    "version": 4
+}

@@ -1,5 +1,10 @@
+#include "BUILD_EMCC.h"
 #include <SDL2/SDL.h>
-#include <emscripten.h>
+
+#if BUILD_EMCC
+    #include <emscripten.h>
+#endif
+
 #include <cmath>
 
 SDL_Window* pwindow;
@@ -49,6 +54,11 @@ void loop()
 
 int main(int, char**)
 {
-    emscripten_set_main_loop(loop, 60, 0);
-    return 0;
+    #if BUILD_EMCC
+        emscripten_set_main_loop(loop, 60, 0);
+    #endif
+
+    #if !BUILD_EMCC
+        loop();
+    #endif
 }
