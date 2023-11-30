@@ -13,25 +13,19 @@ some boilerplate SDL2 code are provided if you wish to build from source.
 - ### [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly) compatible browser
   - Nearly all modern browsers support WebAssembly. If you want to check if your browser is supported see [this page](https://caniuse.com/wasm).
 - ### [SDL2](https://www.libsdl.org/)
-  - C++ Library used to render graphics and obtain peripheral inputs.
+  - Already included in this repo. SDL2 is a C Library which provides a low-level interface for multimedia and input functionalities.
 - ### [Emscripten](https://emscripten.org/index.html)
-  - Already included in this repo, used to compile C++ to JS and ultimately [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly) (.wasm).
-
-## Building & Running (Debian Linux)
-### The instructions below are for Debian-based Linux systems. Windows and macOS instructions will be added soon.
-
-To install the prerequisites:
+  - Already included in this repo. EMscripten is a toolchain used to compile C++ to JS and ultimately [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly) (.wasm).
+- ### [ImGui](https://github.com/ocornut/imgui)
+  - Already included in this repo. ImGui is a GUI library for C++.
+## Building & Running (Linux)
+To build and run in a web browser, simply run in the ``lib`` folder:
 ```
-cd build_tools
-./prerequisites.sh
+./run_web.sh
 ```
-To build *and run* the application onto a browser:
+To build and run locally, i.e. a normal OS window:
 ```
-./build_web.sh
-```
-To build *and run* the application locally (i.e. in an SDL2 application window):
-```
-./build_local.sh
+./run_local.sh
 ```
 
 If you get a permission denied error for running any of the shell scripts, you can simply run:
