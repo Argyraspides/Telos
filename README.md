@@ -8,7 +8,7 @@
 
 
 This is the source code for a highly improved version of my previous physics engine, which will also be able to run on any modern browser through the Emscripten toolchain (compilation into WebAssembly).
-It uses the SDL2 graphics library for graphics output. Upon completion, you may use the engine on my website [here](https://gaugamela.me). It is still in the planning stages. For the moment, a bare-bones build toolkit and 
+It uses the SDL2 graphics library for graphics output and ImGui for the UI. Upon completion, you may use the engine on my website [here](https://gaugamela.me). It is still in the planning stages. For the moment, a bare-bones build toolkit and 
 some boilerplate SDL2 code are provided if you wish to build from source.
 
 ## Prerequisites
