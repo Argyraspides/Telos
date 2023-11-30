@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/Telos.dir/src/main.cpp.o -o Telos  -Wl,-rpath,/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2 lib/SDL2/libSDL2-2.0.so.0.2400.2 libimgui.a 

@@ -1,22 +1,30 @@
 #include "BUILD_EMCC.h"
-#include <SDL2/SDL.h>
-
-#if BUILD_EMCC
-    #include <emscripten.h>
-#endif
-
+#include <SDL.h>
 #include <cmath>
 
-SDL_Window* pwindow;
-SDL_Renderer* prenderer;
+#if BUILD_EMCC
+#include <emscripten.h>
+#endif
+
+SDL_Window *pwindow;
+SDL_Renderer *prenderer;
 bool first_call = true;
+
+float circleX = 1280 / 2;
+float circleY = 720 / 2;
+float xVec = 1;
+float yVec = 1;
+int circleRadius = 100;
 
 void loop()
 {
     // Circle parameters
-    int circleRadius = 100;
-    int circleX = 1280/2;
-    int circleY = 720/2;
+    circleX+=0.1;
+    circleY+=0.1;
+
+    circleY*=yVec;
+    circleX*=xVec;
+    
 
     if (first_call)
     {
@@ -26,14 +34,12 @@ void loop()
             SDL_WINDOWPOS_UNDEFINED,
             1280,
             720,
-            SDL_WINDOW_RESIZABLE
-        );
+            SDL_WINDOW_RESIZABLE);
 
         prenderer = SDL_CreateRenderer(
             pwindow,
             -1,
-            0
-        );
+            0);
 
         first_call = false;
     }
@@ -49,16 +55,24 @@ void loop()
         SDL_RenderDrawPoint(prenderer, x, y);
     }
 
+    if (1280 - circleX <= circleRadius || circleX <= circleRadius)
+    {
+        xVec*=-1;
+    }
+    if (720 - circleY <= circleRadius || circleY <= circleRadius)
+    {
+        yVec*=-1;
+    }
+
     SDL_RenderPresent(prenderer);
 }
 
-int main(int, char**)
+int main(int, char **)
 {
-    #if BUILD_EMCC
-        emscripten_set_main_loop(loop, 60, 0);
-    #endif
-
-    #if !BUILD_EMCC
+#if BUILD_EMCC
+    emscripten_set_main_loop(loop, 120, 0);
+#else
+    while (true)
         loop();
-    #endif
+#endif
 }

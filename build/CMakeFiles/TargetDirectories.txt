@@ -1,0 +1,12 @@
+/home/gaugamela/VSCodeProjects/Telos/build/CMakeFiles/imgui.dir
+/home/gaugamela/VSCodeProjects/Telos/build/CMakeFiles/Telos.dir
+/home/gaugamela/VSCodeProjects/Telos/build/CMakeFiles/edit_cache.dir
+/home/gaugamela/VSCodeProjects/Telos/build/CMakeFiles/rebuild_cache.dir
+/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2/CMakeFiles/sdl_headers_copy.dir
+/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2/CMakeFiles/SDL2main.dir
+/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2/CMakeFiles/SDL2.dir
+/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2/CMakeFiles/SDL2-static.dir
+/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2/CMakeFiles/SDL2_test.dir
+/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2/CMakeFiles/uninstall.dir
+/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2/CMakeFiles/edit_cache.dir
+/home/gaugamela/VSCodeProjects/Telos/build/lib/SDL2/CMakeFiles/rebuild_cache.dir
