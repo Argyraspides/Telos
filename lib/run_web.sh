@@ -6,6 +6,7 @@ source ./emsdk_env.sh
 emcc --version
 cd ..
 cd ..
+mkdir build
 cd ./build
 
 header_file="../include/BUILD_EMCC.h"

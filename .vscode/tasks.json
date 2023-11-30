@@ -3,39 +3,13 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "EMCC: build & run",
-            "command": "emcc",
+            "label": "C/C++: gcc build active file",
+            "command": "bash",
             "args": [
-                "-fdiagnostics-color=always",
-                "-g",
-                "${file}",
-                "-o",
-                "${workspaceFolder}/out/web_build/index.js",
-                "-lSDL2",
-                "--emrun",
-                "&&",
-                "emrun",
-                "${workspaceFolder}/out/web_build/index.html"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "detail": "compiler: emcc",
-        },
-        {
-            "type": "cppbuild",
-            "label": "C/C++: g++-11 build active file",
-            "command": "/usr/bin/g++-11",
-            "args": [
-                "-fdiagnostics-color=always",
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "./run_local.sh"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${workspaceFolder}/lib"
             },
             "problemMatcher": [
                 "$gcc"

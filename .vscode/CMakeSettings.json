@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Linux-Debug",
+            "generator": "Unix Makefiles",
+            "configurationType": "Debug",
+            "buildRoot": "${workspaceFolder}/build/debug",
+            "cmakeCommandArgs": [
+                "-DMY_COMPILER=gcc"
+            ],
+            "compileCommands": "${workspaceFolder}/build/debug/compile_commands.json",
+            "intelliSenseMode": "clang-x64"
+        },
+        {
+            "name": "Linux-Release",
+            "generator": "Unix Makefiles",
+            "configurationType": "Release",
+            "buildRoot": "${workspaceFolder}/build/release",
+            "cmakeCommandArgs": [
+                "-DMY_COMPILER=gcc"
+            ],
+            "compileCommands": "${workspaceFolder}/build/release/compile_commands.json",
+            "intelliSenseMode": "clang-x64"
+        }
+    ]
+}

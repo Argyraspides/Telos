@@ -1,13 +1,13 @@
 {
     "configurations": [
         {
-            "name": "C/C++: emcc build and debug active file",
+            "name": "C/C++: build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/out/web_build/index.js",
+            "program": "${workspaceFolder}/build/${fileDirnameNoExtension}",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -23,7 +23,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "EMCC: build",
+            "preLaunchTask": "C/C++: build active file",
             "miDebuggerPath": "gdb"
         }
     ],
