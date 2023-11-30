@@ -2,8 +2,10 @@
 <img src="https://github.com/Argyraspides/Sarissa/assets/95353936/88658146-38ca-4dc7-896f-4166f3aed94a" width="auto" height="100"></img>
 <img src="https://github.com/Argyraspides/Sarissa/assets/95353936/bd56954d-c437-493e-9231-f8ed43eeab45" width="auto" height="100"></img>
 <img src="https://github.com/Argyraspides/Sarissa/assets/95353936/974f9011-08a2-4f5e-8a65-1d8b1b1bab1b" width="auto" height="100"></img>
+<img src="https://github.com/Argyraspides/Telos/assets/95353936/17432b8f-b17f-4222-92f0-c97231afbb0a" width="auto" height="100"></img> 
+<img src="https://github.com/Argyraspides/Telos/assets/95353936/2fd4e08b-a1af-4f22-936e-c82f46fe4a7c" width="auto" height="100"></img>  
 <img src="https://github.com/Argyraspides/Sarissa/assets/95353936/6e619ad7-d610-431d-9c0f-76ac519d074b" width="auto" height="100"></img>  
-<img src="https://github.com/Argyraspides/Telos/assets/95353936/17432b8f-b17f-4222-92f0-c97231afbb0a" width="auto" height="100"></img>  
+
 
 This is the source code for a highly improved version of my previous physics engine, which will also be able to run on any modern browser through the Emscripten toolchain (compilation into WebAssembly).
 It uses the SDL2 graphics library for graphics output. Upon completion, you may use the engine on my website [here](https://gaugamela.me). It is still in the planning stages. For the moment, a bare-bones build toolkit and 
