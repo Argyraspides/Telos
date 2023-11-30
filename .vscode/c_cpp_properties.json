@@ -1,23 +1,17 @@
 {
     "configurations": [
         {
-            "name": "emcc",
-            "compilerPath": "${workspaceFolder}/build_tools/emsdk-3.1.49/upstream/emscripten/emcc",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64",
-            "includePath": [
-                "${workspaceFolder}/lib/**",
-                "${workspaceFolder}/include/**"
-            ]
-        },
-        {
             "name": "gcc",
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64",
-            "includePath": []
+            "includePath": [
+                "${workspaceFolder}/lib/SDL2/include/**",
+                "${workspaceFolder}/lib/imgui/**",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/lib/emsdk/upstream/emscripten/cache/sysroot/include/**"
+            ]
         }
     ],
     "version": 4

@@ -3,7 +3,7 @@
 #include <cmath>
 
 #if BUILD_EMCC
-#include <emscripten.h>
+    #include <emscripten.h>
 #endif
 
 SDL_Window *pwindow;
