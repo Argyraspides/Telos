@@ -6,7 +6,7 @@
             "label": "C/C++: gcc build active file",
             "command": "bash",
             "args": [
-                "./run_local.sh"
+                "./run_web.sh"
             ],
             "options": {
                 "cwd": "${workspaceFolder}/lib"

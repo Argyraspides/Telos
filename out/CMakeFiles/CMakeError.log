@@ -1,0 +1,258 @@
+Performing C SOURCE FILE Test HAVE_GCC_PREFERRED_STACK_BOUNDARY failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_388a3/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_388a3.dir/build.make CMakeFiles/cmTC_388a3.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_388a3.dir/src.c.o
+/usr/bin/cc -DHAVE_GCC_PREFERRED_STACK_BOUNDARY  -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos" -mpreferred-stack-boundary=2 -o CMakeFiles/cmTC_388a3.dir/src.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/src.c
+cc1: error: ‘-mpreferred-stack-boundary=2’ is not between 3 and 12
+gmake[1]: *** [CMakeFiles/cmTC_388a3.dir/build.make:78: CMakeFiles/cmTC_388a3.dir/src.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_388a3/fast] Error 2
+
+
+Source file was:
+int x = 0; int main(int argc, char **argv) { return 0; }
+Performing C SOURCE FILE Test HAVE_ALTIVEC_H_HDR failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_1b9b1/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_1b9b1.dir/build.make CMakeFiles/cmTC_1b9b1.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1b9b1.dir/src.c.o
+/usr/bin/cc -DHAVE_ALTIVEC_H_HDR  -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos" -maltivec -o CMakeFiles/cmTC_1b9b1.dir/src.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/src.c
+cc: error: unrecognized command-line option ‘-maltivec’
+gmake[1]: *** [CMakeFiles/cmTC_1b9b1.dir/build.make:78: CMakeFiles/cmTC_1b9b1.dir/src.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_1b9b1/fast] Error 2
+
+
+Source file was:
+
+          #include <altivec.h>
+          vector unsigned int vzero() {
+              return vec_splat_u32(0);
+          }
+          int main(int argc, char **argv) { return 0; }
+Performing C SOURCE FILE Test HAVE_ALTIVEC failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_e3726/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e3726.dir/build.make CMakeFiles/cmTC_e3726.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e3726.dir/src.c.o
+/usr/bin/cc -DHAVE_ALTIVEC  -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos" -maltivec -o CMakeFiles/cmTC_e3726.dir/src.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/src.c
+cc: error: unrecognized command-line option ‘-maltivec’
+gmake[1]: *** [CMakeFiles/cmTC_e3726.dir/build.make:78: CMakeFiles/cmTC_e3726.dir/src.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_e3726/fast] Error 2
+
+
+Source file was:
+
+          vector unsigned int vzero() {
+              return vec_splat_u32(0);
+          }
+          int main(int argc, char **argv) { return 0; }
+Determining if the include file libunwind.h exists failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_cad84/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_cad84.dir/build.make CMakeFiles/cmTC_cad84.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_cad84.dir/CheckIncludeFile.c.o
+/usr/bin/cc   -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos"  -o CMakeFiles/cmTC_cad84.dir/CheckIncludeFile.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckIncludeFile.c:1:10: fatal error: libunwind.h: No such file or directory
+    1 | #include <libunwind.h>
+      |          ^~~~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_cad84.dir/build.make:78: CMakeFiles/cmTC_cad84.dir/CheckIncludeFile.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_cad84/fast] Error 2
+
+
+
+Determining if the strlcpy exist failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_a4975/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a4975.dir/build.make CMakeFiles/cmTC_a4975.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a4975.dir/CheckSymbolExists.c.o
+/usr/bin/cc   -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos"  -o CMakeFiles/cmTC_a4975.dir/CheckSymbolExists.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: error: ‘strlcpy’ undeclared (first use in this function); did you mean ‘strncpy’?
+   14 |   return ((int*)(&strlcpy))[argc];
+      |                   ^~~~~~~
+      |                   strncpy
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: note: each undeclared identifier is reported only once for each function it appears in
+gmake[1]: *** [CMakeFiles/cmTC_a4975.dir/build.make:78: CMakeFiles/cmTC_a4975.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_a4975/fast] Error 2
+
+
+File /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stddef.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <wchar.h>
+#include <float.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strlcpy
+  return ((int*)(&strlcpy))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the strlcat exist failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_042ac/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_042ac.dir/build.make CMakeFiles/cmTC_042ac.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_042ac.dir/CheckSymbolExists.c.o
+/usr/bin/cc   -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos"  -o CMakeFiles/cmTC_042ac.dir/CheckSymbolExists.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: error: ‘strlcat’ undeclared (first use in this function); did you mean ‘strncat’?
+   14 |   return ((int*)(&strlcat))[argc];
+      |                   ^~~~~~~
+      |                   strncat
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: note: each undeclared identifier is reported only once for each function it appears in
+gmake[1]: *** [CMakeFiles/cmTC_042ac.dir/build.make:78: CMakeFiles/cmTC_042ac.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_042ac/fast] Error 2
+
+
+File /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stddef.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <wchar.h>
+#include <float.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strlcat
+  return ((int*)(&strlcat))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the _strrev exist failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_94fe2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_94fe2.dir/build.make CMakeFiles/cmTC_94fe2.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_94fe2.dir/CheckSymbolExists.c.o
+/usr/bin/cc   -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos"  -o CMakeFiles/cmTC_94fe2.dir/CheckSymbolExists.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: error: ‘_strrev’ undeclared (first use in this function)
+   14 |   return ((int*)(&_strrev))[argc];
+      |                   ^~~~~~~
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: note: each undeclared identifier is reported only once for each function it appears in
+gmake[1]: *** [CMakeFiles/cmTC_94fe2.dir/build.make:78: CMakeFiles/cmTC_94fe2.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_94fe2/fast] Error 2
+
+
+File /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stddef.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <wchar.h>
+#include <float.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef _strrev
+  return ((int*)(&_strrev))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the _strupr exist failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_208e5/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_208e5.dir/build.make CMakeFiles/cmTC_208e5.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_208e5.dir/CheckSymbolExists.c.o
+/usr/bin/cc   -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos"  -o CMakeFiles/cmTC_208e5.dir/CheckSymbolExists.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: error: ‘_strupr’ undeclared (first use in this function)
+   14 |   return ((int*)(&_strupr))[argc];
+      |                   ^~~~~~~
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: note: each undeclared identifier is reported only once for each function it appears in
+gmake[1]: *** [CMakeFiles/cmTC_208e5.dir/build.make:78: CMakeFiles/cmTC_208e5.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_208e5/fast] Error 2
+
+
+File /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stddef.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <wchar.h>
+#include <float.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef _strupr
+  return ((int*)(&_strupr))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the _strlwr exist failed with the following output:
+Change Dir: /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_e6cd4/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_e6cd4.dir/build.make CMakeFiles/cmTC_e6cd4.dir/build
+gmake[1]: Entering directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e6cd4.dir/CheckSymbolExists.c.o
+/usr/bin/cc   -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos"  -o CMakeFiles/cmTC_e6cd4.dir/CheckSymbolExists.c.o -c /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: error: ‘_strlwr’ undeclared (first use in this function)
+   14 |   return ((int*)(&_strlwr))[argc];
+      |                   ^~~~~~~
+/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:14:19: note: each undeclared identifier is reported only once for each function it appears in
+gmake[1]: *** [CMakeFiles/cmTC_e6cd4.dir/build.make:78: CMakeFiles/cmTC_e6cd4.dir/CheckSymbolExists.c.o] Error 1
+gmake[1]: Leaving directory '/home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:127: cmTC_e6cd4/fast] Error 2
+
+
+File /home/gaugamela/VSCodeProjects/Telos/out/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stddef.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <wchar.h>
+#include <float.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef _strlwr
+  return ((int*)(&_strlwr))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}

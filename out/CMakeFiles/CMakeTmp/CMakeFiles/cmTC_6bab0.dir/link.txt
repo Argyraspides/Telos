@@ -1,0 +1,1 @@
+/usr/bin/cc  -idirafter "/home/gaugamela/VSCodeProjects/Telos/lib/SDL2/src/video/khronos"  -rdynamic CMakeFiles/cmTC_6bab0.dir/CheckSymbolExists.c.o -o cmTC_6bab0 
