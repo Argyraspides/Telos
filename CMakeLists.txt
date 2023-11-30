@@ -3,11 +3,15 @@ project(Telos)
 set(CMAKE_CXX_STANDARD 17)
 set(MY_COMPILER "default" CACHE STRING "Choose a compiler: 'emcc', or 'gcc'")
 
-file(GLOB_RECURSE SOURCES 
+file(GLOB SOURCES 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" # Telos source and header files
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/*.cpp" # ImGui source and header files
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_sdl2.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_sdl2.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_opengl2.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_opengl2.cpp"
 )
 
 # SDL2 already has it's own CMakeLists.txt, so we don't need to worry about it. We can just
@@ -20,11 +24,12 @@ add_library(imgui STATIC "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/imgui.cpp")
 include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2/include" # SDL2
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui" # ImGui
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends"
    # "${CMAKE_CURRENT_SOURCE_DIR}/lib/emsdk/upstream/emscripten/cache/sysroot/include" # Emscripten 
     "${CMAKE_CURRENT_SOURCE_DIR}/include" # Telos
 )
 
-add_executable(${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp") 
+add_executable(${PROJECT_NAME} ${SOURCES}) 
 
 if(MY_COMPILER STREQUAL "emcc")
 
@@ -36,9 +41,8 @@ if(MY_COMPILER STREQUAL "emcc")
     target_link_libraries(${PROJECT_NAME} "-s USE_SDL=2" "imgui")
 
 elseif((MY_COMPILER STREQUAL "gcc")) 
-
-    target_link_libraries(${PROJECT_NAME} "SDL2" "imgui")
-
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(${PROJECT_NAME} "SDL2" "imgui" "OpenGL::GL")
 endif()
 
 
