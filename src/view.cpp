@@ -1,5 +1,7 @@
 #include "view.h"
 #include "imgui.h"
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
 
 void View::RenderUI()
 {
@@ -44,10 +46,21 @@ void View::RenderUI()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window *window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window *window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer)
+    {
+        // Handle renderer creation failure
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return;
+    }
+    SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT); // Set logical size if needed
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);                // Set drawing color (red in this case)
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -55,7 +68,6 @@ void View::RenderUI()
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -94,24 +106,30 @@ void View::RenderUI()
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        //  --------------------------------------------------------------------------------------------------------------------------------------------
+        // ImGui Menu --------------------------------------------------------------------------------------------------------------------------------------------
         ImGui::Begin("Menu");
         ImGui::SetWindowPos(ImVec2(0, 0));
         ImGui::SetWindowSize(ImVec2(200, ImGui::GetIO().DisplaySize.y));
 
         CommonShapeSubMenu();
+        // ImGui Menu --------------------------------------------------------------------------------------------------------------------------------------------
 
-
-        //  --------------------------------------------------------------------------------------------------------------------------------------------
-
-        // Rendering
+        // ImGui Rendering --------------------------------------------------------------------------------------------------------------------------------------------
         ImGui::Render();
         glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        // ImGui Rendering --------------------------------------------------------------------------------------------------------------------------------------------
+
+        // SDL Rendering (FOR ACTUAL OBJECTS) --------------------------------------------------------------------------------------------------------------------------------------------
+        SDL_Point points[] = {{100, 100}, {200, 200}, {300, 100}, {400, 200}, {150, 250}};
+        SDL_RenderDrawLines(renderer, points, 5);
+        SDL_RenderPresent(renderer);
+        // SDL Rendering (FOR ACTUAL OBJECTS) --------------------------------------------------------------------------------------------------------------------------------------------
         SDL_GL_SwapWindow(window);
+
     }
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_END;
@@ -145,5 +163,8 @@ void View::CircleButton()
 
     ImGui::InputText("##TextEntry", textBuffer, sizeof(textBuffer));
     ImGui::SameLine();
-    ImGui::Button("Add");
+
+    if (ImGui::Button("Add"))
+    {
+    }
 }

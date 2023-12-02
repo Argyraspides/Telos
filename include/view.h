@@ -12,13 +12,20 @@
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
 #ifdef __EMSCRIPTEN__
-    #include "../lib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
+#include "../lib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
-
-class View {
+class View
+{
 
 public:
+    void InitSDL();
+    void SDLRender();
+    void CleanupSDL();
+
+    void InitImGui();
+    void CleanupImGui();
+
     void RenderUI();
     void HUD();
 
