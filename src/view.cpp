@@ -1,7 +1,16 @@
 #include "view.h"
 #include "imgui.h"
+#include <functional>
+#include <iostream>
+#include <memory>
+
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
+
+SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+SDL_Window *window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
+SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 void View::RenderUI()
 {
@@ -45,13 +54,9 @@ void View::RenderUI()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window *window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
     {
         // Handle renderer creation failure
@@ -122,13 +127,20 @@ void View::RenderUI()
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         // ImGui Rendering --------------------------------------------------------------------------------------------------------------------------------------------
+        
+        // SDL Rendering (FOR ACTUAL OBJECTS) --------------------------------------------------------------------------------------------------------------------------------------------
+        std::vector<Point> points = {{100, 100}, {200, 200}, {300, 100}, {400, 200}, {150, 250}};
+        PointCloudShape_Cvx pointCloudShape_Cvx(points);
+        ResolveShapeDefinition(pointCloudShape_Cvx);
+        // SDL Rendering (FOR ACTUAL OBJECTS) --------------------------------------------------------------------------------------------------------------------------------------------
 
-        // SDL Rendering (FOR ACTUAL OBJECTS) --------------------------------------------------------------------------------------------------------------------------------------------
-        SDL_Point points[] = {{100, 100}, {200, 200}, {300, 100}, {400, 200}, {150, 250}};
-        SDL_RenderDrawLines(renderer, points, 5);
-        SDL_RenderPresent(renderer);
-        // SDL Rendering (FOR ACTUAL OBJECTS) --------------------------------------------------------------------------------------------------------------------------------------------
+        
+        
+        
         SDL_GL_SwapWindow(window);
+        
+
+
 
     }
 #ifdef __EMSCRIPTEN__
@@ -166,5 +178,38 @@ void View::CircleButton()
 
     if (ImGui::Button("Add"))
     {
+    }
+}
+
+void View::RenderPointCloudShape_Cvx(SDL_Point *sdlPoints, int pointCount)
+{
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawLines(renderer, sdlPoints, pointCount);
+    delete[] sdlPoints;
+}
+
+void View::CreatePointCloudShape_Cvx(std::vector<Point> points)
+{
+    SDL_Point *sdlPoints = new SDL_Point[points.size()];
+
+    for (size_t i = 0; i < points.size(); i++)
+    {
+        sdlPoints[i].x = points[i].x;
+        sdlPoints[i].y = points[i].y;
+    }
+    RenderPointCloudShape_Cvx(sdlPoints, points.size());
+}
+
+void View::ResolveShapeDefinition(const Shape &shape)
+{
+    int shapeID = shape.getID();
+    if (shapeID == POINT_CLOUD_SHAPE_CVX)
+    {
+        const PointCloudShape_Cvx &pointCloudShape_Cvx = dynamic_cast<const PointCloudShape_Cvx &>(shape);
+        CreatePointCloudShape_Cvx(pointCloudShape_Cvx.getPoints());
+    }
+    else 
+    {
+        std::cerr << "SHAPE TYPE IS INVALID (FUNCTION View::ResolveShapeDefinition(const Shape &shape))" << std::endl;
     }
 }
