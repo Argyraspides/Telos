@@ -16,6 +16,10 @@
 #include "../lib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
+
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
+
 class View
 {
 
@@ -28,15 +32,8 @@ public:
     void CleanupImGui();
 
     void RenderUI();
-    void RenderShape();
     void HUD();
 
-    void CommonShapeSubMenu();
-    void CircleButton();
-
-    void ResolveShapeDefinition(const Shape &shape);
-
-    void CreatePointCloudShape_Cvx(std::vector<Point> points);
-    void RenderPointCloudShape_Cvx(SDL_Point* sdlPoints, int pointCount);
+    void RenderPointCloudShape_Cvx(SDL_Renderer* renderer, std::vector<Point> points);
 
 };

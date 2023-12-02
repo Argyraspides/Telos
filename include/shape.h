@@ -37,6 +37,7 @@ public:
 private:
     std::vector<Point> m_points;                        // POINT CLOUD THAT REPRESENTS THE SHAPE
     bool checkConvex(const std::vector<Point> &points); // CHECKS IF A SHAPE IS CONVEX
+    Point center;
 };
 
 // ***************************************************************************************************************************************************************
