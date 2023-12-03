@@ -3,13 +3,19 @@
 #include <iostream>
 #include <memory>
 
-
-SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-SDL_Window *window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
-SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
-
-void View::RenderUI(Controller* controller)
+void View::RenderUI(Controller *controller)
 {
+
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_Window *window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+    
+    if (renderer == nullptr)
+    {
+        SDL_Log("Error creating SDL_Renderer!");
+        return;
+    }
+
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
@@ -22,28 +28,8 @@ void View::RenderUI(Controller* controller)
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 #endif
 
-    // Create window with SDL_Renderer graphics context
-    if (renderer == nullptr)
-    {
-        SDL_Log("Error creating SDL_Renderer!");
-        return;
-    }
 
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-    ImGui_ImplSDLRenderer2_Init(renderer);
+    ImGuiIO io = InitImGui(renderer, window);
 
     bool done = false;
 #ifdef __EMSCRIPTEN__
@@ -72,7 +58,8 @@ void View::RenderUI(Controller* controller)
         ImGui::NewFrame();
 
         // Our menu is created here
-        if(controller != nullptr) controller->FullMenu();
+        if (controller != nullptr)
+            controller->FullMenu();
 
         // ImGui Rendering ------------------------------------------------------------------------------------------------------------------------------------------
         ImGui::Render();
@@ -82,9 +69,9 @@ void View::RenderUI(Controller* controller)
         SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
         SDL_RenderClear(renderer);
 
-        std::vector<Point> pt = {{50, 50}, {100, 50}, {100, 100}, {50, 100}};
-        PointCloudShape_Cvx pcs(pt);
-        RenderPointCloudShape_Cvx(renderer, pt);
+        // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
+
+        // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
 
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);
@@ -94,17 +81,11 @@ void View::RenderUI(Controller* controller)
     EMSCRIPTEN_MAINLOOP_END;
 #endif
 
-    // Cleanup
-    ImGui_ImplSDLRenderer2_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
-
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    CleanupImGui();
+    CleanupSDL(renderer, window);
 }
 
-void View::RenderPointCloudShape_Cvx(SDL_Renderer *renderer, std::vector<Point> points)
+void View::RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
 {
 
     // TODO: FIND MORE EFFICIENT WAY TO RENDER SHAPES
@@ -120,5 +101,39 @@ void View::RenderPointCloudShape_Cvx(SDL_Renderer *renderer, std::vector<Point> 
             points[(i + 1) % points.size()].x,
             points[(i + 1) % points.size()].y);
     }
+}
 
+void View::CleanupImGui()
+{
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void View::CleanupSDL(SDL_Renderer *renderer, SDL_Window *window)
+{
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
+ImGuiIO View::InitImGui(SDL_Renderer *renderer, SDL_Window *window)
+{
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+    ImGui_ImplSDLRenderer2_Init(renderer);
+
+    return io;
 }

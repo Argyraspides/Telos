@@ -1,11 +1,11 @@
-<mxfile host="Electron" modified="2023-12-03T00:34:16.868Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="c79TX7Apd4YhB1gDmdWK" version="22.1.2" type="device">
+<mxfile host="Electron" modified="2023-12-03T05:32:29.978Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="pu71ziZeyevTlOIxeIj9" version="22.1.2" type="device">
   <diagram name="Page-1" id="NtQ69wOWC1nmmlGbP-3g">
-    <mxGraphModel dx="4780" dy="2910" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
+    <mxGraphModel dx="2868" dy="1746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="AB3GFtcWFRhynDyCKT0_-69" value="&lt;span style=&quot;font-size: 22px;&quot;&gt;Universal definitions of 2D shapes (data structures) will be recognized by the entire program. This shows the &quot;Shape Definition Discerner&quot; deriving its understanding of what a shape is from these definitions.&lt;br&gt;&lt;br&gt;The most &quot;atomic&quot; definition of a shape will simpy be a series of points, otherwise known as a &quot;point cloud&quot;. A point cloud can be translated into any other shape data structure.&lt;br&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="1560" y="30" width="510" height="282.5" as="geometry" />
+          <mxGeometry x="1305" y="218.75" width="510" height="282.5" as="geometry" />
         </mxCell>
         <mxCell id="AB3GFtcWFRhynDyCKT0_-104" value="" style="group" parent="1" vertex="1" connectable="0">
           <mxGeometry x="40" y="2050" width="1700" height="1130" as="geometry" />
@@ -44,7 +44,7 @@
           <mxGeometry x="50" y="55" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="jzHVAZvEUVmQOy8ceyDx-17" value="" style="group" parent="1" vertex="1" connectable="0">
-          <mxGeometry x="755" y="30" width="770" height="200" as="geometry" />
+          <mxGeometry x="500" y="260" width="770" height="200" as="geometry" />
         </mxCell>
         <mxCell id="AB3GFtcWFRhynDyCKT0_-2" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;Shape Definition 1&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="jzHVAZvEUVmQOy8ceyDx-17" vertex="1">
           <mxGeometry width="145" height="145" as="geometry" />
