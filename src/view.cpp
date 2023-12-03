@@ -1,4 +1,5 @@
 #include "view.h"
+#include "model.h"
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -70,7 +71,13 @@ void View::RenderUI(Controller *controller)
         SDL_RenderClear(renderer);
 
         // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
-
+        for(int i = 0; i < Model::pointCloudShapeList.size(); i++)
+        {
+            RenderPointCloudShape(
+                renderer,
+                controller->ResolveShapeDefinition(Model::pointCloudShapeList[i])
+            );
+        }
         // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
 
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
