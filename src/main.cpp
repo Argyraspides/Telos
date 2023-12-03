@@ -1,9 +1,11 @@
 #include "view.h"
-
+#include "controller.h"
+#include "model.h"
 // Main code
 int main(int, char**)
 { 
     View v;
-    v.RenderUI();
+    Controller *c;
+    v.RenderUI(c);
     return 0;
 }

@@ -1,19 +1,19 @@
 #include "controller.h"
 #include "view.h"
+#include <cmath>
 #include <functional>
 #include <iostream>
 #include <memory>
 
+int currentShapeType = POINT_CLOUD_SHAPE_CVX;
+
 Controller::Controller()
 {
-    
 }
 
-void Controller::addShape()
+void Controller::addPointCloudShape(const std::vector<Point> &points)
 {
-    
 }
-
 
 std::vector<Point> Controller::ResolveShapeDefinition(const Shape &shape)
 {
@@ -23,13 +23,11 @@ std::vector<Point> Controller::ResolveShapeDefinition(const Shape &shape)
         const PointCloudShape_Cvx &pointCloudShape_Cvx = dynamic_cast<const PointCloudShape_Cvx &>(shape);
         return pointCloudShape_Cvx.getPoints();
     }
-    else
-    {
-        std::cerr << "SHAPE TYPE IS INVALID (FUNCTION View::ResolveShapeDefinition(const Shape &shape))" << std::endl;
-    }
+
+    std::cerr << "SHAPE TYPE IS INVALID (FUNCTION View::ResolveShapeDefinition(const Shape &shape))" << std::endl;
+
+    return {};
 }
-
-
 
 void Controller::CommonShapeSubMenu()
 {
@@ -52,6 +50,7 @@ void Controller::CircleButton()
 
     if (ImGui::Button("Add"))
     {
+    
     }
 }
 

@@ -4,7 +4,7 @@
             "name": "C/C++: build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/${fileDirnameNoExtension}",
+            "program": "${workspaceFolder}/build/Telos",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

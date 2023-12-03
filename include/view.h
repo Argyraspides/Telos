@@ -1,5 +1,6 @@
 #pragma once
 #include "imgui.h"
+#include "controller.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
 #include "shape.h"
@@ -31,7 +32,7 @@ public:
     void InitImGui();
     void CleanupImGui();
 
-    void RenderUI();
+    void RenderUI(Controller* controller);
     void HUD();
 
     void RenderPointCloudShape_Cvx(SDL_Renderer* renderer, std::vector<Point> points);

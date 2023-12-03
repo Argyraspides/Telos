@@ -1,14 +1,14 @@
 #include "view.h"
-#include "controller.h"
 #include <functional>
 #include <iostream>
 #include <memory>
+
 
 SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 SDL_Window *window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
 SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 
-void View::RenderUI()
+void View::RenderUI(Controller* controller)
 {
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -45,9 +45,6 @@ void View::RenderUI()
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
 
-    Controller controller;
-
-
     bool done = false;
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
@@ -75,7 +72,7 @@ void View::RenderUI()
         ImGui::NewFrame();
 
         // Our menu is created here
-        controller.FullMenu();
+        if(controller != nullptr) controller->FullMenu();
 
         // ImGui Rendering ------------------------------------------------------------------------------------------------------------------------------------------
         ImGui::Render();
@@ -85,8 +82,9 @@ void View::RenderUI()
         SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
         SDL_RenderClear(renderer);
 
-        std::vector<Point> points = {{100, 100}, {200, 200}, {300, 100}, {400, 200}};
-        PointCloudShape_Cvx pointCloudShape_Cvx(points);
+        std::vector<Point> pt = {{50, 50}, {100, 50}, {100, 100}, {50, 100}};
+        PointCloudShape_Cvx pcs(pt);
+        RenderPointCloudShape_Cvx(renderer, pt);
 
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);
@@ -108,6 +106,9 @@ void View::RenderUI()
 
 void View::RenderPointCloudShape_Cvx(SDL_Renderer *renderer, std::vector<Point> points)
 {
+
+    // TODO: FIND MORE EFFICIENT WAY TO RENDER SHAPES
+
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     for (int i = 0; i < points.size(); i++)
@@ -119,4 +120,5 @@ void View::RenderPointCloudShape_Cvx(SDL_Renderer *renderer, std::vector<Point> 
             points[(i + 1) % points.size()].x,
             points[(i + 1) % points.size()].y);
     }
+
 }

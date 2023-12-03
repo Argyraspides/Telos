@@ -1,3 +1,4 @@
+#pragma once
 #include "imgui.h"
 #include "shape.h"
 
@@ -8,7 +9,7 @@ public:
 
     Controller();
 
-    void addShape();
+    void addPointCloudShape(const std::vector<Point> &points);
     void removeShape();
     void changeShape();
     void changeGravity();
@@ -17,5 +18,8 @@ public:
     void CommonShapeSubMenu();
     void CircleButton();
     void FullMenu();
+
     std::vector<Point> ResolveShapeDefinition(const Shape &shape);
+
+    void setCurrentShapeType(int shapeTypeID);
 };

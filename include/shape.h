@@ -23,8 +23,8 @@ public:
 
 struct Point
 {
-    int x, y, z;
-    Point(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {} // ALLOW CREATION OF POINTS WITH {X, Y, Z} SYNTAX
+    float x, y, z;
+    Point(float x = 0, float y = 0, float z = 0) : x(x), y(y), z(z) {} 
 };
 
 class PointCloudShape_Cvx : public Shape
@@ -37,7 +37,7 @@ public:
 private:
     std::vector<Point> m_points;                        // POINT CLOUD THAT REPRESENTS THE SHAPE
     bool checkConvex(const std::vector<Point> &points); // CHECKS IF A SHAPE IS CONVEX
-    Point center;
+    Point center;                                       // REPRESENTS THE CENTROID OF THE SHAPE
 };
 
 // ***************************************************************************************************************************************************************

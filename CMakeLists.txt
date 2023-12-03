@@ -27,7 +27,7 @@ include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2/include" # SDL2
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui" # ImGui
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
+   # "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
    # "${CMAKE_CURRENT_SOURCE_DIR}/lib/emsdk/upstream/emscripten/cache/sysroot/include" # Emscripten 
     "${CMAKE_CURRENT_SOURCE_DIR}/include" # Telos
 )
