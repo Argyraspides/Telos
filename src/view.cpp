@@ -45,7 +45,6 @@ void View::RenderUI(Controller *controller)
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
 
-    // Our state
     ImVec4 clear_color = ImVec4(30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f);
     // Main loop
     bool done = false;
@@ -109,9 +108,7 @@ void View::RenderUI(Controller *controller)
 
 void View::RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
 {
-
     // TODO: FIND MORE EFFICIENT WAY TO RENDER SHAPES
-
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     for (int i = 0; i < points.size(); i++)
@@ -123,39 +120,4 @@ void View::RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> poin
             points[(i + 1) % points.size()].x,
             points[(i + 1) % points.size()].y);
     }
-}
-
-void View::CleanupImGui()
-{
-    ImGui_ImplSDLRenderer2_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
-}
-
-void View::CleanupSDL(SDL_Renderer *renderer, SDL_Window *window)
-{
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-}
-
-ImGuiIO View::InitImGui(SDL_Renderer *renderer, SDL_Window *window)
-{
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-    ImGui_ImplSDLRenderer2_Init(renderer);
-
-    return io;
 }
