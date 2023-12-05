@@ -39,7 +39,7 @@ if(MY_COMPILER STREQUAL "emcc")
 
     set(CMAKE_CXX_COMPILER "${CMAKE_CURRENT_SOURCE_DIR}/lib/emsdk/upstream/emscripten/emcc")
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -s FULL_ES3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2")
 
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2")
     target_link_libraries(${PROJECT_NAME} "imgui")

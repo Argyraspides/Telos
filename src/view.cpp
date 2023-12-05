@@ -6,7 +6,6 @@
 
 void View::RenderUI(Controller *controller, Model *model)
 {
-
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
@@ -73,7 +72,8 @@ void View::RenderUI(Controller *controller, Model *model)
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        controller->FullMenu();
+        if (controller != nullptr)
+            controller->FullMenu();
 
         // Rendering
         ImGui::Render();
@@ -82,16 +82,20 @@ void View::RenderUI(Controller *controller, Model *model)
         SDL_RenderClear(renderer);
 
         // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
-        for (int i = 0; i < model->getShapeCount(); i++)
+
+        if (model != nullptr)
         {
-           // std::shared_ptr<Shape> s = model->getShapeList()[i];
-            model->getShapeList()[i];
-            RenderPointCloudShape(
-                renderer,
-                controller->ResolveShapeDefinition(model->getShapeList()[i]));
+            for (int i = 0; i < model->getShapeCount(); i++)
+            {
+                model->getShapeList()[i];
+                RenderPointCloudShape(
+                    renderer,
+                    controller->ResolveShapeDefinition(model->getShapeList()[i]));
+            }
         }
+
         // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
-        
+
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);
     }

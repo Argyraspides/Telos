@@ -1,12 +1,12 @@
+#include "model.h"
 #include "view.h"
 #include "controller.h"
-#include "model.h"
+
 int main()
 {
-    View v;
     Model m;
+    View v;
     Controller c(&m);
-    v.RenderUI(&c, &m);
     
-    return 0;
+    v.RenderUI(&c, &m);
 }

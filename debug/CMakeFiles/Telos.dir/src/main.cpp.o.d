@@ -1,13 +1,11 @@
 CMakeFiles/Telos.dir/src/main.cpp.o: \
  /home/gaugamela/VSCodeProjects/Telos/src/main.cpp \
  /usr/include/stdc-predef.h \
- /home/gaugamela/VSCodeProjects/Telos/include/view.h \
- /home/gaugamela/VSCodeProjects/Telos/lib/imgui/imgui.h \
- /home/gaugamela/VSCodeProjects/Telos/lib/imgui/imconfig.h \
- /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h \
- /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
- /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h /usr/include/string.h \
- /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
+ /home/gaugamela/VSCodeProjects/Telos/include/model.h \
+ /home/gaugamela/VSCodeProjects/Telos/include/shape.h \
+ /usr/include/c++/11/vector /usr/include/c++/11/bits/stl_algobase.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
+ /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/bits/timesize.h \
@@ -15,14 +13,6 @@ CMakeFiles/Telos.dir/src/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/long-double.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
- /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
- /usr/include/strings.h /usr/include/assert.h \
- /home/gaugamela/VSCodeProjects/Telos/include/controller.h \
- /home/gaugamela/VSCodeProjects/Telos/include/shape.h \
- /usr/include/c++/11/vector /usr/include/c++/11/bits/stl_algobase.h \
- /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
- /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/cpu_defines.h \
  /usr/include/c++/11/pstl/pstl_config.h \
  /usr/include/c++/11/bits/functexcept.h \
@@ -54,12 +44,12 @@ CMakeFiles/Telos.dir/src/main.cpp.o: \
  /usr/include/c++/11/bits/functional_hash.h \
  /usr/include/c++/11/bits/hash_bytes.h \
  /usr/include/c++/11/bits/range_access.h \
- /usr/include/c++/11/bits/vector.tcc \
- /home/gaugamela/VSCodeProjects/Telos/include/model.h \
- /usr/include/c++/11/memory /usr/include/c++/11/bits/stl_tempbuf.h \
+ /usr/include/c++/11/bits/vector.tcc /usr/include/c++/11/memory \
+ /usr/include/c++/11/bits/stl_tempbuf.h \
  /usr/include/c++/11/bits/stl_raw_storage_iter.h \
  /usr/include/c++/11/bits/align.h /usr/include/c++/11/bit \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/x86_64-linux-gnu/bits/types.h \
  /usr/include/x86_64-linux-gnu/bits/typesizes.h \
  /usr/include/x86_64-linux-gnu/bits/time64.h \
@@ -77,11 +67,15 @@ CMakeFiles/Telos.dir/src/main.cpp.o: \
  /usr/include/c++/11/cwchar /usr/include/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/floatn.h \
  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
  /usr/include/c++/11/bits/shared_ptr_base.h /usr/include/c++/11/typeinfo \
  /usr/include/c++/11/bits/allocated_ptr.h \
  /usr/include/c++/11/bits/refwrap.h \
@@ -127,6 +121,12 @@ CMakeFiles/Telos.dir/src/main.cpp.o: \
  /usr/include/c++/11/backward/auto_ptr.h \
  /usr/include/c++/11/pstl/glue_memory_defs.h \
  /usr/include/c++/11/pstl/execution_defs.h \
+ /home/gaugamela/VSCodeProjects/Telos/include/view.h \
+ /home/gaugamela/VSCodeProjects/Telos/lib/imgui/imgui.h \
+ /home/gaugamela/VSCodeProjects/Telos/lib/imgui/imconfig.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h /usr/include/string.h \
+ /usr/include/strings.h /usr/include/assert.h \
+ /home/gaugamela/VSCodeProjects/Telos/include/controller.h \
  /home/gaugamela/VSCodeProjects/Telos/lib/imgui/backends/imgui_impl_sdl2.h \
  /home/gaugamela/VSCodeProjects/Telos/lib/imgui/backends/imgui_impl_sdlrenderer2.h \
  /usr/include/stdio.h /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \

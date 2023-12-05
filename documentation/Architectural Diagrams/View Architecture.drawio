@@ -1,10 +1,10 @@
-<mxfile host="Electron" modified="2023-12-05T00:29:34.123Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="m2rOuQRYBVI-BigqE3ou" version="22.1.2" type="device">
+<mxfile host="Electron" modified="2023-12-05T06:41:22.625Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="A_HNhlYRCbMOzx3AbUoj" version="22.1.2" type="device">
   <diagram name="Page-1" id="NtQ69wOWC1nmmlGbP-3g">
     <mxGraphModel dx="2868" dy="1746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="AB3GFtcWFRhynDyCKT0_-69" value="&lt;span style=&quot;font-size: 22px;&quot;&gt;Universal definitions of 2D shapes (data structures) will be recognized by the entire program. This shows the &quot;Shape Definition Discerner&quot; deriving its understanding of what a shape is from these definitions.&lt;br&gt;&lt;br&gt;The most &quot;atomic&quot; definition of a shape will simpy be a series of points, otherwise known as a &quot;point cloud&quot;. A point cloud can be translated into any other shape data structure.&lt;br&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="AB3GFtcWFRhynDyCKT0_-69" value="&lt;span style=&quot;font-size: 22px;&quot;&gt;Universal definitions of 2D shapes (data structures) will be recognized by the model. This shows the &quot;Shape Definition Discerner&quot; deriving its understanding of what a shape is from these definitions.&lt;br&gt;&lt;br&gt;The most &quot;atomic&quot; definition of a shape will simpy be a series of points, otherwise known as a &quot;point cloud&quot;. Any shape definition can be converted into point cloud can, and is what the view understands in order to render them.&lt;br&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="1305" y="218.75" width="510" height="282.5" as="geometry" />
         </mxCell>
         <mxCell id="AB3GFtcWFRhynDyCKT0_-104" value="" style="group" parent="1" vertex="1" connectable="0">
@@ -109,15 +109,6 @@
         <mxCell id="jzHVAZvEUVmQOy8ceyDx-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=3;" parent="1" source="jzHVAZvEUVmQOy8ceyDx-25" target="AB3GFtcWFRhynDyCKT0_-59" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="jzHVAZvEUVmQOy8ceyDx-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="jzHVAZvEUVmQOy8ceyDx-27" target="jzHVAZvEUVmQOy8ceyDx-25" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="jzHVAZvEUVmQOy8ceyDx-27" value="Shape Translator" style="rounded=0;whiteSpace=wrap;html=1;fontSize=22;" parent="1" vertex="1">
-          <mxGeometry x="80" y="1540" width="225" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="jzHVAZvEUVmQOy8ceyDx-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fillColor=#6a00ff;strokeColor=#3700CC;strokeWidth=7;" parent="1" source="AB3GFtcWFRhynDyCKT0_-84" target="jzHVAZvEUVmQOy8ceyDx-27" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
         <mxCell id="XOVWlfCZ6gJrWhnHlsYj-1" value="User Input: Modify shape position" style="rounded=0;whiteSpace=wrap;html=1;fontSize=22;fillColor=#d80073;fontColor=#ffffff;strokeColor=#A50040;" parent="1" vertex="1">
           <mxGeometry x="2200" y="866.1224489795919" width="240" height="81.63265306122449" as="geometry" />
         </mxCell>
@@ -211,7 +202,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="XOVWlfCZ6gJrWhnHlsYj-32" value="UI" style="rounded=0;whiteSpace=wrap;html=1;fontSize=22;" parent="1" vertex="1">
-          <mxGeometry x="1260" y="1290" width="260" height="100" as="geometry" />
+          <mxGeometry x="1580" y="1290" width="260" height="100" as="geometry" />
         </mxCell>
         <mxCell id="XOVWlfCZ6gJrWhnHlsYj-35" value="" style="group" parent="1" vertex="1" connectable="0">
           <mxGeometry x="1880" y="1110" width="195" height="460" as="geometry" />
@@ -236,6 +227,23 @@
         </mxCell>
         <mxCell id="XOVWlfCZ6gJrWhnHlsYj-31" value="UI Element n" style="rounded=0;whiteSpace=wrap;html=1;fontSize=22;" parent="XOVWlfCZ6gJrWhnHlsYj-35" vertex="1">
           <mxGeometry x="25.53571428571428" y="368.13142857142867" width="143.92857142857142" height="75.44" as="geometry" />
+        </mxCell>
+        <mxCell id="4o011ic3MvTay1ZkKN46-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fillColor=#1ba1e2;strokeColor=#006EAF;strokeWidth=7;" edge="1" parent="1" source="AB3GFtcWFRhynDyCKT0_-84" target="AB3GFtcWFRhynDyCKT0_-32">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1520" y="1865" />
+              <mxPoint x="1520" y="844" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4o011ic3MvTay1ZkKN46-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fillColor=#1ba1e2;strokeColor=#006EAF;strokeWidth=7;" edge="1" parent="1" source="AB3GFtcWFRhynDyCKT0_-32" target="jzHVAZvEUVmQOy8ceyDx-25">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1280" y="782" />
+              <mxPoint x="1280" y="590" />
+              <mxPoint x="193" y="590" />
+            </Array>
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
