@@ -4,7 +4,7 @@
             "name": "C/C++: build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/${fileDirnameNoExtension}",
+            "program": "${workspaceFolder}/debug/Telos",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -23,7 +23,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: build active file",
+            "preLaunchTask": "C/C++: gcc build active file",
             "miDebuggerPath": "gdb"
         }
     ],
