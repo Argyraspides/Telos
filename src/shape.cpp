@@ -1,11 +1,11 @@
 #include "shape.h"
 #include <iostream>
 #include <cmath>
-PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape()
+PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
 }
 
-PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape()
+PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
     this->m_points = points;
 }
@@ -13,14 +13,10 @@ PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Sha
 // ***************************************************************************************************************************************************************
 // GETTER FUNCTIONS
 
-Shape::Shape()
+Shape::Shape(int shapeTypeID)
 {
+    this->shapeTypeID = shapeTypeID;
     this->shapeID = (ID_CTR++);
-}
-
-int Shape::getShapeID()
-{
-    return this->shapeID;
 }
 
 std::vector<Point> PointCloudShape_Cvx::getPoints() const
@@ -51,7 +47,7 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
 
     Point pt;
     // y = +sqrt(r^2 - x^2)
-    for (float x = -radius; x < radius; x += increment)
+    for (float x = -radius; x <= radius; x += increment)
     {
         pt.x = x;
         pt.y = sqrt(radius*radius - x*x);
@@ -59,7 +55,7 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
     }
 
     // y = -sqrt(r^2 - x^2)
-    for (float x = radius; x > -radius; x -= increment)
+    for (float x = radius; x >= -radius; x -= increment)
     {
         pt.x = x;
         pt.y = -sqrt(radius*radius - x*x);

@@ -6,22 +6,28 @@
 #include <iostream>
 #include <memory>
 
-Controller::Controller()
+Controller::Controller(Model* model)
 {
+    this->model = model;
 }
 
 void Controller::addPointCloudShape(const std::vector<Point> &points)
 {
 }
 
-// For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
-std::vector<Point> Controller::ResolveShapeDefinition(const Shape &shape)
+void Controller::moveShape(int shapeID)
 {
-    int shapeID = shape.getID();
-    if (shapeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+
+}
+
+// For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
+std::vector<Point> Controller::ResolveShapeDefinition(std::shared_ptr<Shape> shape)
+{
+    int shapeTypeID = shape->getShapeTypeID();
+    if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
-        const PointCloudShape_Cvx &pointCloudShape_Cvx = dynamic_cast<const PointCloudShape_Cvx &>(shape);
-        return pointCloudShape_Cvx.getPoints();
+        std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(shape);
+        return pointCloudShape_Cvx->getPoints();
     }
 
     std::cerr << "SHAPE TYPE IS INVALID (FUNCTION View::ResolveShapeDefinition(const Shape &shape))" << std::endl;
@@ -50,7 +56,9 @@ void Controller::CircleButton()
     if (ImGui::Button("Add"))
     {
         std::vector<Point> pts = PointCloudShape_Cvx::generateCircle(radius);
-        Model::pointCloudShapeList.push_back(PointCloudShape_Cvx(pts));
+        PointCloudShape_Cvx pcs(pts);
+        std::shared_ptr<Shape> shape = std::make_shared<PointCloudShape_Cvx>(pcs);
+        this->model->addShape(shape);
     }
 }
 

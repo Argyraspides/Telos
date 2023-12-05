@@ -2,9 +2,11 @@
 #include "controller.h"
 #include "model.h"
 int main()
-{ 
+{
     View v;
-    Controller *c;
-    v.RenderUI(c);
+    Model m;
+    Controller c(&m);
+    v.RenderUI(&c, &m);
+    
     return 0;
 }

@@ -34,6 +34,7 @@ include_directories(
 
 add_executable(${PROJECT_NAME} ${SOURCES}) 
 find_package(OpenGL REQUIRED)
+
 if(MY_COMPILER STREQUAL "emcc")
 
     set(CMAKE_CXX_COMPILER "${CMAKE_CURRENT_SOURCE_DIR}/lib/emsdk/upstream/emscripten/emcc")
@@ -44,7 +45,5 @@ if(MY_COMPILER STREQUAL "emcc")
     target_link_libraries(${PROJECT_NAME} "imgui")
 
 elseif((MY_COMPILER STREQUAL "gcc")) 
-
     target_link_libraries(${PROJECT_NAME} "SDL2" "imgui" "OpenGL::GL")
-
 endif()

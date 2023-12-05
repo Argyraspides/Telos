@@ -4,6 +4,7 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
 #include "shape.h"
+#include "model.h"
 
 #include <stdio.h>
 #include <vector>
@@ -31,7 +32,7 @@ public:
 
     void CleanupImGui();
 
-    void RenderUI(Controller *controller);
+    void RenderUI(Controller *controller, Model *model);
     void HUD();
 
     void RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);

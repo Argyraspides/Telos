@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 
-void View::RenderUI(Controller *controller)
+void View::RenderUI(Controller *controller, Model *model)
 {
 
     // Setup SDL
@@ -82,11 +82,13 @@ void View::RenderUI(Controller *controller)
         SDL_RenderClear(renderer);
 
         // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
-        for (int i = 0; i < Model::pointCloudShapeList.size(); i++)
+        for (int i = 0; i < model->getShapeCount(); i++)
         {
+           // std::shared_ptr<Shape> s = model->getShapeList()[i];
+            model->getShapeList()[i];
             RenderPointCloudShape(
                 renderer,
-                controller->ResolveShapeDefinition(Model::pointCloudShapeList[i]));
+                controller->ResolveShapeDefinition(model->getShapeList()[i]));
         }
         // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
         

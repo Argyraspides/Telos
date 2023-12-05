@@ -1,11 +1,18 @@
 #pragma once
 #include "shape.h"
+#include <memory>
 
-class Model {
+class Model
+{
 public:
     Model();
 
 public:
-    static std::vector<PointCloudShape_Cvx> pointCloudShapeList;
-};
+    int getShapeCount();
+    void addShape(std::shared_ptr<Shape> shape);
+    std::vector<std::shared_ptr<Shape>> getShapeList();
 
+private:
+    std::vector<std::shared_ptr<Shape>> shapeList;
+    int shapeCount;
+};
