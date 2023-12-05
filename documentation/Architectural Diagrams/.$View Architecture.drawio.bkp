@@ -1,10 +1,10 @@
-<mxfile host="Electron" modified="2023-12-05T06:40:08.613Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="5tJSg1xC_Gs07bLMhaYT" version="22.1.2" type="device">
+<mxfile host="Electron" modified="2023-12-05T07:13:54.710Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="FmU_4gyXFY-R00_S6Kii" version="22.1.2" type="device">
   <diagram name="Page-1" id="NtQ69wOWC1nmmlGbP-3g">
     <mxGraphModel dx="2868" dy="1746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="AB3GFtcWFRhynDyCKT0_-69" value="&lt;span style=&quot;font-size: 22px;&quot;&gt;Universal definitions of 2D shapes (data structures) will be recognized by the entire program. This shows the &quot;Shape Definition Discerner&quot; deriving its understanding of what a shape is from these definitions.&lt;br&gt;&lt;br&gt;The most &quot;atomic&quot; definition of a shape will simpy be a series of points, otherwise known as a &quot;point cloud&quot;. A point cloud can be translated into any other shape data structure.&lt;br&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="AB3GFtcWFRhynDyCKT0_-69" value="&lt;span style=&quot;font-size: 22px;&quot;&gt;Universal definitions of 2D shapes (data structures) will be recognized by the model. This shows the &quot;Shape Definition Discerner&quot; deriving its understanding of what a shape is from these definitions.&lt;br&gt;&lt;br&gt;The most &quot;atomic&quot; definition of a shape will simpy be a series of points, otherwise known as a &quot;point cloud&quot;. Any shape definition can be converted into point cloud can, and is what the view understands in order to render them.&lt;br&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="1305" y="218.75" width="510" height="282.5" as="geometry" />
         </mxCell>
         <mxCell id="AB3GFtcWFRhynDyCKT0_-104" value="" style="group" parent="1" vertex="1" connectable="0">
@@ -195,17 +195,13 @@
         <mxCell id="XOVWlfCZ6gJrWhnHlsYj-24" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;RenderUI()&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="550" y="1040" width="180" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="XOVWlfCZ6gJrWhnHlsYj-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=3;" parent="1" source="XOVWlfCZ6gJrWhnHlsYj-25" target="XOVWlfCZ6gJrWhnHlsYj-32" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="XOVWlfCZ6gJrWhnHlsYj-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=7;fillColor=#008a00;strokeColor=#005700;" parent="1" source="XOVWlfCZ6gJrWhnHlsYj-32" target="XOVWlfCZ6gJrWhnHlsYj-24" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="XOVWlfCZ6gJrWhnHlsYj-32" value="UI" style="rounded=0;whiteSpace=wrap;html=1;fontSize=22;" parent="1" vertex="1">
-          <mxGeometry x="1580" y="1290" width="260" height="100" as="geometry" />
+        <mxCell id="XOVWlfCZ6gJrWhnHlsYj-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=7;fillColor=#008a00;strokeColor=#005700;" parent="1" source="XOVWlfCZ6gJrWhnHlsYj-25" target="XOVWlfCZ6gJrWhnHlsYj-24" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1170" y="1095" as="sourcePoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="XOVWlfCZ6gJrWhnHlsYj-35" value="" style="group" parent="1" vertex="1" connectable="0">
-          <mxGeometry x="1880" y="1110" width="195" height="460" as="geometry" />
+          <mxGeometry x="1880" y="1100" width="195" height="460" as="geometry" />
         </mxCell>
         <mxCell id="XOVWlfCZ6gJrWhnHlsYj-25" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="XOVWlfCZ6gJrWhnHlsYj-35" vertex="1">
           <mxGeometry width="194.99999999999997" height="460" as="geometry" />

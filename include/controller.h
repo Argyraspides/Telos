@@ -14,7 +14,7 @@ public:
 
     Controller(Model* model);
 
-    void addPointCloudShape(const std::vector<Point> &points);
+    void addPointCloudShape(std::vector<Point> points, Point offset);
     void moveShape(int shapeID);
     void removeShape();
     void changeShape();
