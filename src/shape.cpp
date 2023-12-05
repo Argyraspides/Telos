@@ -1,6 +1,13 @@
 #include "shape.h"
 #include <iostream>
 #include <cmath>
+Shape::Shape(int shapeTypeID)
+{
+    this->shapeTypeID = shapeTypeID;
+    this->shapeID = (ID_CTR++);
+}
+
+
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
 }
@@ -13,18 +20,10 @@ PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Sha
 // ***************************************************************************************************************************************************************
 // GETTER FUNCTIONS
 
-Shape::Shape(int shapeTypeID)
-{
-    this->shapeTypeID = shapeTypeID;
-    this->shapeID = (ID_CTR++);
-}
-
 std::vector<Point> PointCloudShape_Cvx::getPoints() const
 {
     return this->m_points;
 }
-
-// ***************************************************************************************************************************************************************
 
 // ***************************************************************************************************************************************************************
 // CHECKER FUNCTIONS
@@ -35,12 +34,13 @@ bool PointCloudShape_Cvx::checkConvex(const std::vector<Point> &points)
 }
 
 // ***************************************************************************************************************************************************************
+// SHAPE GENERATOR FUNCTIONS
 
 std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
 {
-    // x^2 + y^2 = r^2
 
-    float increment = radius / (float) CIRCLE_POINT_COUNT;
+    // Circle will be approximated with CIRCLE_POINT_COUNT number of points on each half
+    float increment = 2*radius / (float) CIRCLE_POINT_COUNT;
 
     std::vector<Point> circle;
     circle.reserve(CIRCLE_POINT_COUNT * 2);

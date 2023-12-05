@@ -4,7 +4,12 @@ static int ID_CTR = 0;
 
 enum SHAPE_TYPE_IDENTIFIERS
 {
-    POINT_CLOUD_SHAPE_CVX = 0
+    // Convex Point Cloud 
+    POINT_CLOUD_SHAPE_CVX = 0,
+    // Arbitrary Point Cloud (concave or convex)
+    POINT_CLOUD_SHAPE_ARB = 1,
+    // Axis-Aligned Bounding Box
+    AABB = 2
 };
 
 class Shape

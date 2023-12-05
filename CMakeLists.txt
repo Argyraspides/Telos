@@ -35,10 +35,14 @@ include_directories(
 add_executable(${PROJECT_NAME} ${SOURCES}) 
 find_package(OpenGL REQUIRED)
 
+# If we are building to run on a web browser, we need to use the EMCC compiler.
 if(MY_COMPILER STREQUAL "emcc")
 
+    # Set the compiler. This is bundled in the emscripten SDK.
     set(CMAKE_CXX_COMPILER "${CMAKE_CURRENT_SOURCE_DIR}/lib/emsdk/upstream/emscripten/emcc")
+    # Emscripten is a C++-to-JS compiler, so we want our output to be a .js file and not a normal binary
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
+    # Emscripten is compatible with SDL2, so we use this flag to enable it ("-s USE_SDL=2")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2")
 
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2")
