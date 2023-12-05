@@ -27,10 +27,12 @@ To build and run in a web browser, simply run in the ``lib`` folder:
 ```
 To build and run locally, i.e. a normal OS window:
 ```
-./run_local.sh
+./build_web.sh
+cd ../build
+./Telos
 ```
 
 If you get a permission denied error for running any of the shell scripts, you can simply run:
 ```
-sudo chmod u+x {path to script here.sh}
+sudo chmod u+x {SCRIPT NAME}.sh
 ```
