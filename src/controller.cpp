@@ -11,7 +11,7 @@ Controller::Controller(Model *model)
     this->model = model;
 }
 
-void Controller::addPointCloudShape(std::vector<Point> points, Point offset)
+void Controller::UpdateModel_AddPointCloudShape(std::vector<Point> points, Point offset)
 {
     for (Point &p : points)
         p = p + offset;
@@ -21,6 +21,6 @@ void Controller::addPointCloudShape(std::vector<Point> points, Point offset)
     this->model->addShape(shape);
 }
 
-void Controller::moveShape(int shapeID)
+void Controller::UpdateModel_MoveShape(int shapeID)
 {
 }

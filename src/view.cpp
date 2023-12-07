@@ -128,7 +128,7 @@ void View::UI_Interactive_AddCircleButton(Controller* controller)
 
     if (ImGui::Button("Add"))
     {
-        controller->addPointCloudShape(
+        controller->UpdateModel_AddPointCloudShape(
             PointCloudShape_Cvx::generateCircle(radius),
             {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
