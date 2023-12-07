@@ -2,7 +2,7 @@
 #include <vector>
 #include <memory>
 
-static int ID_CTR = 0;
+static long long ID_CTR = 0;
 
 enum SHAPE_TYPE_IDENTIFIERS
 {
@@ -25,7 +25,7 @@ public:
     }
 
     // THE ID OF THE ACTUAL SHAPE IN THE WORLD E.G. SHAPE #1, SHAPE #2 ...
-    virtual int getShapeID()
+    virtual long long getShapeID()
     {
         return this->shapeID;
     }
@@ -33,7 +33,7 @@ public:
     virtual ~Shape() {}
 
 protected:
-    int shapeID;
+    long long shapeID;
     int shapeTypeID;
 };
 
@@ -82,13 +82,17 @@ public:
 private:
     std::vector<Point> m_points;                         // POINT CLOUD THAT REPRESENTS THE SHAPE
     bool checkConvex(const std::vector<Point> &points);  // CHECKS IF A SHAPE IS CONVEX
-    Point getCentroid(const std::vector<Point> &points); // CALCULATES CENTROID OF THE SHAPE
     Point center;                                        // REPRESENTS THE CENTROID OF THE SHAPE
 };
 
+// ***************************************************************************************************************************************************************
+// Utilities class for various operations on shapes, e.g. converting a unique shape data structure into the principle point cloud, 
+// calculating the centroid of various shapes, 
 class ShapeUtils
 {
 public:
-    static std::vector<Point> convertToPointCloud(std::shared_ptr<Shape> shape);
+    static std::vector<Point> convertToPointCloud(std::shared_ptr<Shape> shape); // CONVERTS ANY SHAPE DATA STRUCTURE INTO A POINT CLOUD SHAPE
+    static Point getCentroid(const std::vector<Point> &points); // CALCULATES CENTROID OF THE SHAPE
+
 };
 // ***************************************************************************************************************************************************************

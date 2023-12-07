@@ -8,6 +8,17 @@ Shape::Shape(int shapeTypeID)
     this->shapeID = (ID_CTR++);
 }
 
+
+
+
+
+
+
+
+
+
+
+
 // For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
 std::vector<Point> ShapeUtils::convertToPointCloud(std::shared_ptr<Shape> shape)
 {
@@ -17,20 +28,31 @@ std::vector<Point> ShapeUtils::convertToPointCloud(std::shared_ptr<Shape> shape)
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(shape);
         return pointCloudShape_Cvx->getPoints();
     }
-
-    std::cerr << "SHAPE TYPE IS INVALID (FUNCTION View::ResolveShapeDefinition(const Shape &shape))" << std::endl;
+    std::cerr << "SHAPE TYPE IS INVALID. ERROR IN FUNCTION: " << __func__ << " IN CLASS " << typeid(ShapeUtils).name() << std::endl;
     return {};
 }
 
 
+
+
+
+
+
+
+
+
+
+// ***************************************************************************************************************************************************************
+// CONSTRUCTORS
+
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
-    this->center = getCentroid(this->m_points);
+    this->center = ShapeUtils::getCentroid(this->m_points);
 }
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
-    this->center = getCentroid(this->m_points);
+    this->center = ShapeUtils::getCentroid(this->m_points);
     this->m_points = points;
 }
 

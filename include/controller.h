@@ -14,7 +14,7 @@ public:
 
     Controller(Model* model);
 
-    void UpdateModel_AddPointCloudShape(std::vector<Point> points, Point offset);
-    void UpdateModel_MoveShape(int shapeID);
+    long long UpdateModel_AddPointCloudShape(std::vector<Point> points, Point offset);
+    void UpdateModel_MoveShape(long long shapeID);
 
 };

@@ -22,7 +22,7 @@ void View::Render(Controller *controller, Model *model)
 
     // Create window with SDL_Renderer graphics context
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window *window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window *window = SDL_CreateWindow("Telos", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr)
     {
@@ -31,21 +31,13 @@ void View::Render(Controller *controller, Model *model)
     }
 
     // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-
+    ImGuiIO &io = SetupImGui();
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
-
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
-
+    // Color is #1e1e1e
     ImVec4 clear_color = ImVec4(30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f);
     // Main loop
     bool done = false;
@@ -59,6 +51,8 @@ void View::Render(Controller *controller, Model *model)
 #endif
     {
 
+
+        // Handle events such as keyboard/mouse inputs, resizing the window, etc
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -67,6 +61,7 @@ void View::Render(Controller *controller, Model *model)
                 done = true;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
+            SDL_ViewportHandler(event);
         }
 
         // Start the Dear ImGui frame
@@ -74,9 +69,19 @@ void View::Render(Controller *controller, Model *model)
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        // RENDER GUI HERE ***************RENDER GUI HERE*******************RENDER GUI HERE**********************RENDER GUI HERE******************RENDER GUI HERE*************************************************************
+
+
+
+
+        // RENDER GUI HERE ***************
+
         RenderGUI(controller);
-        // RENDER GUI HERE ***************RENDER GUI HERE*******************RENDER GUI HERE**********************RENDER GUI HERE******************RENDER GUI HERE*************************************************************
+        
+        // RENDER GUI HERE ***************
+
+
+
+
 
         // Rendering
         ImGui::Render();
@@ -84,9 +89,19 @@ void View::Render(Controller *controller, Model *model)
         SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
         SDL_RenderClear(renderer);
 
-        // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
+
+
+
+
+        // RENDER OBJECTS HERE ***************
+
         RenderModel(model, controller, renderer);
-        // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
+
+        // RENDER OBJECTS HERE ***************
+
+
+
+
 
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);
@@ -94,22 +109,43 @@ void View::Render(Controller *controller, Model *model)
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_END;
 #endif
-    // Cleanup
-    ImGui_ImplSDLRenderer2_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
+    CleanupSDL(renderer, window);
+    CleanupImGui();
+}
 
+// **************************************************************************************************************************************************************************
+// CLEANUP
+
+void View::CleanupSDL(SDL_Renderer* renderer, SDL_Window* window)
+{
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
+void View::CleanupImGui()
+{
+    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+}
 
+
+ImGuiIO& View::SetupImGui()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+    return io;
+}
 
 // **************************************************************************************************************************************************************************
 // UI ELEMENTS
 
-void View::UI_Interactive_CommonShapeSubMenu(Controller* controller)
+void View::UI_Interactive_CommonShapeSubMenu(Controller *controller)
 {
 
     if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
@@ -120,7 +156,7 @@ void View::UI_Interactive_CommonShapeSubMenu(Controller* controller)
     ImGui::End();
 }
 
-void View::UI_Interactive_AddCircleButton(Controller* controller)
+void View::UI_Interactive_AddCircleButton(Controller *controller)
 {
     ImGui::Text("Circle");
     static float radius = 10;
@@ -134,7 +170,7 @@ void View::UI_Interactive_AddCircleButton(Controller* controller)
     }
 }
 
-void View::UI_ConstructUI(Controller* controller)
+void View::UI_ConstructMenuModule(Controller *controller)
 {
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
@@ -142,13 +178,12 @@ void View::UI_ConstructUI(Controller* controller)
     UI_Interactive_CommonShapeSubMenu(controller);
 }
 
-void View::UI_Update(Controller* controller)
+void View::UI_Update(Controller *controller)
 {
-    
 }
 
 // **************************************************************************************************************************************************************************
-// RENDERING 
+// RENDERING
 
 void View::RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
 {
@@ -182,8 +217,19 @@ void View::RenderModel(Model *model, Controller *controller, SDL_Renderer *rende
 
 void View::RenderGUI(Controller *controller)
 {
-    UI_ConstructUI(controller);
+    UI_ConstructMenuModule(controller);
 }
 
-
 // **************************************************************************************************************************************************************************
+// INPUT HANDLING
+
+void View::SDL_ViewportHandler(SDL_Event &event)
+{
+    int mouseX = event.motion.x;
+    int mouseY = event.motion.y;
+
+    if(event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+    {
+    }
+
+}
