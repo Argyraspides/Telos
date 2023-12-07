@@ -23,8 +23,6 @@ public:
 
 
 
-    std::vector<Point> ResolveShapeDefinition(std::shared_ptr<Shape> shape);
-
     void setCurrentShapeType(int shapeTypeID);
 
 };

@@ -33,9 +33,9 @@ public:
     void RenderGUI(Controller *controller);
     void CleanupImGui();
 
-    void UI_CommonShapeSubMenu(Controller* controller);
-    void UI_AddCircleButton(Controller* controller);
-    void UI_FullMenu(Controller* controller);
+    void UI_Interactive_CommonShapeSubMenu(Controller* controller);
+    void UI_Interactive_AddCircleButton(Controller* controller);
+    void UI_ConstructUI(Controller* controller);
     
     void Render(Controller *controller, Model *model);
     void HUD();

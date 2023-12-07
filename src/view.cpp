@@ -3,6 +3,8 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+// **************************************************************************************************************************************************************************
+// MAIN RENDER FUNCTION
 
 void View::Render(Controller *controller, Model *model)
 {
@@ -102,21 +104,23 @@ void View::Render(Controller *controller, Model *model)
     SDL_Quit();
 }
 
+
+
 // **************************************************************************************************************************************************************************
 // UI ELEMENTS
 
-void View::UI_CommonShapeSubMenu(Controller* controller)
+void View::UI_Interactive_CommonShapeSubMenu(Controller* controller)
 {
 
     if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        UI_AddCircleButton(controller);
+        UI_Interactive_AddCircleButton(controller);
     }
 
     ImGui::End();
 }
 
-void View::UI_AddCircleButton(Controller* controller)
+void View::UI_Interactive_AddCircleButton(Controller* controller)
 {
     ImGui::Text("Circle");
     static float radius = 10;
@@ -130,12 +134,12 @@ void View::UI_AddCircleButton(Controller* controller)
     }
 }
 
-void View::UI_FullMenu(Controller* controller)
+void View::UI_ConstructUI(Controller* controller)
 {
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
     ImGui::SetWindowSize(ImVec2(0.2 * SCREEN_WIDTH, ImGui::GetIO().DisplaySize.y));
-    UI_CommonShapeSubMenu(controller);
+    UI_Interactive_CommonShapeSubMenu(controller);
 }
 
 
@@ -167,14 +171,14 @@ void View::RenderModel(Model *model, Controller *controller, SDL_Renderer *rende
             model->getShapeList()[i];
             RenderPointCloudShape(
                 renderer,
-                controller->ResolveShapeDefinition(model->getShapeList()[i]));
+                ShapeUtils::convertToPointCloud(model->getShapeList()[i]));
         }
     }
 }
 
 void View::RenderGUI(Controller *controller)
 {
-    UI_FullMenu(controller);
+    UI_ConstructUI(controller);
 }
 
 

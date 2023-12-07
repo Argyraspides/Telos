@@ -1,10 +1,12 @@
 #pragma once
 #include <vector>
+#include <memory>
+
 static int ID_CTR = 0;
 
 enum SHAPE_TYPE_IDENTIFIERS
 {
-    // Convex Point Cloud 
+    // Convex Point Cloud
     POINT_CLOUD_SHAPE_CVX = 0,
     // Arbitrary Point Cloud (concave or convex)
     POINT_CLOUD_SHAPE_ARB = 1,
@@ -44,13 +46,12 @@ struct Point
     float x, y, z;
     Point(float x = 0, float y = 0, float z = 0) : x(x), y(y), z(z) {}
 
-    Point operator+(const Point& point)
+    Point operator+(const Point &point)
     {
         return {
             x + point.x,
             y + point.y,
-            z + point.z
-        };
+            z + point.z};
     }
 
     Point operator/(const float &num)
@@ -58,19 +59,17 @@ struct Point
         return {
             x / num,
             y / num,
-            z / num
-        };
+            z / num};
     }
-
 };
 
 class PointCloudShape_Cvx : public Shape
 {
 public:
-    PointCloudShape_Cvx(const std::vector<Point> &points);                                          // CONSTRUCTS THE SHAPE
-    PointCloudShape_Cvx();                                                                          // DEFAULT CONSTRUCTOR
-    std::vector<Point> getPoints() const;                                                           // RETURNS POINT CLOUD
-    int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX; }   // RETURNS THE TYPE OF SHAPE
+    PointCloudShape_Cvx(const std::vector<Point> &points);                                        // CONSTRUCTS THE SHAPE
+    PointCloudShape_Cvx();                                                                        // DEFAULT CONSTRUCTOR
+    std::vector<Point> getPoints() const;                                                         // RETURNS POINT CLOUD
+    int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX; } // RETURNS THE TYPE OF SHAPE
 
 public:
     // COMMON SHAPES
@@ -81,10 +80,15 @@ public:
     static const int CIRCLE_POINT_COUNT = 15;
 
 private:
-    std::vector<Point> m_points;                            // POINT CLOUD THAT REPRESENTS THE SHAPE
-    bool checkConvex(const std::vector<Point> &points);     // CHECKS IF A SHAPE IS CONVEX
-    Point getCentroid(const std::vector<Point> &points);    // CALCULATES CENTROID OF THE SHAPE
-    Point center;                                           // REPRESENTS THE CENTROID OF THE SHAPE
+    std::vector<Point> m_points;                         // POINT CLOUD THAT REPRESENTS THE SHAPE
+    bool checkConvex(const std::vector<Point> &points);  // CHECKS IF A SHAPE IS CONVEX
+    Point getCentroid(const std::vector<Point> &points); // CALCULATES CENTROID OF THE SHAPE
+    Point center;                                        // REPRESENTS THE CENTROID OF THE SHAPE
 };
 
+class ShapeUtils
+{
+public:
+    static std::vector<Point> convertToPointCloud(std::shared_ptr<Shape> shape);
+};
 // ***************************************************************************************************************************************************************
