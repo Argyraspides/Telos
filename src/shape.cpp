@@ -51,6 +51,10 @@ Point ShapeUtils::getCentroid(const std::vector<Point> &points)
     return currentCentroidSum / (float)sectors;
 }
 
+bool ShapeUtils::checkConvex(const std::vector<Point> &points)
+{
+    return true;
+}
 
 
 
@@ -64,12 +68,12 @@ Point ShapeUtils::getCentroid(const std::vector<Point> &points)
 
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
-    this->center = ShapeUtils::getCentroid(this->m_points);
+    this->m_center = ShapeUtils::getCentroid(this->m_points);
 }
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
-    this->center = ShapeUtils::getCentroid(this->m_points);
+    this->m_center = ShapeUtils::getCentroid(this->m_points);
     this->m_points = points;
 }
 
@@ -79,14 +83,6 @@ PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Sha
 std::vector<Point> PointCloudShape_Cvx::getPoints() const
 {
     return this->m_points;
-}
-
-// ***************************************************************************************************************************************************************
-// CHECKER FUNCTIONS
-
-bool PointCloudShape_Cvx::checkConvex(const std::vector<Point> &points)
-{
-    return true;
 }
 
 // ***************************************************************************************************************************************************************

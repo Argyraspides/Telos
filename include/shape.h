@@ -65,14 +65,15 @@ struct Point
 
 class PointCloudShape_Cvx : public Shape
 {
+
 public:
-    PointCloudShape_Cvx(const std::vector<Point> &points);                                        // CONSTRUCTS THE SHAPE
-    PointCloudShape_Cvx();                                                                        // DEFAULT CONSTRUCTOR
+    PointCloudShape_Cvx(const std::vector<Point> &points);
+    PointCloudShape_Cvx();                                 
+public:
     std::vector<Point> getPoints() const;                                                         // RETURNS POINT CLOUD
     int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX; } // RETURNS THE TYPE OF SHAPE
 
-public:
-    // COMMON SHAPES
+public: 
     static std::vector<Point> generateCircle(float radius);                   // CONSTRUCTS A CIRCLE USING RADIUS
     static std::vector<Point> generateRectangle(float w, float h);            // CONSTRUCTS A RECTANGLE USING WIDTH AND HEIGHT
     static std::vector<Point> generateTriangle(Point p1, Point p2, Point p3); // CONSTRUCTS A TRIANGLE USING THREE POINTS
@@ -80,19 +81,22 @@ public:
     static const int CIRCLE_POINT_COUNT = 15;
 
 private:
-    std::vector<Point> m_points;                         // POINT CLOUD THAT REPRESENTS THE SHAPE
-    bool checkConvex(const std::vector<Point> &points);  // CHECKS IF A SHAPE IS CONVEX
-    Point center;                                        // REPRESENTS THE CENTROID OF THE SHAPE
+    std::vector<Point> m_points; // POINT CLOUD THAT REPRESENTS THE SHAPE
+    Point m_center;              // REPRESENTS THE CENTROID OF THE SHAPE
+
+    float m_xVel;   // X-AXIS VELOCITY
+    float m_yVel;   // Y-AXIS VELOCITY
+    float m_rot;    // ROTATION (RADIANS)
 };
 
 // ***************************************************************************************************************************************************************
-// Utilities class for various operations on shapes, e.g. converting a unique shape data structure into the principle point cloud, 
-// calculating the centroid of various shapes, 
+// Utilities class for various operations on shapes, e.g. converting a unique shape data structure into the principle point cloud,
+// calculating the centroid of various shapes,
 class ShapeUtils
 {
 public:
     static std::vector<Point> convertToPointCloud(std::shared_ptr<Shape> shape); // CONVERTS ANY SHAPE DATA STRUCTURE INTO A POINT CLOUD SHAPE
-    static Point getCentroid(const std::vector<Point> &points); // CALCULATES CENTROID OF THE SHAPE
-
+    static Point getCentroid(const std::vector<Point> &points);                  // CALCULATES CENTROID OF THE SHAPE
+    static bool checkConvex(const std::vector<Point> &points);                   // CHECKS IF A SHAPE IS CONVEX
 };
 // ***************************************************************************************************************************************************************
