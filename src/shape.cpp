@@ -32,7 +32,24 @@ std::vector<Point> ShapeUtils::convertToPointCloud(std::shared_ptr<Shape> shape)
     return {};
 }
 
+Point ShapeUtils::getCentroid(const std::vector<Point> &points)
+{
 
+    if (points.size() < 3)
+        return {};
+
+    int sectors = points.size() - 2;
+
+    Point currentCentroidSum = {0, 0, 0};
+
+    for (int i = 0; i < sectors; i++)
+    {
+        currentCentroidSum = currentCentroidSum + points[0] + points[i] + points[i + 1];
+    }
+
+    currentCentroidSum = currentCentroidSum / 3;
+    return currentCentroidSum / (float)sectors;
+}
 
 
 
@@ -102,23 +119,4 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
     }
 
     return circle;
-}
-
-Point PointCloudShape_Cvx::getCentroid(const std::vector<Point> &points)
-{
-
-    if (points.size() < 3)
-        return {};
-
-    int sectors = points.size() - 2;
-
-    Point currentCentroidSum = {0, 0, 0};
-
-    for (int i = 0; i < sectors; i++)
-    {
-        currentCentroidSum = currentCentroidSum + points[0] + points[i] + points[i + 1];
-    }
-
-    currentCentroidSum = currentCentroidSum / 3;
-    return currentCentroidSum / (float)sectors;
 }
