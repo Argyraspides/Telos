@@ -29,10 +29,15 @@ public:
     void SDLRender();
     void CleanupSDL(SDL_Renderer *renderer, SDL_Window *window);
     ImGuiIO InitImGui(SDL_Renderer *renderer, SDL_Window *window);
-
+    void RenderModel(Model *model, Controller* controller, SDL_Renderer* renderer); 
+    void RenderGUI(Controller *controller);
     void CleanupImGui();
 
-    void RenderUI(Controller *controller, Model *model);
+    void UI_CommonShapeSubMenu(Controller* controller);
+    void UI_AddCircleButton(Controller* controller);
+    void UI_FullMenu(Controller* controller);
+    
+    void Render(Controller *controller, Model *model);
     void HUD();
 
     void RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);

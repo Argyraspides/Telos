@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 
-void View::RenderUI(Controller *controller, Model *model)
+void View::Render(Controller *controller, Model *model)
 {
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -72,8 +72,9 @@ void View::RenderUI(Controller *controller, Model *model)
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        if (controller != nullptr)
-            controller->FullMenu();
+        // RENDER GUI HERE ***************RENDER GUI HERE*******************RENDER GUI HERE**********************RENDER GUI HERE******************RENDER GUI HERE*************************************************************
+        RenderGUI(controller);
+        // RENDER GUI HERE ***************RENDER GUI HERE*******************RENDER GUI HERE**********************RENDER GUI HERE******************RENDER GUI HERE*************************************************************
 
         // Rendering
         ImGui::Render();
@@ -82,18 +83,7 @@ void View::RenderUI(Controller *controller, Model *model)
         SDL_RenderClear(renderer);
 
         // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
-
-        if (model != nullptr)
-        {
-            for (int i = 0; i < model->getShapeCount(); i++)
-            {
-                model->getShapeList()[i];
-                RenderPointCloudShape(
-                    renderer,
-                    controller->ResolveShapeDefinition(model->getShapeList()[i]));
-            }
-        }
-
+        RenderModel(model, controller, renderer);
         // RENDER OBJECTS HERE ***************RENDER OBJECTS HERE*******************RENDER OBJECTS HERE**********************RENDER OBJECTS HERE******************RENDER OBJECTS HERE*************************************************************
 
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
@@ -112,6 +102,46 @@ void View::RenderUI(Controller *controller, Model *model)
     SDL_Quit();
 }
 
+// **************************************************************************************************************************************************************************
+// UI ELEMENTS
+
+void View::UI_CommonShapeSubMenu(Controller* controller)
+{
+
+    if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        UI_AddCircleButton(controller);
+    }
+
+    ImGui::End();
+}
+
+void View::UI_AddCircleButton(Controller* controller)
+{
+    ImGui::Text("Circle");
+    static float radius = 10;
+    ImGui::InputFloat("Radius", &radius);
+
+    if (ImGui::Button("Add"))
+    {
+        controller->addPointCloudShape(
+            PointCloudShape_Cvx::generateCircle(radius),
+            {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+    }
+}
+
+void View::UI_FullMenu(Controller* controller)
+{
+    ImGui::Begin("Menu");
+    ImGui::SetWindowPos(ImVec2(0, 0));
+    ImGui::SetWindowSize(ImVec2(0.2 * SCREEN_WIDTH, ImGui::GetIO().DisplaySize.y));
+    UI_CommonShapeSubMenu(controller);
+}
+
+
+// **************************************************************************************************************************************************************************
+// RENDERING 
+
 void View::RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
 {
     // TODO: FIND MORE EFFICIENT WAY TO RENDER SHAPES
@@ -127,3 +157,25 @@ void View::RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> poin
             points[(i + 1) % points.size()].y);
     }
 }
+
+void View::RenderModel(Model *model, Controller *controller, SDL_Renderer *renderer)
+{
+    if (model != nullptr)
+    {
+        for (int i = 0; i < model->getShapeCount(); i++)
+        {
+            model->getShapeList()[i];
+            RenderPointCloudShape(
+                renderer,
+                controller->ResolveShapeDefinition(model->getShapeList()[i]));
+        }
+    }
+}
+
+void View::RenderGUI(Controller *controller)
+{
+    UI_FullMenu(controller);
+}
+
+
+// **************************************************************************************************************************************************************************

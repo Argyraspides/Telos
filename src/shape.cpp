@@ -7,13 +7,14 @@ Shape::Shape(int shapeTypeID)
     this->shapeID = (ID_CTR++);
 }
 
-
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
+    this->center = getCentroid(this->m_points);
 }
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
+    this->center = getCentroid(this->m_points);
     this->m_points = points;
 }
 
@@ -40,7 +41,7 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
 {
 
     // Circle will be approximated with CIRCLE_POINT_COUNT number of points on each half
-    float increment = 2*radius / (float) CIRCLE_POINT_COUNT;
+    float increment = 2 * radius / (float)CIRCLE_POINT_COUNT;
 
     std::vector<Point> circle;
     circle.reserve(CIRCLE_POINT_COUNT * 2);
@@ -50,7 +51,7 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
     for (float x = -radius; x <= radius; x += increment)
     {
         pt.x = x;
-        pt.y = sqrt(radius*radius - x*x);
+        pt.y = sqrt(radius * radius - x * x);
         circle.push_back(pt);
     }
 
@@ -58,9 +59,28 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
     for (float x = radius; x >= -radius; x -= increment)
     {
         pt.x = x;
-        pt.y = -sqrt(radius*radius - x*x);
+        pt.y = -sqrt(radius * radius - x * x);
         circle.push_back(pt);
     }
 
     return circle;
+}
+
+Point PointCloudShape_Cvx::getCentroid(const std::vector<Point> &points)
+{
+
+    if (points.size() < 3)
+        return {};
+
+    int sectors = points.size() - 2;
+
+    Point currentCentroidSum = {0, 0, 0};
+
+    for (int i = 0; i < sectors; i++)
+    {
+        currentCentroidSum = currentCentroidSum + points[0] + points[i] + points[i + 1];
+    }
+
+    currentCentroidSum = currentCentroidSum / 3;
+    return currentCentroidSum / (float)sectors;
 }

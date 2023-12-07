@@ -39,33 +39,3 @@ std::vector<Point> Controller::ResolveShapeDefinition(std::shared_ptr<Shape> sha
     return {};
 }
 
-void Controller::CommonShapeSubMenu()
-{
-
-    if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        CircleButton();
-    }
-
-    ImGui::End();
-}
-
-void Controller::CircleButton()
-{
-    ImGui::Text("Circle");
-    static float radius = 10;
-    ImGui::InputFloat("Radius", &radius);
-
-    if (ImGui::Button("Add"))
-    {
-        addPointCloudShape(PointCloudShape_Cvx::generateCircle(radius), {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
-    }
-}
-
-void Controller::FullMenu()
-{
-    ImGui::Begin("Menu");
-    ImGui::SetWindowPos(ImVec2(0, 0));
-    ImGui::SetWindowSize(ImVec2(0.2 * SCREEN_WIDTH, ImGui::GetIO().DisplaySize.y));
-    CommonShapeSubMenu();
-}

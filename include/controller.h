@@ -20,9 +20,8 @@ public:
     void changeShape();
     void changeGravity();
     void changeWallElasticity();
-    void CommonShapeSubMenu();
-    void CircleButton();
-    void FullMenu();
+
+
 
     std::vector<Point> ResolveShapeDefinition(std::shared_ptr<Shape> shape);
 

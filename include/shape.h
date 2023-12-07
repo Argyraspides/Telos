@@ -43,6 +43,7 @@ struct Point
 {
     float x, y, z;
     Point(float x = 0, float y = 0, float z = 0) : x(x), y(y), z(z) {}
+
     Point operator+(const Point& point)
     {
         return {
@@ -51,15 +52,25 @@ struct Point
             z + point.z
         };
     }
+
+    Point operator/(const float &num)
+    {
+        return {
+            x / num,
+            y / num,
+            z / num
+        };
+    }
+
 };
 
 class PointCloudShape_Cvx : public Shape
 {
 public:
-    PointCloudShape_Cvx(const std::vector<Point> &points); // CONSTRUCTS THE SHAPE
-    PointCloudShape_Cvx();                                 // DEFAULT CONSTRUCTOR
-    std::vector<Point> getPoints() const;                  // RETURNS POINT CLOUD
-    int getShapeTypeID() const override { return POINT_CLOUD_SHAPE_CVX; }
+    PointCloudShape_Cvx(const std::vector<Point> &points);                                          // CONSTRUCTS THE SHAPE
+    PointCloudShape_Cvx();                                                                          // DEFAULT CONSTRUCTOR
+    std::vector<Point> getPoints() const;                                                           // RETURNS POINT CLOUD
+    int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX; }   // RETURNS THE TYPE OF SHAPE
 
 public:
     // COMMON SHAPES
@@ -70,9 +81,10 @@ public:
     static const int CIRCLE_POINT_COUNT = 15;
 
 private:
-    std::vector<Point> m_points;                        // POINT CLOUD THAT REPRESENTS THE SHAPE
-    bool checkConvex(const std::vector<Point> &points); // CHECKS IF A SHAPE IS CONVEX
-    Point center;                                       // REPRESENTS THE CENTROID OF THE SHAPE
+    std::vector<Point> m_points;                            // POINT CLOUD THAT REPRESENTS THE SHAPE
+    bool checkConvex(const std::vector<Point> &points);     // CHECKS IF A SHAPE IS CONVEX
+    Point getCentroid(const std::vector<Point> &points);    // CALCULATES CENTROID OF THE SHAPE
+    Point center;                                           // REPRESENTS THE CENTROID OF THE SHAPE
 };
 
 // ***************************************************************************************************************************************************************

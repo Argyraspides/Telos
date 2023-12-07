@@ -8,5 +8,5 @@ int main()
     View v;
     Controller c(&m);
     
-    v.RenderUI(&c, &m);
+    v.Render(&c, &m);
 }
