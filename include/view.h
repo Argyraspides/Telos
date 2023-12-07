@@ -25,20 +25,18 @@ class View
 {
 
 public:
-    void InitSDL();
-    void SDLRender();
-    void CleanupSDL(SDL_Renderer *renderer, SDL_Window *window);
-    ImGuiIO InitImGui(SDL_Renderer *renderer, SDL_Window *window);
+// RENDER METHODS
+
+    void Render(Controller *controller, Model *model);
     void RenderModel(Model *model, Controller* controller, SDL_Renderer* renderer); 
     void RenderGUI(Controller *controller);
-    void CleanupImGui();
+    void RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);
 
+public:
+// UI ELEMENT METHODS
     void UI_Interactive_CommonShapeSubMenu(Controller* controller);
     void UI_Interactive_AddCircleButton(Controller* controller);
     void UI_ConstructUI(Controller* controller);
-    
-    void Render(Controller *controller, Model *model);
-    void HUD();
+    void UI_Update(Controller* controller);
 
-    void RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);
 };

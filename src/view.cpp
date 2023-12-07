@@ -142,6 +142,10 @@ void View::UI_ConstructUI(Controller* controller)
     UI_Interactive_CommonShapeSubMenu(controller);
 }
 
+void View::UI_Update(Controller* controller)
+{
+    
+}
 
 // **************************************************************************************************************************************************************************
 // RENDERING 

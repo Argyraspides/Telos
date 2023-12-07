@@ -11,7 +11,6 @@ void Model::addShape(std::shared_ptr<Shape> shape)
     shapeCount++;
 }
 
-
 std::vector<std::shared_ptr<Shape>> Model::getShapeList()
 {
     return this->shapeList;
