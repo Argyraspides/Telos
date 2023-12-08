@@ -11,6 +11,8 @@ This is the source code for a highly improved version of my previous physics eng
 It uses the SDL2 graphics library for graphics output and ImGui for the UI. Upon completion, you may use the engine on my website [here](https://gaugamela.me). It is still in the planning stages. For the moment, a bare-bones build toolkit and 
 some boilerplate SDL2 code are provided if you wish to build from source.
 
+If you are using VSCode to check out the project, I have included the .vscode folder to take care of IntelliSense and all necessary include directories for both the emcc and gcc compiler for you :)
+
 ## Prerequisites
 - ### [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly) compatible browser
   - Nearly all modern browsers support WebAssembly. If you want to check if your browser is supported see [this page](https://caniuse.com/wasm).
@@ -20,7 +22,12 @@ some boilerplate SDL2 code are provided if you wish to build from source.
   - Already included in this repo. EMscripten is a toolchain used to compile C++ to JS and ultimately [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly) (.wasm).
 - ### [ImGui](https://github.com/ocornut/imgui)
   - Already included in this repo. ImGui is a GUI library for C++.
-## Building & Running (Linux)
+## Building & Running (Debian Linux)
+First ensure you have OpenGL and essential build tools installed by running:
+```
+sudo apt-get update && sudo apt-get install build-essential
+sudo apt install freeglut3-dev
+```
 To build and run in a web browser, simply run in the ``lib`` folder:
 ```
 ./run_web.sh
