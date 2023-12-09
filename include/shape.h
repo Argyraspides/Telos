@@ -40,11 +40,6 @@ public:
         return this->m_shapeID;
     }
 
-    virtual Point getCenter() const
-    {
-        return this->m_center;
-    }
-
     virtual void moveShape(const Point &p)
     {
     }
@@ -53,18 +48,21 @@ public:
     {
     }
 
+    virtual void rotShape(const float &rad, const Point &pivot)
+    {
+    }
+
     virtual ~Shape()
     {
     }
 
-protected:
-    int m_shapeTypeID;      // TYPE OF SHAPE (E.G. POINT CLOUD)
-    int m_bodyTypeID;       // TYPE OF BODY (E.G. RIGID BODY)
-    long long m_shapeID;    // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
-    float m_xVel;           // X-AXIS VELOCITY
-    float m_yVel;           // Y-AXIS VELOCITY
-    float m_rot;            // ROTATION (RADIANS)
-    Point m_center;         // CENTER OF SHAPE
+public:
+    int m_shapeTypeID;   // TYPE OF SHAPE (E.G. POINT CLOUD)
+    int m_bodyTypeID;    // TYPE OF BODY (E.G. RIGID BODY)
+    long long m_shapeID; // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
+    float m_rot;         // ROTATION (RADIANS)
+    Point m_center;      // CENTER OF SHAPE
+    Point m_vel;         // VELOCITY
 };
 
 // ***************************************************************************************************************************************************************
@@ -79,12 +77,13 @@ public:
     PointCloudShape_Cvx();
 
 public:
-    std::vector<Point> getPoints() const;                                                         // RETURNS POINT CLOUD
+    std::vector<Point> getPoints() const; // RETURNS POINT CLOUD
+    void setPoint(const Point &p, const int &pointNum);
     int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX; } // RETURNS THE TYPE OF SHAPE
 
-public:
     void moveShape(const Point &p) override;
     void setShapePos(const Point &p) override;
+    void rotShape(const float &rad, const Point &pivot) override;
 
 public:
     static std::vector<Point> generateCircle(float radius);                   // CONSTRUCTS A CIRCLE USING RADIUS
@@ -93,7 +92,7 @@ public:
     static std::vector<Point> generateTriangle(float t1, float t2, float t3); // CONSTRUCTS A TRIANGLE USING THREE ANGLES FROM THE X AXIS OF A UNIT CIRCLE
     static const int CIRCLE_POINT_COUNT = 15;
 
-private:
+public:
     std::vector<Point> m_points; // POINT CLOUD THAT REPRESENTS THE SHAPE
 };
 

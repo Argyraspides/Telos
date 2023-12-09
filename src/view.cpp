@@ -7,7 +7,7 @@
 #include <chrono>
 #include <thread>
 
-View::View(Controller* controller)
+View::View(Controller *controller)
 {
     this->m_controller = controller;
     this->Render();
@@ -156,9 +156,9 @@ void View::UI_Interactive_AddCircleButton()
 
     if (ImGui::Button("Add"))
     {
-        this->m_controller->UpdateModel_AddPointCloudShape(
-            PointCloudShape_Cvx::generateCircle(radius),
-            {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+        PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
+        circle.m_vel = {1.0f, 1.0f, 0.0f};
+        this->m_controller->UpdateModel_AddPointCloudShape(circle, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }
 
@@ -224,7 +224,7 @@ void View::SDL_ViewportHandler(SDL_Event &event)
 
 void View::SDL_DragShape(SDL_Event &event)
 {
-     int mouseX, mouseY;
+    int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)

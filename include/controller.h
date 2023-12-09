@@ -12,7 +12,7 @@ private:
 public:
     Controller(Model *model);
 
-    long long UpdateModel_AddPointCloudShape(std::vector<Point> points, Point offset);
+    long long UpdateModel_AddPointCloudShape(PointCloudShape_Cvx s, Point offset);
     void UpdateModel_MoveShape(long long shapeID);
     void UpdateModel_AddShape(std::shared_ptr<Shape> shape);
     void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape);

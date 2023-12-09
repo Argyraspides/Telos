@@ -11,13 +11,13 @@ Controller::Controller(Model *model)
     this->model = model;
 }
 
-long long Controller::UpdateModel_AddPointCloudShape(std::vector<Point> points, Point offset)
+long long Controller::UpdateModel_AddPointCloudShape(PointCloudShape_Cvx s, Point offset)
 {
-    for (Point &p : points)
+    s.m_center = s.m_center + offset;
+    for(Point &p : s.m_points)
         p = p + offset;
 
-    PointCloudShape_Cvx pcs(points);
-    std::shared_ptr<Shape> shape = std::make_shared<PointCloudShape_Cvx>(pcs);
+    std::shared_ptr<Shape> shape = std::make_shared<PointCloudShape_Cvx>(s);
     UpdateModel_AddShape(shape);
     return shape->getShapeID();
 }

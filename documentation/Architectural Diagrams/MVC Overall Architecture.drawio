@@ -1,6 +1,6 @@
-<mxfile host="Electron" modified="2023-12-09T07:34:02.126Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="73CpQwC-4v7bDS-FqI5T" version="22.1.2" type="device">
+<mxfile host="Electron" modified="2023-12-09T08:08:07.628Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="J-kd7sfUucxB1kwFBT_6" version="22.1.2" type="device">
   <diagram name="Page-1" id="G8i8LE4mS__vQXn5z2gx">
-    <mxGraphModel dx="1793" dy="1091" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
+    <mxGraphModel dx="3585" dy="2183" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -327,13 +327,13 @@
         <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-146" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="o1G3f_ZrXJ-Z2UeKWCLR-161" vertex="1">
           <mxGeometry width="120" height="320" as="geometry" />
         </mxCell>
-        <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-147" value="Object 1" style="rounded=0;whiteSpace=wrap;html=1;" parent="o1G3f_ZrXJ-Z2UeKWCLR-161" vertex="1">
+        <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-147" value="Object 1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="o1G3f_ZrXJ-Z2UeKWCLR-161" vertex="1">
           <mxGeometry x="17.5" y="20" width="85" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-148" value="Object 2" style="rounded=0;whiteSpace=wrap;html=1;" parent="o1G3f_ZrXJ-Z2UeKWCLR-161" vertex="1">
+        <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-148" value="Object 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="o1G3f_ZrXJ-Z2UeKWCLR-161" vertex="1">
           <mxGeometry x="17.5" y="70" width="85" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-149" value="Object 3" style="rounded=0;whiteSpace=wrap;html=1;" parent="o1G3f_ZrXJ-Z2UeKWCLR-161" vertex="1">
+        <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-149" value="Object 3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="o1G3f_ZrXJ-Z2UeKWCLR-161" vertex="1">
           <mxGeometry x="17.5" y="120" width="85" height="40" as="geometry" />
         </mxCell>
         <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-150" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=10;rounded=0;" parent="o1G3f_ZrXJ-Z2UeKWCLR-161" edge="1">
@@ -469,49 +469,49 @@
         <mxCell id="o1G3f_ZrXJ-Z2UeKWCLR-90" value="Model*" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="URBZrm9Z0biOJ75B66dk-5" vertex="1">
           <mxGeometry x="70" y="10" width="120" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-9" value="Soft Body" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-9" value="Soft Body" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" vertex="1" parent="1">
           <mxGeometry x="320" y="1870" width="120" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-10" value="Rigid Body Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-10" value="Rigid Body Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a20025;fontColor=#ffffff;strokeColor=#6F0000;" vertex="1" parent="1">
           <mxGeometry x="270" y="1425" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-11" value="Soft Body Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-11" value="Soft Body Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" vertex="1" parent="1">
           <mxGeometry x="395" y="1425" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-13" value="Fluid Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-13" value="Fluid Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#006EAF;" vertex="1" parent="1">
           <mxGeometry x="525" y="1425" width="120" height="40" as="geometry" />
         </mxCell>
         <mxCell id="URBZrm9Z0biOJ75B66dk-14" value="Particle Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="650" y="1425" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-15" value="Rigid Body Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-15" value="Rigid Body Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a20025;fontColor=#ffffff;strokeColor=#6F0000;" vertex="1" parent="1">
           <mxGeometry x="270" y="1570" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-16" value="Soft Body Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-16" value="Soft Body Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" vertex="1" parent="1">
           <mxGeometry x="395" y="1570" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-17" value="Fluid Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-17" value="Fluid Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#006EAF;" vertex="1" parent="1">
           <mxGeometry x="525" y="1570" width="120" height="40" as="geometry" />
         </mxCell>
         <mxCell id="URBZrm9Z0biOJ75B66dk-18" value="Particle Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="650" y="1570" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-19" value="Rigid Body Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-19" value="Rigid Body Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a20025;fontColor=#ffffff;strokeColor=#6F0000;" vertex="1" parent="1">
           <mxGeometry x="270" y="1715" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-20" value="Soft Body Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-20" value="Soft Body Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" vertex="1" parent="1">
           <mxGeometry x="395" y="1715" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-21" value="Fluid Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-21" value="Fluid Module" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#006EAF;" vertex="1" parent="1">
           <mxGeometry x="525" y="1715" width="120" height="40" as="geometry" />
         </mxCell>
         <mxCell id="URBZrm9Z0biOJ75B66dk-22" value="Particle Module" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="650" y="1715" width="120" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-23" value="Rigid Body" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-23" value="Rigid Body" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a20025;fontColor=#ffffff;strokeColor=#6F0000;" vertex="1" parent="1">
           <mxGeometry x="320" y="1910" width="120" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="URBZrm9Z0biOJ75B66dk-24" value="Fluid" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="URBZrm9Z0biOJ75B66dk-24" value="Fluid" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#006EAF;" vertex="1" parent="1">
           <mxGeometry x="320" y="1950" width="120" height="30" as="geometry" />
         </mxCell>
         <mxCell id="URBZrm9Z0biOJ75B66dk-25" value="Particle" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">

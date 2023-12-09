@@ -8,9 +8,10 @@ Shape::Shape(int shapeTypeID, int bodyTypeID)
     this->m_shapeTypeID = shapeTypeID;
     this->m_bodyTypeID = bodyTypeID;
     this->m_shapeID = (ID_CTR++);
-    this->m_xVel = 0;
-    this->m_yVel = 0;
+    this->m_vel = {0, 0, 0};
     this->m_rot = 0;
+
+
 }
 
 // For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
@@ -100,23 +101,22 @@ void ShapeUtils::printInfo(PointCloudShape_Cvx s)
     }
     std::cout << "\n";
     std::cout << "CENTER: "
-              << "(" << s.getCenter().x << "," << s.getCenter().y << ")\n";
+              << "(" << s.m_center.x << "," << s.m_center.y << ")\n";
 }
 
 // ***************************************************************************************************************************************************************
 // CONSTRUCTORS (POINT CLOUD SHAPE)
 
-PointCloudShape_Cvx::PointCloudShape_Cvx() : 
-Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
+PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     this->m_center = ShapeUtils::getCentroid(this->m_points);
 }
 
-PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : 
-Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
+PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     this->m_points = points;
     this->m_center = ShapeUtils::getCentroid(this->m_points);
+    ShapeUtils::printInfo(*this);
 }
 
 // ***************************************************************************************************************************************************************
@@ -182,4 +182,8 @@ void PointCloudShape_Cvx::setShapePos(const Point &p)
     }
 
     this->m_center = this->m_center + delta;
+}
+
+void PointCloudShape_Cvx::rotShape(const float &rad, const Point &pivot)
+{
 }

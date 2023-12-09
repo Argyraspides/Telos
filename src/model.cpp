@@ -14,7 +14,7 @@ void Model::run()
     {
         while (m_isRunning)
         {
-            update(this->m_PCSCVX_shapeList);
+           // update(this->m_PCSCVX_shapeList);
         }
     }
 
@@ -32,11 +32,13 @@ void Model::update(std::vector<PointCloudShape_Cvx> &shapeList)
     // Translate
     for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
     {
+        shape.moveShape(shape.m_vel);
     }
 
     // Rotate
     for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
     {
+        shape.rotShape(shape.m_rot, shape.m_center);
     }
 }
 
