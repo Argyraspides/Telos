@@ -219,8 +219,12 @@ void View::Render_GUI()
 
 void View::SDL_ViewportHandler(SDL_Event &event)
 {
+    SDL_DragShape(event);
+}
 
-    int mouseX, mouseY;
+void View::SDL_DragShape(SDL_Event &event)
+{
+     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
