@@ -37,8 +37,11 @@ To build and run locally, i.e. a normal OS window:
 cd ../build
 ./Telos
 ```
-
 If you get a permission denied error for running any of the shell scripts, you can simply run:
+
 ```
 sudo chmod u+x {SCRIPT NAME}.sh
 ```
+## Current High-level Application Architecture (MVC pattern)
+#### Multi-threaded support is enabled, with the model running in a separate thread from the view and controller.
+![MVC Overall Architecture drawio](https://github.com/Argyraspides/Telos/assets/95353936/c0a076dd-010f-4cdf-93a9-d3f537143780)
