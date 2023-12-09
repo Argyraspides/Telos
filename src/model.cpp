@@ -7,11 +7,6 @@ Model::Model()
     this->m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
 }
 
-int Model::getShapeCount()
-{
-    return this->m_shapeCount;
-}
-
 void Model::run()
 {
 

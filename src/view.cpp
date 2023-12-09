@@ -229,7 +229,8 @@ void View::SDL_DragShape(SDL_Event &event)
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
     {
-        for (std::shared_ptr<Shape> shapePtr : this->m_controller->RetrieveModel_GetShapes())
+        std::vector<std::shared_ptr<Shape>> shapePtrs = this->m_controller->RetrieveModel_GetShapes();
+        for (std::shared_ptr<Shape> &shapePtr : shapePtrs)
         {
 
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))

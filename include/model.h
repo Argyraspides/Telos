@@ -8,17 +8,12 @@ public:
     Model();
 
 public:
-
     void run();
-
-    int getShapeCount();
-
-    std::vector<std::shared_ptr<Shape>> getShapeList();
 
     std::vector<std::shared_ptr<Shape>> m_shapeList;
     std::vector<PointCloudShape_Cvx> m_PCSCVX_shapeList;
-    int m_shapeCount;
 
+    int m_shapeCount;
     bool m_isRunning;
     SHAPE_TYPE_IDENTIFIERS m_shapeType;
 
