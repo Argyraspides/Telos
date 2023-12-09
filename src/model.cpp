@@ -1,24 +1,47 @@
 #include "model.h"
+#include <iostream>
 
 Model::Model()
 {
-    this->shapeCount = 0;
+    this->m_shapeCount = 0;
+    this->m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
 }
-
-void Model::addShape(std::shared_ptr<Shape> shape)
-{
-    this->shapeList.push_back(shape);
-    shapeCount++;
-}
-
-
-std::vector<std::shared_ptr<Shape>> Model::getShapeList()
-{
-    return this->shapeList;
-}
-
 
 int Model::getShapeCount()
 {
-    return this->shapeCount;
+    return this->m_shapeCount;
 }
+
+void Model::run()
+{
+
+    if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    {
+        while (m_isRunning)
+        {
+            update(this->m_PCSCVX_shapeList);
+        }
+    }
+
+    else if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
+    {
+        while (m_isRunning)
+        {
+        }
+    }
+}
+
+// TODO: UPDATE POSITIONS VIA POINTS
+void Model::update(std::vector<PointCloudShape_Cvx> &shapeList)
+{
+    // Translate
+    for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
+    {
+    }
+
+    // Rotate
+    for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
+    {
+    }
+}
+

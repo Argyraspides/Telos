@@ -9,23 +9,15 @@ class Controller
 private:
     Model *model;
 
-
 public:
+    Controller(Model *model);
 
-    Controller(Model* model);
+    long long UpdateModel_AddPointCloudShape(std::vector<Point> points, Point offset);
+    void UpdateModel_MoveShape(long long shapeID);
+    void UpdateModel_AddShape(std::shared_ptr<Shape> shape);
+    void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape);
+    void UpdateModel_RemoveShape(long long shapeID);
 
-    void addPointCloudShape(std::vector<Point> points, Point offset);
-    void moveShape(int shapeID);
-    void removeShape();
-    void changeShape();
-    void changeGravity();
-    void changeWallElasticity();
-    void CommonShapeSubMenu();
-    void CircleButton();
-    void FullMenu();
-
-    std::vector<Point> ResolveShapeDefinition(std::shared_ptr<Shape> shape);
-
-    void setCurrentShapeType(int shapeTypeID);
-
+    const std::vector<std::shared_ptr<Shape>>& RetrieveModel_GetShapes();
+    int RetrieveModel_GetShapeCount();
 };

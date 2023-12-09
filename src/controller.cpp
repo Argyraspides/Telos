@@ -11,61 +11,54 @@ Controller::Controller(Model *model)
     this->model = model;
 }
 
-void Controller::addPointCloudShape(std::vector<Point> points, Point offset)
+long long Controller::UpdateModel_AddPointCloudShape(std::vector<Point> points, Point offset)
 {
     for (Point &p : points)
         p = p + offset;
 
     PointCloudShape_Cvx pcs(points);
     std::shared_ptr<Shape> shape = std::make_shared<PointCloudShape_Cvx>(pcs);
-    this->model->addShape(shape);
+    UpdateModel_AddShape(shape);
+    return shape->getShapeID();
 }
 
-void Controller::moveShape(int shapeID)
+void Controller::UpdateModel_MoveShape(long long shapeID)
 {
+    
 }
 
-// For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
-std::vector<Point> Controller::ResolveShapeDefinition(std::shared_ptr<Shape> shape)
+// TODO: TEST
+void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape)
 {
-    int shapeTypeID = shape->getShapeTypeID();
-    if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    this->model->m_shapeList.push_back(shape);
+    if (shape->getShapeTypeID() == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(shape);
-        return pointCloudShape_Cvx->getPoints();
+        this->model->m_PCSCVX_shapeList.push_back(*pointCloudShape_Cvx);
     }
-
-    std::cerr << "SHAPE TYPE IS INVALID (FUNCTION View::ResolveShapeDefinition(const Shape &shape))" << std::endl;
-    return {};
-}
-
-void Controller::CommonShapeSubMenu()
-{
-
-    if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
+    else if (shape->getShapeTypeID() == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
-        CircleButton();
     }
-
-    ImGui::End();
+    this->model->m_shapeCount++;
 }
 
-void Controller::CircleButton()
+// TODO: IMPLEMENT
+void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
 {
-    ImGui::Text("Circle");
-    static float radius = 10;
-    ImGui::InputFloat("Radius", &radius);
-
-    if (ImGui::Button("Add"))
-    {
-        addPointCloudShape(PointCloudShape_Cvx::generateCircle(radius), {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
-    }
 }
 
-void Controller::FullMenu()
+// TODO: IMPLEMENT
+void Controller::UpdateModel_RemoveShape(long long shapeID)
 {
-    ImGui::Begin("Menu");
-    ImGui::SetWindowPos(ImVec2(0, 0));
-    ImGui::SetWindowSize(ImVec2(0.2 * SCREEN_WIDTH, ImGui::GetIO().DisplaySize.y));
-    CommonShapeSubMenu();
+}
+
+
+const std::vector<std::shared_ptr<Shape>>& Controller::RetrieveModel_GetShapes()
+{
+    return this->model->m_shapeList;
+}
+
+int Controller::RetrieveModel_GetShapeCount()
+{
+    return this->model->m_shapeCount;
 }

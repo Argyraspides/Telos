@@ -1,4 +1,5 @@
 #pragma once
+
 #include "imgui.h"
 #include "controller.h"
 #include "imgui_impl_sdl2.h"
@@ -6,14 +7,13 @@
 #include "shape.h"
 #include "model.h"
 
-#include <stdio.h>
 #include <vector>
 #include <SDL.h>
 
 #if !SDL_VERSION_ATLEAST(2, 0, 17)
 #error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
 #endif
-// This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
+
 #ifdef __EMSCRIPTEN__
 #include "../lib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
 #endif
@@ -25,15 +25,35 @@ class View
 {
 
 public:
-    void InitSDL();
-    void SDLRender();
-    void CleanupSDL(SDL_Renderer *renderer, SDL_Window *window);
-    ImGuiIO InitImGui(SDL_Renderer *renderer, SDL_Window *window);
+    View(Controller *controller);
+    void Render();
 
+private:
+    void Render_Model(SDL_Renderer *renderer);
+    void Render_GUI();
+    void Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);
+
+    // CLEANUP METHODS
+private:
+    void CleanupSDL(SDL_Renderer *renderer, SDL_Window *window);
     void CleanupImGui();
 
-    void RenderUI(Controller *controller, Model *model);
-    void HUD();
+private:
+    // SETUP METHODS
+    ImGuiIO &SetupImGui();
 
-    void RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);
+private:
+    // UI ELEMENT METHODS
+    void UI_Interactive_CommonShapeSubMenu();
+    void UI_Interactive_AddCircleButton();
+    void UI_ConstructMenuModule();
+    void UI_Update();
+
+private:
+    // USER INPUT HANDLING METHODS
+    void SDL_ViewportHandler(SDL_Event &event);
+    void SDL_DragShape(SDL_Event &event);
+
+private:
+    Controller *m_controller;
 };
