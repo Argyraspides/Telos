@@ -23,15 +23,16 @@
 
 class View
 {
-    // RENDER METHODS
+
 public:
-    void Render(Controller *controller, Model *model);
+    View(Controller *controller);
+    void Render();
 
 private:
-    void Render_Model(Model *model, Controller *controller, SDL_Renderer *renderer);
-    void Render_GUI(Controller *controller);
+    void Render_Model(SDL_Renderer *renderer);
+    void Render_GUI();
     void Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);
-    
+
     // CLEANUP METHODS
 private:
     void CleanupSDL(SDL_Renderer *renderer, SDL_Window *window);
@@ -43,12 +44,15 @@ private:
 
 private:
     // UI ELEMENT METHODS
-    void UI_Interactive_CommonShapeSubMenu(Controller *controller);
-    void UI_Interactive_AddCircleButton(Controller *controller);
-    void UI_ConstructMenuModule(Controller *controller);
-    void UI_Update(Controller *controller);
+    void UI_Interactive_CommonShapeSubMenu();
+    void UI_Interactive_AddCircleButton();
+    void UI_ConstructMenuModule();
+    void UI_Update();
 
 private:
     // USER INPUT HANDLING METHODS
-    void SDL_ViewportHandler(SDL_Event &event, Model* model);
+    void SDL_ViewportHandler(SDL_Event &event);
+
+private:
+    Controller *m_controller;
 };

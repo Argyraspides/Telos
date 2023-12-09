@@ -5,8 +5,6 @@
 int main()
 {
     Model m;
-    View v;
     Controller c(&m);
-    
-    v.Render(&c, &m);
+    View v(&c);
 }

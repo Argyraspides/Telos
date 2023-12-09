@@ -18,10 +18,47 @@ long long Controller::UpdateModel_AddPointCloudShape(std::vector<Point> points, 
 
     PointCloudShape_Cvx pcs(points);
     std::shared_ptr<Shape> shape = std::make_shared<PointCloudShape_Cvx>(pcs);
-    this->model->addShape(shape);
+    UpdateModel_AddShape(shape);
+    return shape->getShapeID();
 }
 
 void Controller::UpdateModel_MoveShape(long long shapeID)
 {
     
+}
+
+// TODO: TEST
+void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape)
+{
+    this->model->m_shapeList.push_back(shape);
+    if (shape->getShapeTypeID() == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    {
+        std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(shape);
+        this->model->m_PCSCVX_shapeList.push_back(*pointCloudShape_Cvx);
+    }
+    else if (shape->getShapeTypeID() == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
+    {
+    }
+    this->model->m_shapeCount++;
+}
+
+// TODO: IMPLEMENT
+void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
+{
+}
+
+// TODO: IMPLEMENT
+void Controller::UpdateModel_RemoveShape(long long shapeID)
+{
+}
+
+
+const std::vector<std::shared_ptr<Shape>>& Controller::RetrieveModel_GetShapes()
+{
+    return this->model->m_shapeList;
+}
+
+int Controller::RetrieveModel_GetShapeCount()
+{
+    return this->model->m_shapeCount;
 }

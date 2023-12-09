@@ -14,7 +14,7 @@ Shape::Shape(int shapeTypeID)
 }
 
 // For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
-std::vector<Point> ShapeUtils::convertToPointCloud(std::shared_ptr<Shape> shape)
+std::vector<Point> ShapeUtils::convertToPointCloud(const std::shared_ptr<Shape> &shape)
 {
     int shapeTypeID = shape->getShapeTypeID();
     if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
@@ -27,7 +27,7 @@ std::vector<Point> ShapeUtils::convertToPointCloud(std::shared_ptr<Shape> shape)
 }
 
 // Checks if a point lies within a shape
-bool ShapeUtils::isInside(Point p, std::shared_ptr<Shape> s)
+bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
 {
 
     int shapeTypeID = s->getShapeTypeID();
@@ -62,13 +62,7 @@ bool ShapeUtils::isInside(Point p, std::shared_ptr<Shape> s)
         }
 
         // If the points cover all four quadrants, the point is inside the polygon.
-        bool isInside = quadrantCount[0] > 0 && quadrantCount[1] > 0 && quadrantCount[2] > 0 && quadrantCount[3] > 0;
-        if (isInside)
-        {
-            std::cout << "INSIDE"
-                      << "\n";
-        }
-        return isInside;
+        return quadrantCount[0] > 0 && quadrantCount[1] > 0 && quadrantCount[2] > 0 && quadrantCount[3] > 0;
     }
 
     std::cerr << "SHAPE TYPE IS INVALID. ERROR IN FUNCTION: " << __func__ << " IN CLASS " << typeid(ShapeUtils).name() << std::endl;
@@ -115,14 +109,12 @@ void ShapeUtils::printInfo(PointCloudShape_Cvx s)
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
     this->m_center = ShapeUtils::getCentroid(this->m_points);
-    ShapeUtils::printInfo(*this);
 }
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
 {
     this->m_points = points;
     this->m_center = ShapeUtils::getCentroid(this->m_points);
-    ShapeUtils::printInfo(*this);
 }
 
 // ***************************************************************************************************************************************************************
@@ -175,14 +167,13 @@ void PointCloudShape_Cvx::moveShape(const Point &p)
         shapePts = shapePts + p;
     }
     this->m_center = this->m_center + p;
-    ShapeUtils::printInfo(*this);
 }
 
 void PointCloudShape_Cvx::setShapePos(const Point &p)
 {
     Point delta = this->m_center - p;
     delta = delta * -1;
-    
+
     for (Point &shapePts : this->m_points)
     {
         shapePts = shapePts + delta;

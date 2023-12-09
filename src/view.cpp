@@ -1,12 +1,22 @@
 #include "view.h"
 #include "model.h"
+#include "BUILD_EMCC.h"
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <chrono>
+#include <thread>
+
+View::View(Controller* controller)
+{
+    this->m_controller = controller;
+    this->Render();
+}
+
 // **************************************************************************************************************************************************************************
 // MAIN RENDER FUNCTION
 
-void View::Render(Controller *controller, Model *model)
+void View::Render()
 {
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -60,7 +70,7 @@ void View::Render(Controller *controller, Model *model)
                 done = true;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
-            SDL_ViewportHandler(event, model);
+            SDL_ViewportHandler(event);
         }
 
         // Start the Dear ImGui frame
@@ -70,7 +80,7 @@ void View::Render(Controller *controller, Model *model)
 
         // RENDER GUI HERE ***************
 
-        Render_GUI(controller);
+        Render_GUI();
 
         // RENDER GUI HERE ***************
 
@@ -82,7 +92,7 @@ void View::Render(Controller *controller, Model *model)
 
         // RENDER OBJECTS HERE ***************
 
-        Render_Model(model, controller, renderer);
+        Render_Model(renderer);
 
         // RENDER OBJECTS HERE ***************
 
@@ -127,18 +137,18 @@ ImGuiIO &View::SetupImGui()
 // **************************************************************************************************************************************************************************
 // UI ELEMENTS
 
-void View::UI_Interactive_CommonShapeSubMenu(Controller *controller)
+void View::UI_Interactive_CommonShapeSubMenu()
 {
 
     if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        UI_Interactive_AddCircleButton(controller);
+        UI_Interactive_AddCircleButton();
     }
 
     ImGui::End();
 }
 
-void View::UI_Interactive_AddCircleButton(Controller *controller)
+void View::UI_Interactive_AddCircleButton()
 {
     ImGui::Text("Circle");
     static float radius = 10;
@@ -146,21 +156,21 @@ void View::UI_Interactive_AddCircleButton(Controller *controller)
 
     if (ImGui::Button("Add"))
     {
-        controller->UpdateModel_AddPointCloudShape(
+        this->m_controller->UpdateModel_AddPointCloudShape(
             PointCloudShape_Cvx::generateCircle(radius),
             {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }
 
-void View::UI_ConstructMenuModule(Controller *controller)
+void View::UI_ConstructMenuModule()
 {
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
     ImGui::SetWindowSize(ImVec2(0.2 * SCREEN_WIDTH, ImGui::GetIO().DisplaySize.y));
-    UI_Interactive_CommonShapeSubMenu(controller);
+    UI_Interactive_CommonShapeSubMenu();
 }
 
-void View::UI_Update(Controller *controller)
+void View::UI_Update()
 {
 }
 
@@ -183,12 +193,12 @@ void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> poi
     }
 }
 
-void View::Render_Model(Model *model, Controller *controller, SDL_Renderer *renderer)
+void View::Render_Model(SDL_Renderer *renderer)
 {
-    if (model != nullptr)
+    if (this->m_controller != nullptr)
     {
-        int shapeCount = model->getShapeCount();
-        std::vector<std::shared_ptr<Shape>> shapeList = model->getShapeList();
+        int shapeCount = this->m_controller->RetrieveModel_GetShapeCount();
+        std::vector<std::shared_ptr<Shape>> shapeList = this->m_controller->RetrieveModel_GetShapes();
 
         for (int i = 0; i < shapeCount; i++)
         {
@@ -199,34 +209,37 @@ void View::Render_Model(Model *model, Controller *controller, SDL_Renderer *rend
     }
 }
 
-void View::Render_GUI(Controller *controller)
+void View::Render_GUI()
 {
-    UI_ConstructMenuModule(controller);
+    UI_ConstructMenuModule();
 }
 
 // **************************************************************************************************************************************************************************
 // INPUT HANDLING
 
-void View::SDL_ViewportHandler(SDL_Event &event, Model *model)
+void View::SDL_ViewportHandler(SDL_Event &event)
 {
+
     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
     {
-        for (std::shared_ptr<Shape> shapePtr : model->getShapeList())
+        for (std::shared_ptr<Shape> shapePtr : this->m_controller->RetrieveModel_GetShapes())
         {
 
-            if (ShapeUtils::isInside({mouseX, mouseY}, shapePtr))
+            if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
+                // TODO: TEMPORARY, FIND A WAY TO GET EMSCRIPTEN TO ACTUALLY KNOW WHEN THE MOUSE IS RELEASED
+#if !BUILD_EMCC
                 while (true)
+#endif
                 {
                     SDL_PollEvent(&event);
                     if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
                         break;
                     SDL_GetMouseState(&mouseX, &mouseY);
-                    shapePtr->setShapePos(Point({mouseX, mouseY, 0}));
-                    std::cout << mouseX << ", " << mouseY << "\n";
+                    shapePtr->setShapePos(Point({(float)mouseX, (float)mouseY, 0}));
                 }
             }
         }
