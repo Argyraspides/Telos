@@ -28,9 +28,9 @@ public:
     void Render(Controller *controller, Model *model);
 
 private:
-    void RenderModel(Model *model, Controller *controller, SDL_Renderer *renderer);
-    void RenderGUI(Controller *controller);
-    void RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);
+    void Render_Model(Model *model, Controller *controller, SDL_Renderer *renderer);
+    void Render_GUI(Controller *controller);
+    void Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);
     
     // CLEANUP METHODS
 private:
@@ -50,5 +50,5 @@ private:
 
 private:
     // USER INPUT HANDLING METHODS
-    void SDL_ViewportHandler(SDL_Event &event);
+    void SDL_ViewportHandler(SDL_Event &event, Model* model);
 };

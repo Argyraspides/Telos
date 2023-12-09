@@ -22,16 +22,13 @@ private:
     std::vector<PointCloudShape_Cvx> m_PCSCVX_shapeList;
     int m_shapeCount;
 
-// FOR POINT CLOUD SHAPES
-private: 
+    // FOR POINT CLOUD SHAPES
+private:
     bool m_isRunning;
     SHAPE_TYPE_IDENTIFIERS m_shapeType;
 
-    void update(std::vector<PointCloudShape_Cvx>& shapeList);
+    void update(std::vector<PointCloudShape_Cvx> &shapeList);
 
     // Detects collision between two convex point cloud shapes. Returns the point of collision
     Point isContact(PointCloudShape_Cvx s1, PointCloudShape_Cvx s2);
-
-    // Detects if a point lies within a convex point cloud
-    bool isInside(Point p, PointCloudShape_Cvx s);
 };

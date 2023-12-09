@@ -51,7 +51,6 @@ void View::Render(Controller *controller, Model *model)
 #endif
     {
 
-
         // Handle events such as keyboard/mouse inputs, resizing the window, etc
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -61,7 +60,7 @@ void View::Render(Controller *controller, Model *model)
                 done = true;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
-            SDL_ViewportHandler(event);
+            SDL_ViewportHandler(event, model);
         }
 
         // Start the Dear ImGui frame
@@ -69,19 +68,11 @@ void View::Render(Controller *controller, Model *model)
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-
-
-
-
         // RENDER GUI HERE ***************
 
-        RenderGUI(controller);
-        
+        Render_GUI(controller);
+
         // RENDER GUI HERE ***************
-
-
-
-
 
         // Rendering
         ImGui::Render();
@@ -89,19 +80,11 @@ void View::Render(Controller *controller, Model *model)
         SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
         SDL_RenderClear(renderer);
 
-
-
-
-
         // RENDER OBJECTS HERE ***************
 
-        RenderModel(model, controller, renderer);
+        Render_Model(model, controller, renderer);
 
         // RENDER OBJECTS HERE ***************
-
-
-
-
 
         ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);
@@ -116,7 +99,7 @@ void View::Render(Controller *controller, Model *model)
 // **************************************************************************************************************************************************************************
 // CLEANUP
 
-void View::CleanupSDL(SDL_Renderer* renderer, SDL_Window* window)
+void View::CleanupSDL(SDL_Renderer *renderer, SDL_Window *window)
 {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -130,8 +113,7 @@ void View::CleanupImGui()
     ImGui::DestroyContext();
 }
 
-
-ImGuiIO& View::SetupImGui()
+ImGuiIO &View::SetupImGui()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -185,7 +167,7 @@ void View::UI_Update(Controller *controller)
 // **************************************************************************************************************************************************************************
 // RENDERING
 
-void View::RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
+void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
 {
     // TODO: FIND MORE EFFICIENT WAY TO RENDER SHAPES
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -201,21 +183,23 @@ void View::RenderPointCloudShape(SDL_Renderer *renderer, std::vector<Point> poin
     }
 }
 
-void View::RenderModel(Model *model, Controller *controller, SDL_Renderer *renderer)
+void View::Render_Model(Model *model, Controller *controller, SDL_Renderer *renderer)
 {
     if (model != nullptr)
     {
-        for (int i = 0; i < model->getShapeCount(); i++)
+        int shapeCount = model->getShapeCount();
+        std::vector<std::shared_ptr<Shape>> shapeList = model->getShapeList();
+
+        for (int i = 0; i < shapeCount; i++)
         {
-            model->getShapeList()[i];
-            RenderPointCloudShape(
+            Render_PointCloudShape(
                 renderer,
-                ShapeUtils::convertToPointCloud(model->getShapeList()[i]));
+                ShapeUtils::convertToPointCloud(shapeList[i]));
         }
     }
 }
 
-void View::RenderGUI(Controller *controller)
+void View::Render_GUI(Controller *controller)
 {
     UI_ConstructMenuModule(controller);
 }
@@ -223,13 +207,28 @@ void View::RenderGUI(Controller *controller)
 // **************************************************************************************************************************************************************************
 // INPUT HANDLING
 
-void View::SDL_ViewportHandler(SDL_Event &event)
+void View::SDL_ViewportHandler(SDL_Event &event, Model *model)
 {
-    int mouseX = event.motion.x;
-    int mouseY = event.motion.y;
+    int mouseX, mouseY;
+    SDL_GetMouseState(&mouseX, &mouseY);
 
-    if(event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
     {
-    }
+        for (std::shared_ptr<Shape> shapePtr : model->getShapeList())
+        {
 
+            if (ShapeUtils::isInside({mouseX, mouseY}, shapePtr))
+            {
+                while (true)
+                {
+                    SDL_PollEvent(&event);
+                    if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
+                        break;
+                    SDL_GetMouseState(&mouseX, &mouseY);
+                    shapePtr->setShapePos(Point({mouseX, mouseY, 0}));
+                    std::cout << mouseX << ", " << mouseY << "\n";
+                }
+            }
+        }
+    }
 }

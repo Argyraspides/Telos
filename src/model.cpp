@@ -1,4 +1,6 @@
 #include "model.h"
+#include <iostream>
+
 Model::Model()
 {
     this->m_shapeCount = 0;
@@ -55,22 +57,21 @@ void Model::run()
     {
         while (m_isRunning)
         {
-
         }
     }
 }
 
 // TODO: UPDATE POSITIONS VIA POINTS
-void Model::update(std::vector<PointCloudShape_Cvx>& shapeList)
+void Model::update(std::vector<PointCloudShape_Cvx> &shapeList)
 {
-    for(PointCloudShape_Cvx& shape : this->m_PCSCVX_shapeList)
+    // Translate
+    for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
     {
+    }
 
+    // Rotate
+    for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
+    {
     }
 }
 
-// TODO
-bool Model::isInside(Point p, PointCloudShape_Cvx s)
-{
-
-}
