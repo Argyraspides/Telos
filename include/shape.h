@@ -15,10 +15,18 @@ enum SHAPE_TYPE_IDENTIFIERS
     AABB = 2
 };
 
+enum BODY_TYPE_IDENTIFIERS
+{
+    RIGID_BODY = 0,
+    SOFT_BODY = 1,
+    PARTICLE = 2,
+    FLUID = 3
+};
+
 class Shape
 {
 public:
-    Shape(int shapeTypeID);
+    Shape(int shapeTypeID, int bodyTypeID);
 
     // THE TYPE OF SHAPE THAT IT IS E.G. POINT CLOUD (WHICH IS ASSUMED BY DEFAULT)
     virtual int getShapeTypeID() const
@@ -50,12 +58,13 @@ public:
     }
 
 protected:
-    long long m_shapeID;    // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
     int m_shapeTypeID;      // TYPE OF SHAPE (E.G. POINT CLOUD)
-    Point m_center;         // CENTER OF SHAPE
+    int m_bodyTypeID;       // TYPE OF BODY (E.G. RIGID BODY)
+    long long m_shapeID;    // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
     float m_xVel;           // X-AXIS VELOCITY
     float m_yVel;           // Y-AXIS VELOCITY
     float m_rot;            // ROTATION (RADIANS)
+    Point m_center;         // CENTER OF SHAPE
 };
 
 // ***************************************************************************************************************************************************************

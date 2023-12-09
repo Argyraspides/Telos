@@ -3,11 +3,11 @@
 #include <cmath>
 #define MOVE_THRESH 1
 
-Shape::Shape(int shapeTypeID)
+Shape::Shape(int shapeTypeID, int bodyTypeID)
 {
     this->m_shapeTypeID = shapeTypeID;
+    this->m_bodyTypeID = bodyTypeID;
     this->m_shapeID = (ID_CTR++);
-
     this->m_xVel = 0;
     this->m_yVel = 0;
     this->m_rot = 0;
@@ -106,12 +106,14 @@ void ShapeUtils::printInfo(PointCloudShape_Cvx s)
 // ***************************************************************************************************************************************************************
 // CONSTRUCTORS (POINT CLOUD SHAPE)
 
-PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+PointCloudShape_Cvx::PointCloudShape_Cvx() : 
+Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     this->m_center = ShapeUtils::getCentroid(this->m_points);
 }
 
-PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : 
+Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     this->m_points = points;
     this->m_center = ShapeUtils::getCentroid(this->m_points);
