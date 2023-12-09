@@ -89,6 +89,7 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "typeindex": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "__availability": "cpp"
     }
 }

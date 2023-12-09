@@ -157,7 +157,7 @@ void View::UI_Interactive_AddCircleButton()
     if (ImGui::Button("Add"))
     {
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
-        circle.m_vel = {1.0f, 1.0f, 0.0f};
+        circle.m_vel = {0.01f, 0.01f, 0.0f};
         this->m_controller->UpdateModel_AddPointCloudShape(circle, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }
@@ -199,9 +199,10 @@ void View::Render_Model(SDL_Renderer *renderer)
     {
         int shapeCount = this->m_controller->RetrieveModel_GetShapeCount();
         std::vector<std::shared_ptr<Shape>> shapeList = this->m_controller->RetrieveModel_GetShapes();
-
+    
         for (int i = 0; i < shapeCount; i++)
         {
+            std::cout << shapeList[i]->m_center.x << "\n";
             Render_PointCloudShape(
                 renderer,
                 ShapeUtils::convertToPointCloud(shapeList[i]));

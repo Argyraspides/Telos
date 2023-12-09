@@ -1,5 +1,8 @@
 #include "model.h"
+#include <chrono>
 #include <iostream>
+
+#define POLLING_RATE_S 60
 
 Model::Model()
 {
@@ -12,9 +15,19 @@ void Model::run()
 
     if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
+        const std::chrono::milliseconds frameDuration(1000 / POLLING_RATE_S);
+        auto startTime = std::chrono::high_resolution_clock::now();
+
         while (m_isRunning)
         {
-           // update(this->m_PCSCVX_shapeList);
+            auto endTime = std::chrono::high_resolution_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+            if (elapsed >= frameDuration)
+            {
+                update(this->m_PCSCVX_shapeList);
+                startTime = std::chrono::high_resolution_clock::now();
+            }
         }
     }
 
@@ -27,18 +40,17 @@ void Model::run()
 }
 
 // TODO: UPDATE POSITIONS VIA POINTS
-void Model::update(std::vector<PointCloudShape_Cvx> &shapeList)
+void Model::update(std::vector<std::shared_ptr<PointCloudShape_Cvx>> shapeList)
 {
     // Translate
-    for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
+    for (int i = 0; i < this->m_PCSCVX_shapeList.size(); i++)
     {
-        shape.moveShape(shape.m_vel);
+        shapeList[i]->moveShape(shapeList[i]->m_vel);
     }
 
     // Rotate
-    for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
-    {
-        shape.rotShape(shape.m_rot, shape.m_center);
-    }
+    // for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
+    // {
+    //     shape.rotShape(shape.m_rot, shape.m_center);
+    // }
 }
-

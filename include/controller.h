@@ -18,6 +18,6 @@ public:
     void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape);
     void UpdateModel_RemoveShape(long long shapeID);
 
-    const std::vector<std::shared_ptr<Shape>>& RetrieveModel_GetShapes();
+    std::vector<std::shared_ptr<Shape>> RetrieveModel_GetShapes();
     int RetrieveModel_GetShapeCount();
 };

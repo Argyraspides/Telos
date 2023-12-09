@@ -92,7 +92,7 @@ bool ShapeUtils::checkConvex(const std::vector<Point> &points)
     return true;
 }
 
-void ShapeUtils::printInfo(PointCloudShape_Cvx s)
+void ShapeUtils::printAllShapeInfo(PointCloudShape_Cvx s)
 {
     std::cout << "SHAPE POINTS: ";
     for (Point &p : s.getPoints())
@@ -102,7 +102,10 @@ void ShapeUtils::printInfo(PointCloudShape_Cvx s)
     std::cout << "\n";
     std::cout << "CENTER: "
               << "(" << s.m_center.x << "," << s.m_center.y << ")\n";
+    
+    std::cout << "VELOCITY: (" << s.m_vel.x << "," << s.m_vel.y << ")\n";
 }
+
 
 // ***************************************************************************************************************************************************************
 // CONSTRUCTORS (POINT CLOUD SHAPE)
@@ -116,7 +119,7 @@ PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Sha
 {
     this->m_points = points;
     this->m_center = ShapeUtils::getCentroid(this->m_points);
-    ShapeUtils::printInfo(*this);
+    ShapeUtils::printAllShapeInfo(*this);
 }
 
 // ***************************************************************************************************************************************************************
