@@ -37,7 +37,6 @@ public:
         return this->m_center;
     }
 
-    // MOVE THE SHAPE
     virtual void moveShape(const Point &p)
     {
     }
@@ -46,15 +45,17 @@ public:
     {
     }
 
-    virtual ~Shape() {}
+    virtual ~Shape()
+    {
+    }
 
 protected:
-    long long m_shapeID;
-    int m_shapeTypeID;
-    Point m_center;
-    float m_xVel; // X-AXIS VELOCITY
-    float m_yVel; // Y-AXIS VELOCITY
-    float m_rot;  // ROTATION (RADIANS)
+    long long m_shapeID;    // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
+    int m_shapeTypeID;      // TYPE OF SHAPE (E.G. POINT CLOUD)
+    Point m_center;         // CENTER OF SHAPE
+    float m_xVel;           // X-AXIS VELOCITY
+    float m_yVel;           // Y-AXIS VELOCITY
+    float m_rot;            // ROTATION (RADIANS)
 };
 
 // ***************************************************************************************************************************************************************
@@ -96,7 +97,7 @@ public:
     static std::vector<Point> convertToPointCloud(const std::shared_ptr<Shape> &shape); // CONVERTS ANY SHAPE DATA STRUCTURE INTO A POINT CLOUD SHAPE
     static Point getCentroid(const std::vector<Point> &points);                         // CALCULATES CENTROID OF THE SHAPE
     static bool checkConvex(const std::vector<Point> &points);                          // CHECKS IF A SHAPE IS CONVEX
-    static bool isInside(Point p, const std::shared_ptr<Shape> &shape);                            // CHECKS IF A POINT IS INSIDE OF A CONVEX POINT CLOUD
+    static bool isInside(Point p, const std::shared_ptr<Shape> &shape);                 // CHECKS IF A POINT IS INSIDE OF A CONVEX POINT CLOUD
     static void printInfo(PointCloudShape_Cvx s);                                       // PRINTS SHAPE POINT COORDINATES, CENTER, VELOCITY, ROTATION, MASS
 };
 // ***************************************************************************************************************************************************************
