@@ -7,8 +7,19 @@
 Model::Model()
 {
     this->m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
+    
+    pthread_mutex_init(&this->shapeListMutex, nullptr);
+    pthread_mutex_unlock(&this->shapeListMutex);
+
+    pthread_mutex_init(&this->PCSCVXShapeListMutex, nullptr);
+    pthread_mutex_unlock(&this->PCSCVXShapeListMutex);
 }
 
+Model::~Model()
+{
+    pthread_mutex_destroy(&this->shapeListMutex);
+    pthread_mutex_destroy(&this->PCSCVXShapeListMutex);
+}
 
 void Model::run()
 {
@@ -25,7 +36,7 @@ void Model::run()
 
             if (elapsed >= frameDuration)
             {
-                update(this->m_PCSCVX_shapeList);
+                updatePCSL();
                 startTime = std::chrono::high_resolution_clock::now();
             }
         }
@@ -38,19 +49,25 @@ void Model::run()
         }
     }
 }
-
-// TODO: UPDATE POSITIONS VIA POINTS
-void Model::update(std::vector<std::shared_ptr<PointCloudShape_Cvx>> shapeList)
+// Update Point Cloud Shape List
+void Model::updatePCSL()
 {
     // Translate
-    // for (int i = 0; i < this->m_PCSCVX_shapeList.size(); i++)
-    // {
-    //     shapeList[i]->moveShape(shapeList[i]->m_vel);
-    // }
+    for (int i = 0; i < this->m_PCSCVX_shapeList.size(); i++)
+    {
+        this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
+    }
+}
 
-    // Rotate
-    // for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)
-    // {
-    //     shape.rotShape(shape.m_rot, shape.m_center);
-    // }
+// MAKE SURE TO CALL pthread_mutex_unlock() ONCE YOU ARE DONE ACCESSING THE LIST
+std::vector<std::shared_ptr<Shape>> &Model::getShapeList()
+{
+    pthread_mutex_lock(&shapeListMutex);
+    return this->m_shapeList;
+}
+// MAKE SURE TO CALL pthread_mutex_unlock() ONCE YOU ARE DONE ACCESSING THE LIST
+std::vector<std::shared_ptr<PointCloudShape_Cvx>> &Model::getPCSCVXShapeList()
+{
+    pthread_mutex_lock(&PCSCVXShapeListMutex);
+    return this->m_PCSCVX_shapeList;
 }

@@ -26,9 +26,9 @@ class View
 
 public:
     View(Controller *controller);
-    void Render();
 
 private:
+    void Render();
     void Render_Model(SDL_Renderer *renderer);
     void Render_GUI();
     void Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points);

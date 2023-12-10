@@ -204,8 +204,8 @@ void View::Render_Model(SDL_Renderer *renderer)
 {
     if (this->m_controller != nullptr)
     {
-        int shapeCount = this->m_controller->RetrieveModel_GetShapeCount();
-        std::vector<std::shared_ptr<Shape>> shapeList = this->m_controller->RetrieveModel_GetShapes();
+        const int shapeCount = this->m_controller->RetrieveModel_GetShapeCount();
+        const std::vector<std::shared_ptr<Shape>>& shapeList = this->m_controller->RetrieveModel_ReadShapes();
 
         for (int i = 0; i < shapeCount; i++)
         {
@@ -237,8 +237,8 @@ void View::SDL_DragShape(SDL_Event &event)
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
     {
-        std::vector<std::shared_ptr<Shape>> shapePtrs = this->m_controller->RetrieveModel_GetShapes();
-        for (std::shared_ptr<Shape> &shapePtr : shapePtrs)
+        const std::vector<std::shared_ptr<Shape>>& shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
+        for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
 
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
@@ -259,7 +259,6 @@ void View::SDL_DragShape(SDL_Event &event)
     }
 }
 
-// TODO: TEST IN CONJUNCTION WITH REMOVE SHAPE METHOD IN CONTORLLER
 void View::SDL_RemoveShape(SDL_Event &event)
 {
     int mouseX, mouseY;
@@ -267,12 +266,13 @@ void View::SDL_RemoveShape(SDL_Event &event)
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
     {
-        std::vector<std::shared_ptr<Shape>> shapePtrs = this->m_controller->RetrieveModel_GetShapes();
-        for (std::shared_ptr<Shape> &shapePtr : shapePtrs)
+        const std::vector<std::shared_ptr<Shape>>& shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
+        for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 this->m_controller->UpdateModel_RemoveShape(shapePtr);
+                break;
             }
         }
     }

@@ -19,6 +19,6 @@ public:
     void UpdateModel_RemoveShape(long long shapeID);
     void ShutModel();
 
-    std::vector<std::shared_ptr<Shape>> RetrieveModel_GetShapes();
-    int RetrieveModel_GetShapeCount();
+    const std::vector<std::shared_ptr<Shape>>& RetrieveModel_ReadShapes();
+    const int RetrieveModel_GetShapeCount();
 };

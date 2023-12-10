@@ -55,13 +55,13 @@ public:
     }
 
 public:
-    static long long ID_CTR;
-    int m_shapeTypeID;   // TYPE OF SHAPE (E.G. POINT CLOUD)
-    int m_bodyTypeID;    // TYPE OF BODY (E.G. RIGID BODY)
-    long long m_shapeID; // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
-    float m_rot;         // ROTATION (RADIANS)
-    Point m_center;      // CENTER OF SHAPE
-    Point m_vel;         // VELOCITY
+    static long long ID_CTR; // NEXT AVAILABLE ID OF SHAPE
+    int m_shapeTypeID;       // TYPE OF SHAPE (E.G. POINT CLOUD)
+    int m_bodyTypeID;        // TYPE OF BODY (E.G. RIGID BODY)
+    long long m_shapeID;     // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
+    float m_rot;             // ROTATION (RADIANS)
+    Point m_center;          // CENTER OF SHAPE
+    Point m_vel;             // VELOCITY
 };
 
 // ***************************************************************************************************************************************************************
