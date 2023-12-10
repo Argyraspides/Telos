@@ -78,9 +78,7 @@ void Controller::UpdateModel_RemoveShape(long long shapeID)
 
 const std::vector<std::shared_ptr<Shape>> &Controller::RetrieveModel_ReadShapes()
 {
-    std::vector<std::shared_ptr<Shape>> &vec = this->model->getShapeList();
-    pthread_mutex_unlock(&this->model->shapeListMutex);
-    return vec;
+    return this->model->m_shapeList;
 }
 
 const int Controller::RetrieveModel_GetShapeCount()

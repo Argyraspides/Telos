@@ -31,9 +31,7 @@ void View::Render()
 #endif
 
     // Create window with SDL_Renderer graphics context
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window *window = SDL_CreateWindow("Telos", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+
     if (renderer == nullptr)
     {
         SDL_Log("Error creating SDL_Renderer!");
@@ -174,7 +172,6 @@ void View::UI_Interactive_AddCircleButton()
     if (ImGui::Button("Add"))
     {
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
-        circle.m_vel = {0.01f, 0.01f, 0.0f};
         this->m_controller->UpdateModel_AddPointCloudShape(circle, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }

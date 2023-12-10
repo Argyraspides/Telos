@@ -1,3 +1,4 @@
 # CMake builds
 build/
 debug/
+include/BUILD_EMCC.h
