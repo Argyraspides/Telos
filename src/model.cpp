@@ -6,7 +6,6 @@
 
 Model::Model()
 {
-    this->m_shapeCount = 0;
     this->m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
 }
 
@@ -44,10 +43,10 @@ void Model::run()
 void Model::update(std::vector<std::shared_ptr<PointCloudShape_Cvx>> shapeList)
 {
     // Translate
-    for (int i = 0; i < this->m_PCSCVX_shapeList.size(); i++)
-    {
-        shapeList[i]->moveShape(shapeList[i]->m_vel);
-    }
+    // for (int i = 0; i < this->m_PCSCVX_shapeList.size(); i++)
+    // {
+    //     shapeList[i]->moveShape(shapeList[i]->m_vel);
+    // }
 
     // Rotate
     // for (PointCloudShape_Cvx &shape : this->m_PCSCVX_shapeList)

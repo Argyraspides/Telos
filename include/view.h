@@ -53,6 +53,8 @@ private:
     // USER INPUT HANDLING METHODS
     void SDL_ViewportHandler(SDL_Event &event);
     void SDL_DragShape(SDL_Event &event);
+    void SDL_RemoveShape(SDL_Event &event);
+
 
 private:
     Controller *m_controller;

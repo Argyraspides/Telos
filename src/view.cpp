@@ -227,6 +227,7 @@ void View::Render_GUI()
 void View::SDL_ViewportHandler(SDL_Event &event)
 {
     SDL_DragShape(event);
+    SDL_RemoveShape(event);
 }
 
 void View::SDL_DragShape(SDL_Event &event)
@@ -243,7 +244,6 @@ void View::SDL_DragShape(SDL_Event &event)
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 // TODO: TEMPORARY, FIND A WAY TO GET EMSCRIPTEN TO ACTUALLY KNOW WHEN THE MOUSE IS RELEASED
-                // MIGHT BE A PERFORMANCE ISSUE: ATTEMPT ONCE MORE ONCE THREAD SUPPORT ENABLED FOR EMSCRIPTEN
 #if !BUILD_EMCC
                 while (true)
 #endif
@@ -254,6 +254,25 @@ void View::SDL_DragShape(SDL_Event &event)
                     SDL_GetMouseState(&mouseX, &mouseY);
                     shapePtr->setShapePos(Point({(float)mouseX, (float)mouseY, 0}));
                 }
+            }
+        }
+    }
+}
+
+// TODO: TEST IN CONJUNCTION WITH REMOVE SHAPE METHOD IN CONTORLLER
+void View::SDL_RemoveShape(SDL_Event &event)
+{
+    int mouseX, mouseY;
+    SDL_GetMouseState(&mouseX, &mouseY);
+
+    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
+    {
+        std::vector<std::shared_ptr<Shape>> shapePtrs = this->m_controller->RetrieveModel_GetShapes();
+        for (std::shared_ptr<Shape> &shapePtr : shapePtrs)
+        {
+            if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
+            {
+                this->m_controller->UpdateModel_RemoveShape(shapePtr);
             }
         }
     }

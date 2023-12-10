@@ -6,9 +6,9 @@ set(MY_COMPILER "default" CACHE STRING "Choose a compiler: 'emcc', or 'gcc'")
 file(GLOB SOURCES 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" # Telos source and header files
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/*.cpp" # ImGui source and header files
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/*.cpp" # ImGui source and header files.
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_sdl2.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_sdl2.h" 
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_sdl2.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_opengl3.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_opengl3.cpp"
@@ -43,7 +43,10 @@ if(MY_COMPILER STREQUAL "emcc")
     # Emscripten is a C++-to-JS compiler, so we want our output to be a .js file and not a normal binary
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
     # Emscripten is compatible with SDL2, so we use this flag to enable it ("-s USE_SDL=2")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -pthread -s PTHREAD_POOL_SIZE=8")
+    # For this particular build, the model is run in a separate thread from the view and controller,
+    # so we enable multi-threaded support by passing in -pthread and the max number of threads we are allowed
+    # to allocate (in this case as many threads as there are CPU cores)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -pthread -s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency")
 
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2")
     target_link_libraries(${PROJECT_NAME} "imgui")

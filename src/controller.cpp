@@ -38,12 +38,29 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape)
     else if (shape->getShapeTypeID() == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
     }
-    this->model->m_shapeCount++;
 }
 
-// TODO: IMPLEMENT
+// TODO: TEST
 void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
 {
+    int id = shape->getShapeID();
+    if (shape->getShapeTypeID() == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    {
+        this->model->m_shapeList[id].reset();
+        this->model->m_PCSCVX_shapeList[id].reset();
+
+        this->model->m_PCSCVX_shapeList.erase(this->model->m_PCSCVX_shapeList.begin() + id);
+        this->model->m_shapeList.erase(this->model->m_shapeList.begin() + id);
+
+        for(int i = id; i < this->model->m_shapeList.size(); i++)
+        {
+            this->model->m_shapeList[i]->m_shapeID--;
+        }
+        Shape::ID_CTR--;
+    }
+    else if (shape->getShapeTypeID() == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
+    {
+    }
 }
 
 // TODO: IMPLEMENT
@@ -59,7 +76,7 @@ std::vector<std::shared_ptr<Shape>> Controller::RetrieveModel_GetShapes()
 
 int Controller::RetrieveModel_GetShapeCount()
 {
-    return this->model->m_shapeCount;
+    return this->model->m_shapeList.size();
 }
 
 void Controller::ShutModel()

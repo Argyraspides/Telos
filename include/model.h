@@ -21,7 +21,6 @@ public:
     std::vector<std::shared_ptr<Shape>> m_shapeList;
     std::vector<std::shared_ptr<PointCloudShape_Cvx>> m_PCSCVX_shapeList;
 
-    int m_shapeCount;
     bool m_isRunning;
     SHAPE_TYPE_IDENTIFIERS m_shapeType;
 

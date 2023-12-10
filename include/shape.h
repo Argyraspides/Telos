@@ -3,8 +3,6 @@
 #include <memory>
 #include "cartesian.h"
 
-static long long ID_CTR = 0;
-
 enum SHAPE_TYPE_IDENTIFIERS
 {
     // Convex Point Cloud
@@ -57,6 +55,7 @@ public:
     }
 
 public:
+    static long long ID_CTR;
     int m_shapeTypeID;   // TYPE OF SHAPE (E.G. POINT CLOUD)
     int m_bodyTypeID;    // TYPE OF BODY (E.G. RIGID BODY)
     long long m_shapeID; // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
@@ -106,6 +105,6 @@ public:
     static Point getCentroid(const std::vector<Point> &points);                         // CALCULATES CENTROID OF THE SHAPE
     static bool checkConvex(const std::vector<Point> &points);                          // CHECKS IF A SHAPE IS CONVEX
     static bool isInside(Point p, const std::shared_ptr<Shape> &shape);                 // CHECKS IF A POINT IS INSIDE OF A CONVEX POINT CLOUD
-    static void printAllShapeInfo(PointCloudShape_Cvx s);                                       // PRINTS SHAPE POINT COORDINATES, CENTER, VELOCITY, ROTATION, MASS
+    static void printAllShapeInfo(PointCloudShape_Cvx s);                               // PRINTS SHAPE POINT COORDINATES, CENTER, VELOCITY, ROTATION, MASS
 };
 // ***************************************************************************************************************************************************************
