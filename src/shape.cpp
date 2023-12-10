@@ -44,7 +44,7 @@ bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
 
         std::vector<Point> shapePoints = pointCloudShape_Cvx->getPoints();
 
-        for (int i = 0; i < shapePoints.size(); i++)
+        for (size_t i = 0; i < shapePoints.size(); i++)
         {
             // Quadrants 1, 2, 3, and 4
 
@@ -84,7 +84,7 @@ Point ShapeUtils::getCentroid(const std::vector<Point> &points)
 // TODO: IMPLEMENT
 bool ShapeUtils::checkConvex(const std::vector<Point> &points)
 {
-    for (int i = 0; i < points.size(); i++)
+    for (size_t i = 0; i < points.size(); i++)
     {
     }
 

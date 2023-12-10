@@ -20,6 +20,7 @@
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
+#define VIEW_POLLING_RATE 30
 
 class View
 {

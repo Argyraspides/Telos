@@ -58,7 +58,7 @@ void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
         PCSCVXList.erase(PCSCVXList.begin() + id);
         shapeList.erase(shapeList.begin() + id);
 
-        for (int i = id; i < shapeList.size(); i++)
+        for (size_t i = id; i < shapeList.size(); i++)
         {
             shapeList[i]->m_shapeID--;
         }

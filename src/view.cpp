@@ -51,6 +51,10 @@ void View::Render()
     ImVec4 clear_color = ImVec4(30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f);
     // Main loop
     bool done = false;
+
+    const std::chrono::milliseconds frameDuration(1000 / VIEW_POLLING_RATE);
+    auto startTime = std::chrono::high_resolution_clock::now();
+
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
     // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
@@ -61,50 +65,56 @@ void View::Render()
 #endif
     {
 
-        // Handle events such as keyboard/mouse inputs, resizing the window, etc
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+        if (elapsed >= frameDuration)
         {
-            ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT)
+            // Handle events such as keyboard/mouse inputs, resizing the window, etc
+            SDL_Event event;
+            while (SDL_PollEvent(&event))
             {
-                done = true;
-                this->m_controller->ShutModel();
+                ImGui_ImplSDL2_ProcessEvent(&event);
+                if (event.type == SDL_QUIT)
+                {
+                    done = true;
+                    this->m_controller->ShutModel();
+                }
+                if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+                {
+                    done = true;
+                    this->m_controller->ShutModel();
+                }
+                SDL_ViewportHandler(event);
             }
 
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
-            {
-                done = true;
-                this->m_controller->ShutModel();
-            }
-            SDL_ViewportHandler(event);
+            // Start the Dear ImGui frame
+            ImGui_ImplSDLRenderer2_NewFrame();
+            ImGui_ImplSDL2_NewFrame();
+            ImGui::NewFrame();
+
+            // RENDER GUI HERE ***************
+
+            Render_GUI();
+
+            // RENDER GUI HERE ***************
+
+            // Rendering
+            ImGui::Render();
+            SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+            SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
+            SDL_RenderClear(renderer);
+
+            // RENDER OBJECTS HERE ***************
+
+            Render_Model(renderer);
+
+            // RENDER OBJECTS HERE ***************
+
+            ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+            SDL_RenderPresent(renderer);
+            startTime = std::chrono::high_resolution_clock::now();
         }
-
-        // Start the Dear ImGui frame
-        ImGui_ImplSDLRenderer2_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
-        ImGui::NewFrame();
-
-        // RENDER GUI HERE ***************
-
-        Render_GUI();
-
-        // RENDER GUI HERE ***************
-
-        // Rendering
-        ImGui::Render();
-        SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-        SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
-        SDL_RenderClear(renderer);
-
-        // RENDER OBJECTS HERE ***************
-
-        Render_Model(renderer);
-
-        // RENDER OBJECTS HERE ***************
-
-        ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
-        SDL_RenderPresent(renderer);
     }
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_END;
@@ -189,7 +199,7 @@ void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> poi
     // TODO: FIND MORE EFFICIENT WAY TO RENDER SHAPES
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-    for (int i = 0; i < points.size(); i++)
+    for (size_t i = 0; i < points.size(); i++)
     {
         SDL_RenderDrawLine(
             renderer,
@@ -205,9 +215,9 @@ void View::Render_Model(SDL_Renderer *renderer)
     if (this->m_controller != nullptr)
     {
         const int shapeCount = this->m_controller->RetrieveModel_GetShapeCount();
-        const std::vector<std::shared_ptr<Shape>>& shapeList = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>> &shapeList = this->m_controller->RetrieveModel_ReadShapes();
 
-        for (int i = 0; i < shapeCount; i++)
+        for (size_t i = 0; i < shapeCount; i++)
         {
             Render_PointCloudShape(
                 renderer,
@@ -237,7 +247,7 @@ void View::SDL_DragShape(SDL_Event &event)
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
     {
-        const std::vector<std::shared_ptr<Shape>>& shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
 
@@ -266,7 +276,7 @@ void View::SDL_RemoveShape(SDL_Event &event)
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
     {
-        const std::vector<std::shared_ptr<Shape>>& shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))

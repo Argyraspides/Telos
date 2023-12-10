@@ -9,10 +9,7 @@ Model::Model()
     this->m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
     
     pthread_mutex_init(&this->shapeListMutex, nullptr);
-    pthread_mutex_unlock(&this->shapeListMutex);
-
     pthread_mutex_init(&this->PCSCVXShapeListMutex, nullptr);
-    pthread_mutex_unlock(&this->PCSCVXShapeListMutex);
 }
 
 Model::~Model()
@@ -53,10 +50,12 @@ void Model::run()
 void Model::updatePCSL()
 {
     // Translate
-    for (int i = 0; i < this->m_PCSCVX_shapeList.size(); i++)
+    size_t size = this->getPCSCVXShapeList().size();
+    for (size_t i = 0; i < size; i++)
     {
         this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
     }
+    pthread_mutex_unlock(&PCSCVXShapeListMutex);
 }
 
 // MAKE SURE TO CALL pthread_mutex_unlock() ONCE YOU ARE DONE ACCESSING THE LIST
