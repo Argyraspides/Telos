@@ -67,9 +67,16 @@ void View::Render()
         {
             ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT)
+            {
                 done = true;
+                this->m_controller->ShutModel();
+            }
+
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+            {
                 done = true;
+                this->m_controller->ShutModel();
+            }
             SDL_ViewportHandler(event);
         }
 
@@ -199,10 +206,9 @@ void View::Render_Model(SDL_Renderer *renderer)
     {
         int shapeCount = this->m_controller->RetrieveModel_GetShapeCount();
         std::vector<std::shared_ptr<Shape>> shapeList = this->m_controller->RetrieveModel_GetShapes();
-    
+
         for (int i = 0; i < shapeCount; i++)
         {
-            std::cout << shapeList[i]->m_center.x << "\n";
             Render_PointCloudShape(
                 renderer,
                 ShapeUtils::convertToPointCloud(shapeList[i]));
@@ -237,6 +243,7 @@ void View::SDL_DragShape(SDL_Event &event)
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 // TODO: TEMPORARY, FIND A WAY TO GET EMSCRIPTEN TO ACTUALLY KNOW WHEN THE MOUSE IS RELEASED
+                // MIGHT BE A PERFORMANCE ISSUE: ATTEMPT ONCE MORE ONCE THREAD SUPPORT ENABLED FOR EMSCRIPTEN
 #if !BUILD_EMCC
                 while (true)
 #endif

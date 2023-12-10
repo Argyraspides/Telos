@@ -43,7 +43,7 @@ if(MY_COMPILER STREQUAL "emcc")
     # Emscripten is a C++-to-JS compiler, so we want our output to be a .js file and not a normal binary
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
     # Emscripten is compatible with SDL2, so we use this flag to enable it ("-s USE_SDL=2")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -pthread -s PTHREAD_POOL_SIZE=8")
 
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2")
     target_link_libraries(${PROJECT_NAME} "imgui")

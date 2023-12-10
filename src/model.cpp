@@ -2,7 +2,7 @@
 #include <chrono>
 #include <iostream>
 
-#define POLLING_RATE_S 60
+#define POLLING_RATE_S 60 // POLLING RATE (POLLS PER SECOND)
 
 Model::Model()
 {
@@ -10,9 +10,10 @@ Model::Model()
     this->m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
 }
 
+
 void Model::run()
 {
-
+    this->m_isRunning = true;
     if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
         const std::chrono::milliseconds frameDuration(1000 / POLLING_RATE_S);

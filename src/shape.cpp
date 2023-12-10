@@ -119,7 +119,6 @@ PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Sha
 {
     this->m_points = points;
     this->m_center = ShapeUtils::getCentroid(this->m_points);
-    ShapeUtils::printAllShapeInfo(*this);
 }
 
 // ***************************************************************************************************************************************************************

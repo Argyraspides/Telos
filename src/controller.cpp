@@ -61,3 +61,8 @@ int Controller::RetrieveModel_GetShapeCount()
 {
     return this->model->m_shapeCount;
 }
+
+void Controller::ShutModel()
+{
+    this->model->m_isRunning = false;
+}

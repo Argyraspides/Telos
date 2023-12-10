@@ -7,6 +7,14 @@ class Model
 public:
     Model();
 
+    // Emscripten doesn't support std::thread for multithreading, only C-type pthread's. This will essentially be a pointer
+    // to the run() function so we can actually pass it into pthread_create()
+    static void *threadEntry(void *instance)
+    {
+        reinterpret_cast<Model *>(instance)->run();
+        return nullptr;
+    }
+
 public:
     void run();
 

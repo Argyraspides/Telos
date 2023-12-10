@@ -5,10 +5,14 @@
 
 int main()
 {
-
+    // Instantiate the physics engine
     Model m;
-    std::thread modelThread(&Model::run, &m);
+    // Run engine in separate thread
+    pthread_t modelThreadId;
+    pthread_create(&modelThreadId, nullptr, &Model::threadEntry, &m);
+
     Controller c(&m);
     View v(&c);
-    modelThread.join();
+
+    pthread_join(modelThreadId, nullptr);
 }
