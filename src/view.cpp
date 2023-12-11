@@ -172,7 +172,8 @@ void View::UI_Interactive_AddCircleButton()
     if (ImGui::Button("Add"))
     {
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
-        this->m_controller->UpdateModel_AddPointCloudShape(circle, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+        std::shared_ptr<Shape> circleGeneric = std::make_shared<PointCloudShape_Cvx>(circle);
+        this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }
 

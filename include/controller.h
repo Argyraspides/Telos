@@ -12,13 +12,11 @@ private:
 public:
     Controller(Model *model);
 
-    long long UpdateModel_AddPointCloudShape(PointCloudShape_Cvx s, Point offset);
-    void UpdateModel_MoveShape(long long shapeID);
-    void UpdateModel_AddShape(std::shared_ptr<Shape> shape);
-    void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape);
-    void UpdateModel_RemoveShape(long long shapeID);
-    void ShutModel();
+    void UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset);    // ADDS A SHAPE TO THE WORLD
+    void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape); // REMOVES A SHAPE FROM THE WORLD
+    void UpdateModel_RemoveShape(long long shapeID);            // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID
+    void ShutModel();                                           // SHUTS OFF THE MODEL
 
-    const std::vector<std::shared_ptr<Shape>>& RetrieveModel_ReadShapes();
-    const int RetrieveModel_GetShapeCount();
+    const std::vector<std::shared_ptr<Shape>> &RetrieveModel_ReadShapes(); // RETRIEVES LIST OF SHAPES FROM THE MODEL AS READ-ONLY
+    const int RetrieveModel_GetShapeCount();                               // RETURNS NUMBER OF SHAPES FROM THE MODEL
 };

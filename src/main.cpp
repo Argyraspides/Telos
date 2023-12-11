@@ -1,7 +1,6 @@
 #include "model.h"
 #include "view.h"
 #include "controller.h"
-#include <thread>
 
 int main()
 {

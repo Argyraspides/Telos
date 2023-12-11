@@ -1,4 +1,6 @@
 #pragma once
+// Defines basic data structures for anything related to a cartesian plane.
+
 
 struct Point
 {
