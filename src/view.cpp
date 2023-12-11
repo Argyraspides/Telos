@@ -166,12 +166,17 @@ void View::UI_Interactive_CommonShapeSubMenu()
 void View::UI_Interactive_AddCircleButton()
 {
     ImGui::Text("Circle");
-    static float radius = 10;
+    static float radius = 50;
+    static float xVel = 0.0f;
+    static float yVel = 0.0f;
     ImGui::InputFloat("Radius", &radius);
+    ImGui::InputFloat("X Velocity", &xVel);
+    ImGui::InputFloat("Y Velocity", &yVel);
 
     if (ImGui::Button("Add"))
     {
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
+        circle.m_vel = {xVel, yVel};
         std::shared_ptr<Shape> circleGeneric = std::make_shared<PointCloudShape_Cvx>(circle);
         this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }

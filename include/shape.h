@@ -97,7 +97,7 @@ public:
 
 // ***************************************************************************************************************************************************************
 // Utilities class for various operations on shapes, e.g. converting a unique shape data structure into the principle point cloud,
-// calculating the centroid of various shapes,
+// calculating the centroid of various shapes, checking if a shape is convex, etc
 class ShapeUtils
 {
 public:

@@ -39,22 +39,23 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset
 void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
 {
     // Determine the type of shape it is
-    int id = shape->getShapeTypeID();
-    if (id == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    int ShapeTypeID = shape->getShapeTypeID();
+    long long shapeID = shape->getShapeID();
+    if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
         std::vector<std::shared_ptr<Shape>> &shapeList = this->model->getShapeList();
         // PCSCVX means "Point Cloud Shape Convex"
         std::vector<std::shared_ptr<PointCloudShape_Cvx>> &PCSCVXList = this->model->getPCSCVXShapeList();
 
         // Free the pointers to the shapes and erase them from the vector
-        shapeList[id].reset();
-        PCSCVXList[id].reset();
+        shapeList[shapeID].reset();
+        PCSCVXList[shapeID].reset();
 
-        PCSCVXList.erase(PCSCVXList.begin() + id);
-        shapeList.erase(shapeList.begin() + id);
+        PCSCVXList.erase(PCSCVXList.begin() + shapeID);
+        shapeList.erase(shapeList.begin() + shapeID);
 
         // Shift all shape ID's down by one ahead of the deleted one
-        for (size_t i = id; i < shapeList.size(); i++)
+        for (size_t i = shapeID; i < shapeList.size(); i++)
         {
             shapeList[i]->m_shapeID--;
         }
@@ -65,7 +66,7 @@ void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
         pthread_mutex_unlock(&this->model->shapeListMutex);
         pthread_mutex_unlock(&this->model->PCSCVXShapeListMutex);
     }
-    else if (id == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
+    else if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
     }
 }

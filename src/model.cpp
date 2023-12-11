@@ -18,11 +18,15 @@ Model::~Model()
     pthread_mutex_destroy(&this->PCSCVXShapeListMutex);
 }
 
+// The engine can only handle shapes of one particular data structure at a time. Here we resolve what
+// kind of shapes we are dealing with and then begin the respective loop that handles those particular
+// types of shapes. By default the shape type is of type point cloud.
 void Model::run()
 {
     this->m_isRunning = true;
     if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
+        // Control the loop to execute at the desired frequency
         const std::chrono::milliseconds frameDuration(1000 / POLLING_RATE_S);
         auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -33,6 +37,7 @@ void Model::run()
 
             if (elapsed >= frameDuration)
             {
+                // Update all shapes including their positions, resolve their collisions, etc
                 updatePCSL();
                 startTime = std::chrono::high_resolution_clock::now();
             }
@@ -49,12 +54,14 @@ void Model::run()
 // Update Point Cloud Shape List
 void Model::updatePCSL()
 {
-    // Translate
+    // Translate the shapes
+    // Calling "getPCSCVXShapeList()" locks access to the shape list.
     size_t size = this->getPCSCVXShapeList().size();
     for (size_t i = 0; i < size; i++)
     {
         this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
     }
+    // Unlock access to the shape list now that we are done
     pthread_mutex_unlock(&PCSCVXShapeListMutex);
 }
 

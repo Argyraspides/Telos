@@ -19,6 +19,7 @@ std::vector<Point> ShapeUtils::convertToPointCloud(const std::shared_ptr<Shape> 
     int shapeTypeID = shape->getShapeTypeID();
     if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
+        // Point cloud shapes are already of type point cloud. Just return points.
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(shape);
         return pointCloudShape_Cvx->getPoints();
     }
@@ -72,6 +73,7 @@ bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
 // Calculates the centroid of a polygon given its vertices (assumes that the polygon has an even mass distribution)
 Point ShapeUtils::getCentroid(const std::vector<Point> &points)
 {
+    // Assuming an even mass distribution the centroid is simply the average location of all the points
     float sumX = 0.0, sumY = 0.0;
     for (const Point &p : points)
     {
