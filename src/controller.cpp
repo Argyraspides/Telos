@@ -92,3 +92,8 @@ void Controller::ShutModel()
 {
     this->model->m_isRunning = false;
 }
+
+void Controller::PauseUnpauseModel()
+{
+    this->model->m_isPaused = !this->model->m_isPaused;
+}

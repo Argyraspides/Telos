@@ -24,6 +24,7 @@ Model::~Model()
 void Model::run()
 {
     this->m_isRunning = true;
+    this->m_isPaused = false;
     if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
         // Control the loop to execute at the desired frequency
@@ -35,7 +36,7 @@ void Model::run()
             auto endTime = std::chrono::high_resolution_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-            if (elapsed >= frameDuration)
+            if (elapsed >= frameDuration && !m_isPaused)
             {
                 // Update all shapes including their positions, resolve their collisions, etc
                 updatePCSL();

@@ -56,7 +56,8 @@ private:
 private:
     void SDL_ViewportHandler(SDL_Event &event); // HANDLES INPUT ON THE VIEWPORT (I.E. THE AREA THINGS ARE RENDERED)
     void SDL_DragShape(SDL_Event &event);       // ALLOWS USER TO DRAG SHAPES AROUND THE VIEWPORT
-    void SDL_RemoveShape(SDL_Event &event);     // ALLOWS UER TO REMOVE SHAPES FROM THE WORLD
+    void SDL_RemoveShape(SDL_Event &event);     // ALLOWS USER TO REMOVE SHAPES FROM THE WORLD
+    void SDL_Pause(SDL_Event &event);           // ALLOWS USER TO PAUSE THE MODEL
 
 private:
     Controller *m_controller; // CONTROLLER INTERFACE TO MANIPULATE AND/OR RETRIEVE DATA FROM THE MODEL

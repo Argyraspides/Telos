@@ -12,10 +12,11 @@ private:
 public:
     Controller(Model *model);
 
-    void UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset);    // ADDS A SHAPE TO THE WORLD
-    void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape); // REMOVES A SHAPE FROM THE WORLD
-    void UpdateModel_RemoveShape(long long shapeID);            // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID
-    void ShutModel();                                           // SHUTS OFF THE MODEL
+    void UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset); // ADDS A SHAPE TO THE WORLD
+    void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape);            // REMOVES A SHAPE FROM THE WORLD
+    void UpdateModel_RemoveShape(long long shapeID);                       // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID
+    void ShutModel();                                                      // SHUTS OFF THE MODEL
+    void PauseUnpauseModel();                                              // FLIPS THE MODELS PAUSE STATE
 
     const std::vector<std::shared_ptr<Shape>> &RetrieveModel_ReadShapes(); // RETRIEVES LIST OF SHAPES FROM THE MODEL AS READ-ONLY
     const int RetrieveModel_GetShapeCount();                               // RETURNS NUMBER OF SHAPES FROM THE MODEL

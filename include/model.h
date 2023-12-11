@@ -29,6 +29,7 @@ public:
     pthread_mutex_t PCSCVXShapeListMutex;
 
     bool m_isRunning;                   // ENGINE LOOP CONDITIONAL
+    bool m_isPaused;                    // ENGINE PAUSE CONDITIONAL
     SHAPE_TYPE_IDENTIFIERS m_shapeType; // CURRENT TYPE OF SHAPE THAT THE ENGINE IS DEALING WITH, E.G. POINT CLOUD SHAPES
 
     void updatePCSL();                                               // UPDATES THE POINT CLOUD SHAPE LIST (PCSL)

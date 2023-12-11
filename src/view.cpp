@@ -241,6 +241,7 @@ void View::SDL_ViewportHandler(SDL_Event &event)
 {
     SDL_DragShape(event);
     SDL_RemoveShape(event);
+    SDL_Pause(event);
 }
 
 void View::SDL_DragShape(SDL_Event &event)
@@ -288,5 +289,13 @@ void View::SDL_RemoveShape(SDL_Event &event)
                 break;
             }
         }
+    }
+}
+
+void View::SDL_Pause(SDL_Event &event)
+{
+    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
+    {
+        this->m_controller->PauseUnpauseModel();
     }
 }
