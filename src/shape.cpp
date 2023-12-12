@@ -95,16 +95,20 @@ bool ShapeUtils::checkConvex(const std::vector<Point> &points)
 
 void ShapeUtils::printAllShapeInfo(PointCloudShape_Cvx s)
 {
-    std::cout << "SHAPE POINTS: ";
+    std::cout << "SHAPE POINTS: polygon(";
     for (Point &p : s.getPoints())
     {
         std::cout << "(" << p.x << "," << p.y << "),";
     }
-    std::cout << "\n";
+    std::cout << ")\n";
+
     std::cout << "CENTER: "
               << "(" << s.m_center.x << "," << s.m_center.y << ")\n";
     
     std::cout << "VELOCITY: (" << s.m_vel.x << "," << s.m_vel.y << ")\n";
+
+
+    std::cout << "\n";
 }
 
 

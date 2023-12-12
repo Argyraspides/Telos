@@ -7,7 +7,7 @@
 Model::Model()
 {
     this->m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
-    
+
     pthread_mutex_init(&this->shapeListMutex, nullptr);
     pthread_mutex_init(&this->PCSCVXShapeListMutex, nullptr);
 }
@@ -57,11 +57,22 @@ void Model::updatePCSL()
 {
     // Translate the shapes
     // Calling "getPCSCVXShapeList()" locks access to the shape list.
-    size_t size = this->getPCSCVXShapeList().size();
-    for (size_t i = 0; i < size; i++)
+    int size = this->getPCSCVXShapeList().size();
+    for (int i = 0; i < size; i++)
     {
         this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
     }
+
+    // TEMPORARY IMPLEMENTATION: O(N^2), ONLY EXECUTE AT BROAD PHASE (TODO)
+
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = i + 1; j < size; j++)
+        {
+            isContactPCSCVX(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]);
+        }
+    }
+
     // Unlock access to the shape list now that we are done
     pthread_mutex_unlock(&PCSCVXShapeListMutex);
 }
@@ -77,4 +88,53 @@ std::vector<std::shared_ptr<PointCloudShape_Cvx>> &Model::getPCSCVXShapeList()
 {
     pthread_mutex_lock(&PCSCVXShapeListMutex);
     return this->m_PCSCVX_shapeList;
+}
+
+// Uses the SAT (Separation Axis Theorem) to detect collision
+bool Model::isContactPCSCVX(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
+{
+    PointCloudShape_Cvx *_s1 = &s1;
+    PointCloudShape_Cvx *_s2 = &s2;
+
+    for (int s = 0; s < 2; s++)
+    {
+        // On the second iteration, we compute shape 2's projection lines and test for collision
+        if (s == 1)
+        {
+            _s1 = &s2;
+            _s2 = &s1;
+        }
+
+        for (int v = 0; v < _s1->m_points.size(); v++)
+        {
+            Point grad = _s1->m_points[(v + 1) % _s1->m_points.size()] - _s1->m_points[v];
+            Point projectionAxis = Math::getNormal2D(grad);
+
+            float min1 = std::numeric_limits<float>::infinity(),
+                  max1 = -std::numeric_limits<float>::infinity();
+
+            for (int p = 0; p < _s1->m_points.size(); p++)
+            {
+                float dotProd = Math::dotProd(_s1->m_points[p], projectionAxis);
+                min1 = std::min(min1, dotProd);
+                max1 = std::max(max1, dotProd);
+            }
+
+            float min2 = std::numeric_limits<float>::infinity(),
+                  max2 = -std::numeric_limits<float>::infinity();
+
+            for (int p = 0; p < _s2->m_points.size(); p++)
+            {
+                float dotProd = Math::dotProd(_s2->m_points[p], projectionAxis);
+                min2 = std::min(min2, dotProd);
+                max2 = std::max(max2, dotProd);
+            }
+
+            if(max1 < min2 || max2 < min1) 
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
