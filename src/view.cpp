@@ -199,18 +199,16 @@ void View::UI_Update()
 
 void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
 {
-    // TODO: FIND MORE EFFICIENT WAY TO RENDER SHAPES
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-    for (size_t i = 0; i < points.size(); i++)
+    for (size_t i = 0; i < points.size() - 1; ++i)
     {
-        SDL_RenderDrawLine(
-            renderer,
-            points[i].x,
-            points[i].y,
-            points[(i + 1) % points.size()].x,
-            points[(i + 1) % points.size()].y);
+        SDL_RenderDrawLine(renderer, static_cast<int>(points[i].x), static_cast<int>(points[i].y),
+                           static_cast<int>(points[i + 1].x), static_cast<int>(points[i + 1].y));
     }
+
+    SDL_RenderDrawLine(renderer, static_cast<int>(points.back().x), static_cast<int>(points.back().y),
+                       static_cast<int>(points.front().x), static_cast<int>(points.front().y));
 }
 
 void View::Render_Model(SDL_Renderer *renderer)
@@ -258,6 +256,7 @@ void View::SDL_DragShape(SDL_Event &event)
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 // TODO: TEMPORARY, FIND A WAY TO GET EMSCRIPTEN TO ACTUALLY KNOW WHEN THE MOUSE IS RELEASED
+                this->m_controller->PauseUnpauseModel();
 #if !BUILD_EMCC
                 while (true)
 #endif
@@ -268,6 +267,8 @@ void View::SDL_DragShape(SDL_Event &event)
                     SDL_GetMouseState(&mouseX, &mouseY);
                     shapePtr->setShapePos(Point({(float)mouseX, (float)mouseY, 0}));
                 }
+
+                this->m_controller->PauseUnpauseModel();
             }
         }
     }

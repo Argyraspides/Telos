@@ -62,7 +62,7 @@ void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
         // Next available shape ID is now one less than before
         Shape::ID_CTR--;
 
-        // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here. 
+        // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
         pthread_mutex_unlock(&this->model->shapeListMutex);
         pthread_mutex_unlock(&this->model->PCSCVXShapeListMutex);
     }
@@ -96,4 +96,14 @@ void Controller::ShutModel()
 void Controller::PauseUnpauseModel()
 {
     this->model->m_isPaused = !this->model->m_isPaused;
+}
+
+void Controller::PauseModel()
+{
+    this->model->m_isPaused = true;
+}
+
+void Controller::UnpauseModel()
+{
+    this->model->m_isPaused = false;
 }

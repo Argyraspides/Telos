@@ -1,8 +1,7 @@
 #include "model.h"
+#include "application_params.h"
 #include <chrono>
 #include <iostream>
-
-#define POLLING_RATE_S 60 // POLLING RATE (POLLS PER SECOND)
 
 Model::Model()
 {
@@ -28,7 +27,7 @@ void Model::run()
     if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
         // Control the loop to execute at the desired frequency
-        const std::chrono::milliseconds frameDuration(1000 / POLLING_RATE_S);
+        const std::chrono::milliseconds frameDuration(1000 / ENGINE_POLLING_RATE);
         auto startTime = std::chrono::high_resolution_clock::now();
 
         while (m_isRunning)
@@ -61,16 +60,6 @@ void Model::updatePCSL()
     for (int i = 0; i < size; i++)
     {
         this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
-    }
-
-    // TEMPORARY IMPLEMENTATION: O(N^2), ONLY EXECUTE AT BROAD PHASE (TODO)
-
-    for (int i = 0; i < size - 1; i++)
-    {
-        for (int j = i + 1; j < size; j++)
-        {
-            isContactPCSCVX(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]);
-        }
     }
 
     // Unlock access to the shape list now that we are done
@@ -107,11 +96,15 @@ bool Model::isContactPCSCVX(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
 
         for (int v = 0; v < _s1->m_points.size(); v++)
         {
+            // Gradient, or vector, of the line that is made from one shape's vertex to the next
             Point grad = _s1->m_points[(v + 1) % _s1->m_points.size()] - _s1->m_points[v];
+            // Projection axis is the normal of the gradient vector
             Point projectionAxis = Math::getNormal2D(grad);
 
             float min1 = std::numeric_limits<float>::infinity(),
-                  max1 = -std::numeric_limits<float>::infinity();
+                  max1 = -min1;
+
+            // Obtain minimum and maximum points of projection for each shape
 
             for (int p = 0; p < _s1->m_points.size(); p++)
             {
@@ -121,7 +114,7 @@ bool Model::isContactPCSCVX(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
             }
 
             float min2 = std::numeric_limits<float>::infinity(),
-                  max2 = -std::numeric_limits<float>::infinity();
+                  max2 = -min2;
 
             for (int p = 0; p < _s2->m_points.size(); p++)
             {
@@ -130,11 +123,43 @@ bool Model::isContactPCSCVX(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
                 max2 = std::max(max2, dotProd);
             }
 
-            if(max1 < min2 || max2 < min1) 
+            if (max1 < min2 || max2 < min1)
             {
                 return false;
             }
         }
     }
     return true;
+}
+
+// Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
+std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isContactBroad()
+{
+    // Aspect ratios are universally in favor of a larger width. It is for this reason we will use the X-axis
+    // to sweep as it provides a greater liklihood of eliminating shapes that won't collide.
+
+    std::vector<std::pair<float, PointCloudShape_Cvx &>> intervals;
+
+    return {};
+}
+
+bool Model::isContactWall(const PointCloudShape_Cvx &s1)
+{
+    // Check if any of the vertices go beyond the walls
+
+    for (int i = 0; i < s1.m_points.size(); i++)
+    {
+        bool leftCol = s1.m_points[i].x <= 0;
+        bool rightCol = s1.m_points[i].x >= SCREEN_WIDTH;
+
+        bool bottomCol = s1.m_points[i].y >= SCREEN_HEIGHT;
+        bool topCol = s1.m_points[i].y <= 0;
+
+        if (bottomCol || topCol || leftCol || rightCol)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }

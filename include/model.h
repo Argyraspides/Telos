@@ -32,6 +32,8 @@ public:
     bool m_isPaused;                    // ENGINE PAUSE CONDITIONAL
     SHAPE_TYPE_IDENTIFIERS m_shapeType; // CURRENT TYPE OF SHAPE THAT THE ENGINE IS DEALING WITH, E.G. POINT CLOUD SHAPES
 
-    void updatePCSL();                                                                  // UPDATES THE POINT CLOUD SHAPE LIST (PCSL)
-    bool isContactPCSCVX(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
+    void updatePCSL();                                                                     // UPDATES THE POINT CLOUD SHAPE LIST (PCSL)
+    bool isContactPCSCVX(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2);                // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
+    bool isContactWall(const PointCloudShape_Cvx &s1);                                     // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
+    std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> isContactBroad(); // BROAD PHASE COLLISION DETECTION. QUICKLY FILTERS OUT SHAPES THAT "OBVIOUSLY" WILL NOT COLLIDE
 };

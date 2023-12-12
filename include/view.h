@@ -6,7 +6,7 @@
 #include "imgui_impl_sdlrenderer2.h"
 #include "shape.h"
 #include "model.h"
-
+#include "application_params.h"
 #include <vector>
 #include <SDL.h>
 
@@ -21,9 +21,6 @@
 #include "../lib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
-#define VIEW_POLLING_RATE 30 // POLLS PER SECOND
 
 class View
 {
