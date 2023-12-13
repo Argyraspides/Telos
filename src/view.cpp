@@ -261,14 +261,18 @@ void View::SDL_DragShape(SDL_Event &event)
 
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
+                this->m_controller->PauseModel();
                 // TODO: TEMPORARY, FIND A WAY TO GET EMSCRIPTEN TO ACTUALLY KNOW WHEN THE MOUSE IS RELEASED
 #if !BUILD_EMCC
                 while (true)
 #endif
                 {
                     SDL_PollEvent(&event);
-                    if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
+                    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+                    {
+                        this->m_controller->UnpauseModel();
                         break;
+                    }
                     SDL_GetMouseState(&mouseX, &mouseY);
                     shapePtr->setShapePos(Point({(float)mouseX, (float)mouseY, 0}));
                 }
