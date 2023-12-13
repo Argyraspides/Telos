@@ -176,6 +176,9 @@ void PointCloudShape_Cvx::moveShape(const Point &p)
         shapePts = shapePts + p;
     }
     this->m_center = this->m_center + p;
+
+    ShapeUtils::printAllShapeInfo(*this);
+
 }
 
 void PointCloudShape_Cvx::setShapePos(const Point &p)

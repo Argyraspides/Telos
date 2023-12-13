@@ -62,6 +62,14 @@ void Model::updatePCSL()
         this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
     }
 
+    for(int i = 0; i < size; i++)
+    {
+        if(isContactWall(*this->m_PCSCVX_shapeList[i]))
+        {
+            this->m_PCSCVX_shapeList[i]->m_vel.x *= -1;
+        }
+    }
+
     // Unlock access to the shape list now that we are done
     pthread_mutex_unlock(&PCSCVXShapeListMutex);
 }

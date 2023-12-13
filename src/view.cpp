@@ -19,13 +19,20 @@ View::View(Controller *controller)
 void View::Render()
 {
     // Setup SDL
+
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
         printf("Error: %s\n", SDL_GetError());
         return;
     }
 
-    // From 2.0.18: Enable native IME.
+    // SDL BOILERPLATE
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_Window *window = SDL_CreateWindow("Telos", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
+   // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+
+// From 2.0.18: Enable native IME.
 #ifdef SDL_HINT_IME_SHOW_UI
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 #endif
@@ -62,7 +69,6 @@ void View::Render()
     while (!done)
 #endif
     {
-
         auto endTime = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
@@ -186,7 +192,7 @@ void View::UI_ConstructMenuModule()
 {
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
-    ImGui::SetWindowSize(ImVec2(0.2 * SCREEN_WIDTH, ImGui::GetIO().DisplaySize.y));
+    ImGui::SetWindowSize(ImVec2(300, ImGui::GetIO().DisplaySize.y));
     UI_Interactive_CommonShapeSubMenu();
 }
 
@@ -256,7 +262,6 @@ void View::SDL_DragShape(SDL_Event &event)
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 // TODO: TEMPORARY, FIND A WAY TO GET EMSCRIPTEN TO ACTUALLY KNOW WHEN THE MOUSE IS RELEASED
-                this->m_controller->PauseUnpauseModel();
 #if !BUILD_EMCC
                 while (true)
 #endif
@@ -267,8 +272,6 @@ void View::SDL_DragShape(SDL_Event &event)
                     SDL_GetMouseState(&mouseX, &mouseY);
                     shapePtr->setShapePos(Point({(float)mouseX, (float)mouseY, 0}));
                 }
-
-                this->m_controller->PauseUnpauseModel();
             }
         }
     }
