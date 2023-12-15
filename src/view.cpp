@@ -6,11 +6,11 @@
 #include <memory>
 #include <chrono>
 #include <thread>
+#include <unistd.h>
 
 View::View(Controller *controller)
 {
     this->m_controller = controller;
-    this->Render();
 }
 
 // **************************************************************************************************************************************************************************
@@ -27,10 +27,6 @@ void View::Render()
     }
 
     // SDL BOILERPLATE
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window *window = SDL_CreateWindow("Telos", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
-   // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 
 // From 2.0.18: Enable native IME.
 #ifdef SDL_HINT_IME_SHOW_UI
@@ -57,6 +53,9 @@ void View::Render()
     // Main loop
     bool done = false;
 
+    pthread_t inputThreadId;
+    pthread_create(&inputThreadId, nullptr, &View::threadEntry, this);
+
     const std::chrono::milliseconds frameDuration(1000 / VIEW_POLLING_RATE);
     auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -78,19 +77,26 @@ void View::Render()
             SDL_Event event;
             while (SDL_PollEvent(&event))
             {
-                ImGui_ImplSDL2_ProcessEvent(&event);
-                if (event.type == SDL_QUIT)
-                {
-                    done = true;
-                    this->m_controller->ShutModel();
-                }
-                if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
-                {
-                    done = true;
-                    this->m_controller->ShutModel();
-                }
-                SDL_ViewportHandler(event);
+                GetFrameEvents().push_back(event);
             }
+            renderDone = false;
+            for (SDL_Event &_event : GetFrameEvents())
+            {
+                ImGui_ImplSDL2_ProcessEvent(&_event);
+                if (_event.type == SDL_QUIT)
+                {
+                    done = true;
+                    this->m_controller->ShutModel();
+                }
+                if (_event.type == SDL_WINDOWEVENT && _event.window.event == SDL_WINDOWEVENT_CLOSE && _event.window.windowID == SDL_GetWindowID(window))
+                {
+                    done = true;
+                    this->m_controller->ShutModel();
+                }
+                renderDone = true;
+                if(inputDone) GetFrameEvents().clear();
+            }
+
 
             // Start the Dear ImGui frame
             ImGui_ImplSDLRenderer2_NewFrame();
@@ -117,12 +123,14 @@ void View::Render()
 
             ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
             SDL_RenderPresent(renderer);
+
             startTime = std::chrono::high_resolution_clock::now();
         }
     }
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_END;
 #endif
+    pthread_join(inputThreadId, nullptr);
     CleanupSDL(renderer, window);
     CleanupImGui();
 }
@@ -241,6 +249,36 @@ void View::Render_GUI()
 // **************************************************************************************************************************************************************************
 // INPUT HANDLING
 
+void View::EventHandlingLoop()
+{
+    const std::chrono::milliseconds frameDuration(1000 / VIEW_INPUT_POLLING_RATE);
+    auto startTime = std::chrono::high_resolution_clock::now();
+    while (true)
+    {
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            GetFrameEvents().push_back(event);
+        }
+
+        inputDone = false;
+        if (elapsed >= frameDuration)
+        {
+            for (SDL_Event &event : GetFrameEvents())
+            {
+                SDL_ViewportHandler(event);
+                if(renderDone) GetFrameEvents().clear();
+            }
+            inputDone = true;
+            startTime = std::chrono::high_resolution_clock::now();
+        }
+
+        
+    }
+}
+
 void View::SDL_ViewportHandler(SDL_Event &event)
 {
     SDL_DragShape(event);
@@ -262,13 +300,12 @@ void View::SDL_DragShape(SDL_Event &event)
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
-                // TODO: TEMPORARY, FIND A WAY TO GET EMSCRIPTEN TO ACTUALLY KNOW WHEN THE MOUSE IS RELEASED
-#if !BUILD_EMCC
+                // #if !BUILD_EMCC
                 while (true)
-#endif
+                // #endif
                 {
                     SDL_PollEvent(&event);
-                    if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+                    if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
                     {
                         this->m_controller->UnpauseModel();
                         break;

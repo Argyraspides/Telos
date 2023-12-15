@@ -15,21 +15,25 @@
 #endif
 
 // EMSCRIPTEN REQUIRES THE ENTIRE APPLICATION TO BE BUNDLED INSIDE OF A SINGLE FUNCTION LOOP THAT IS HANDED OVER TO EMSCRIPTEN.
-// HERE IS A STOWED AWAY "HACK" THAT LETS US DEFINE WHICH PART OF OUR CODE WE WANT EMSCRIPTEN TO WORRY ABOUT WITHOUT NEEDING TO 
+// HERE IS A STOWED AWAY "HACK" THAT LETS US DEFINE WHICH PART OF OUR CODE WE WANT EMSCRIPTEN TO WORRY ABOUT WITHOUT NEEDING TO
 // GIVE OURSELVES A HEADACHE BY DESIGNING THE APPLICATION AROUND EMSCRIPTENS REQUIREMENTS.
 #ifdef __EMSCRIPTEN__
 #include "../lib/imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
 #endif
-
 
 class View
 {
 
 public:
     View(Controller *controller);
+    static void *threadEntry(void *instance)
+    {
+        reinterpret_cast<View *>(instance)->EventHandlingLoop();
+        return nullptr;
+    }
+    void Render();                                                                  // SETS UP SDL2, DEAR IMGUI, AND BEGINS THE RENDER & INPUT LOOPS
 
 private:
-    void Render();                                                                  // SETS UP SDL2, DEAR IMGUI, AND BEGINS THE RENDER & INPUT LOOPS
     void Render_Model(SDL_Renderer *renderer);                                      // RENDERS THE CONTENTS OF THE PHYSICS ENGINE
     void Render_GUI();                                                              // RENDERS IMGUI COMPONENTS
     void Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points); // RENDERS A SHAPE OF TYPE POINT CLOUD
@@ -51,6 +55,7 @@ private:
     void UI_Update(); // UPDATES ALL THE UI CONTENTS
 
 private:
+    void EventHandlingLoop();
     void SDL_ViewportHandler(SDL_Event &event); // HANDLES INPUT ON THE VIEWPORT (I.E. THE AREA THINGS ARE RENDERED)
     void SDL_DragShape(SDL_Event &event);       // ALLOWS USER TO DRAG SHAPES AROUND THE VIEWPORT
     void SDL_RemoveShape(SDL_Event &event);     // ALLOWS USER TO REMOVE SHAPES FROM THE WORLD
@@ -58,6 +63,18 @@ private:
 
 private:
     Controller *m_controller; // CONTROLLER INTERFACE TO MANIPULATE AND/OR RETRIEVE DATA FROM THE MODEL
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_Window *window = SDL_CreateWindow("Telos", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
+    // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 
+    std::vector<SDL_Event>& GetFrameEvents()
+    {
+        static std::vector<SDL_Event> frame_events;
+        return frame_events;
+    }
 
+    bool done = false;
+    bool inputDone = false;
+    bool renderDone = false;
 };

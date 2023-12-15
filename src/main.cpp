@@ -13,5 +13,6 @@ int main()
     Controller c(&m);
     View v(&c);
 
+    v.Render();
     pthread_join(modelThreadId, nullptr);
 }
