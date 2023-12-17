@@ -31,7 +31,7 @@ public:
         reinterpret_cast<View *>(instance)->EventHandlingLoop();
         return nullptr;
     }
-    void Render();                                                                  // SETS UP SDL2, DEAR IMGUI, AND BEGINS THE RENDER & INPUT LOOPS
+    void Render(); // SETS UP SDL2, DEAR IMGUI, AND BEGINS THE RENDER & INPUT LOOPS
 
 private:
     void Render_Model(SDL_Renderer *renderer);                                      // RENDERS THE CONTENTS OF THE PHYSICS ENGINE
@@ -48,8 +48,12 @@ private:
 
 private:
     // THESE ARE ALL FUNCTIONS WHICH DEFINE UI COMPONENTS OF IMGUI, INCLUDING MENUS, BUTTONS, TEXT BOXES, ETC
+    int UI_FetchID();
     void UI_Interactive_CommonShapeSubMenu();
     void UI_Interactive_AddCircleButton();
+    void UI_Interactive_AddRectangleButton();
+    void UI_Interactive_AddTriangleButton();
+
     void UI_ConstructMenuModule();
 
     void UI_Update(); // UPDATES ALL THE UI CONTENTS
@@ -68,7 +72,7 @@ private:
     // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 
-    std::vector<SDL_Event>& GetFrameEvents()
+    std::vector<SDL_Event> &GetFrameEvents()
     {
         static std::vector<SDL_Event> frame_events;
         return frame_events;
@@ -77,4 +81,5 @@ private:
     bool done = false;
     bool inputDone = false;
     bool renderDone = false;
+    static int ImGuiID;
 };

@@ -1,6 +1,7 @@
 #include "shape.h"
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 #define MOVE_THRESH 1
 long long Shape::ID_CTR = 0;
 
@@ -104,13 +105,23 @@ void ShapeUtils::printAllShapeInfo(PointCloudShape_Cvx s)
 
     std::cout << "CENTER: "
               << "(" << s.m_center.x << "," << s.m_center.y << ")\n";
-    
-    std::cout << "VELOCITY: (" << s.m_vel.x << "," << s.m_vel.y << ")\n";
 
+    std::cout << "VELOCITY: (" << s.m_vel.x << "," << s.m_vel.y << ")\n";
 
     std::cout << "\n";
 }
 
+void ShapeUtils::printLineInfo(Line l)
+{
+    if (!l.isVertical)
+        std::cout << "y = " << l.m << "x + " << l.c << "\n";
+    else
+        std::cout << "x = " << l.x << "\n";
+}
+void ShapeUtils::printPointInfo(Point p)
+{
+    std::cout << "(" << p.x << "," << p.y << ")\n";
+}
 
 // ***************************************************************************************************************************************************************
 // CONSTRUCTORS (POINT CLOUD SHAPE)
@@ -166,6 +177,23 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
     return circle;
 }
 
+std::vector<Point> PointCloudShape_Cvx::generateRectangle(float w, float h)
+{
+    return {
+        {0, 0},
+        {w, 0},
+        {w, h},
+        {0, h}};
+}
+
+std::vector<Point> PointCloudShape_Cvx::generateTriangle(Point p1, Point p2, Point p3)
+{
+    std::vector<Point> pts = {p1, p2, p3};
+    std::sort(pts.begin(), pts.end(), [](const Point &a, const Point &b)
+              { return a.x < b.x; });
+    return pts;
+}
+
 // ***************************************************************************************************************************************************************
 // SHAPE MODIFIERS
 
@@ -176,9 +204,6 @@ void PointCloudShape_Cvx::moveShape(const Point &p)
         shapePts = shapePts + p;
     }
     this->m_center = this->m_center + p;
-
-   // ShapeUtils::printAllShapeInfo(*this);
-
 }
 
 void PointCloudShape_Cvx::setShapePos(const Point &p)

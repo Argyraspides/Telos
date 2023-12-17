@@ -8,6 +8,8 @@
 #include <thread>
 #include <unistd.h>
 
+int View::ImGuiID = 1;
+
 View::View(Controller *controller)
 {
     this->m_controller = controller;
@@ -94,9 +96,9 @@ void View::Render()
                     this->m_controller->ShutModel();
                 }
                 renderDone = true;
-                if(inputDone) GetFrameEvents().clear();
+                if (inputDone)
+                    GetFrameEvents().clear();
             }
-
 
             // Start the Dear ImGui frame
             ImGui_ImplSDLRenderer2_NewFrame();
@@ -123,7 +125,7 @@ void View::Render()
 
             ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
             SDL_RenderPresent(renderer);
-
+            this->ImGuiID = 1;
             startTime = std::chrono::high_resolution_clock::now();
         }
     }
@@ -166,12 +168,17 @@ ImGuiIO &View::SetupImGui()
 // **************************************************************************************************************************************************************************
 // UI ELEMENTS
 
+int View::UI_FetchID()
+{
+    return this->ImGuiID++;
+}
 void View::UI_Interactive_CommonShapeSubMenu()
 {
 
     if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
     {
         UI_Interactive_AddCircleButton();
+        UI_Interactive_AddRectangleButton();
     }
 
     ImGui::End();
@@ -183,11 +190,11 @@ void View::UI_Interactive_AddCircleButton()
     static float radius = 50;
     static float xVel = 0.0f;
     static float yVel = 0.0f;
-    ImGui::InputFloat("Radius", &radius);
-    ImGui::InputFloat("X Velocity", &xVel);
-    ImGui::InputFloat("Y Velocity", &yVel);
+    ImGui::InputFloat(("Radius##ID" + std::to_string(UI_FetchID())).c_str(), &radius);
+    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
+    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
 
-    if (ImGui::Button("Add"))
+    if (ImGui::Button("Add Circle"))
     {
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
         circle.m_vel = {xVel, yVel};
@@ -195,6 +202,27 @@ void View::UI_Interactive_AddCircleButton()
         this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }
+
+void View::UI_Interactive_AddRectangleButton()
+{
+    ImGui::Text("Rectangle");
+    static float w = 50, h = 50;
+    static float xVel = 0.0f;
+    static float yVel = 0.0f;
+    ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
+    ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
+    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
+    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
+
+    if (ImGui::Button("Add Rect"))
+    {
+        PointCloudShape_Cvx Rectangle(PointCloudShape_Cvx::generateRectangle(w, h));
+        Rectangle.m_vel = {xVel, yVel};
+        std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
+        this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+    }
+}
+
 
 void View::UI_ConstructMenuModule()
 {
@@ -269,13 +297,12 @@ void View::EventHandlingLoop()
             for (SDL_Event &event : GetFrameEvents())
             {
                 SDL_ViewportHandler(event);
-                if(renderDone) GetFrameEvents().clear();
+                if (renderDone)
+                    GetFrameEvents().clear();
             }
             inputDone = true;
             startTime = std::chrono::high_resolution_clock::now();
         }
-
-        
     }
 }
 

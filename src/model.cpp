@@ -62,11 +62,27 @@ void Model::updatePCSL()
         this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
     }
 
-    for(int i = 0; i < size; i++)
+    // for (int i = 0; i < size; i++)
+    // {
+    //     if (isContactWall(*this->m_PCSCVX_shapeList[i]))
+    //     {
+    //         this->m_PCSCVX_shapeList[i]->m_vel.x *= -1;
+    //     }
+    // }
+
+    for (int i = 0; i < size - 1; i++)
     {
-        if(isContactWall(*this->m_PCSCVX_shapeList[i]))
+        for (int j = i + 1; j < size; j++)
         {
-            this->m_PCSCVX_shapeList[i]->m_vel.x *= -1;
+            CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]).hasCollided;
+            if(c.hasCollided)
+            {
+                ShapeUtils::printAllShapeInfo(*c.s1);
+                ShapeUtils::printAllShapeInfo(*c.s2);
+
+                ShapeUtils::printLineInfo(c.penetrationLine);
+                ShapeUtils::printPointInfo(c.collisionPoint);
+            }
         }
     }
 
@@ -88,7 +104,7 @@ std::vector<std::shared_ptr<PointCloudShape_Cvx>> &Model::getPCSCVXShapeList()
 }
 
 // Uses the SAT (Separation Axis Theorem) to detect collision
-bool Model::isContactPCSCVX(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
+bool Model::isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
 {
     PointCloudShape_Cvx *_s1 = &s1;
     PointCloudShape_Cvx *_s2 = &s2;
@@ -138,6 +154,64 @@ bool Model::isContactPCSCVX(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
         }
     }
     return true;
+}
+
+CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
+{
+
+    PointCloudShape_Cvx *_s1 = &s1;
+    PointCloudShape_Cvx *_s2 = &s2;
+
+    ShapeUtils::printAllShapeInfo(s1);
+    ShapeUtils::printAllShapeInfo(s2);
+
+    for (int s = 0; s < 2; s++)
+    {
+        if (s == 1)
+        {
+            _s1 = &s2;
+            _s2 = &s1;
+        }
+
+        for (int i = 0; i < _s1->m_points.size(); i++)
+        {
+            // Line formed from the center of the polygon to one of its vertices
+            Point bounds[2] = {_s1->m_center, _s1->m_points[i]};
+            Line l1(bounds[0], bounds[1]);
+            if (l1.isVertical)
+            {
+                bounds[0] = _s1->m_center.y < _s1->m_points[i].y ? _s1->m_center : _s1->m_points[i];
+                bounds[1] = _s1->m_center.y > _s1->m_points[i].y ? _s1->m_points[i] : _s1->m_center;
+            }
+            else
+            {
+                bounds[0] = _s1->m_center.x < _s1->m_points[i].x ? _s1->m_center : _s1->m_points[i];
+                bounds[1] = _s1->m_center.x > _s1->m_points[i].x ? _s1->m_points[i] : _s1->m_center;
+            }
+
+            ShapeUtils::printLineInfo(l1);
+
+            for (int j = 0; j < _s2->m_points.size(); j++)
+            {
+                // Line formed from one vertex of the polygon to the next
+                Line l2(_s2->m_points[j], _s2->m_points[(j + 1) % _s2->m_points.size()]);
+                ShapeUtils::printLineInfo(l2);
+                Point intersection = Math::intersectionPt(l1, l2);
+
+                if (intersection.x >= bounds[0].x && intersection.x <= bounds[1].x)
+                {
+                    float penetrationDepth = Math::dist(intersection, _s1->m_points[i]);
+                    ShapeUtils::printLineInfo(l2);
+                    ShapeUtils::printPointInfo(intersection);
+                    std::shared_ptr<PointCloudShape_Cvx> ptr1 = std::make_shared<PointCloudShape_Cvx>(s1);
+                    std::shared_ptr<PointCloudShape_Cvx> ptr2 = std::make_shared<PointCloudShape_Cvx>(s2);
+                    return CollisionInfo_PCSCVX(true, intersection, {intersection - _s1->m_center}, l1, penetrationDepth, ptr1, ptr2);
+                }
+            }
+        }
+    }
+
+    return CollisionInfo_PCSCVX(false);
 }
 
 // Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
