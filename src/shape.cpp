@@ -97,10 +97,11 @@ bool ShapeUtils::checkConvex(const std::vector<Point> &points)
 void ShapeUtils::printAllShapeInfo(PointCloudShape_Cvx s)
 {
     std::cout << "polygon(";
-    for(int i = 0; i < s.m_points.size(); i++)
+    for (int i = 0; i < s.m_points.size(); i++)
     {
         std::cout << "(" << s.m_points[i].x << "," << s.m_points[i].y << ")";
-        if(i < s.m_points.size() - 1) std::cout << ",";
+        if (i < s.m_points.size() - 1)
+            std::cout << ",";
     }
     std::cout << ")\n";
 
@@ -222,4 +223,19 @@ void PointCloudShape_Cvx::setShapePos(const Point &p)
 
 void PointCloudShape_Cvx::rotShape(const float &rad, const Point &pivot)
 {
+    for (Point &v : this->m_points)
+	{	
+		v = v - this->m_center;
+
+		float sRot = sin(this->m_rot);
+		float cRot = cos(this->m_rot);
+		
+		Point shift =
+		{
+			v.x * cRot - v.y * sRot,
+			v.x * sRot + v.y * cRot
+		};
+
+		v = shift + this->m_center;
+	}
 }

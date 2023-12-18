@@ -99,6 +99,8 @@ struct Line
 
 namespace Math
 {
+    static Point origin = {0,0,0};
+    
     static Point getNormal2D(Point p)
     {
         return {-p.y, p.x, p.z};

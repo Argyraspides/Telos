@@ -190,14 +190,18 @@ void View::UI_Interactive_AddCircleButton()
     static float radius = 50;
     static float xVel = 0.0f;
     static float yVel = 0.0f;
+    static float rot = 0.0f;
+
     ImGui::InputFloat(("Radius##ID" + std::to_string(UI_FetchID())).c_str(), &radius);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
+    ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
 
     if (ImGui::Button("Add Circle"))
     {
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
         circle.m_vel = {xVel, yVel};
+        circle.m_rot = rot;
         std::shared_ptr<Shape> circleGeneric = std::make_shared<PointCloudShape_Cvx>(circle);
         this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
@@ -209,20 +213,22 @@ void View::UI_Interactive_AddRectangleButton()
     static float w = 50, h = 50;
     static float xVel = 0.0f;
     static float yVel = 0.0f;
+    static float rot = 0.0f;
     ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
     ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
+    ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
 
     if (ImGui::Button("Add Rect"))
     {
         PointCloudShape_Cvx Rectangle(PointCloudShape_Cvx::generateRectangle(w, h));
         Rectangle.m_vel = {xVel, yVel};
+        Rectangle.m_rot = rot;
         std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
         this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }
-
 
 void View::UI_ConstructMenuModule()
 {

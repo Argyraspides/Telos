@@ -62,19 +62,30 @@ void Model::updatePCSL()
         this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
     }
 
+    for (int i = 0; i < size; i++)
+    {
+        this->m_PCSCVX_shapeList[i]->rotShape(m_PCSCVX_shapeList[i]->m_rot, m_PCSCVX_shapeList[i]->m_center);
+    }
+
     for (int i = 0; i < size - 1; i++)
     {
+
         for (int j = i + 1; j < size; j++)
         {
             CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]);
-            if(c.hasCollided)
-            {
-                ShapeUtils::printAllShapeInfo(*this->m_PCSCVX_shapeList[i]);
-                ShapeUtils::printAllShapeInfo(*this->m_PCSCVX_shapeList[j]);
+        }
+    }
 
-                ShapeUtils::printLineInfo(c.penetrationLine);
-                ShapeUtils::printPointInfo(c.collisionPoint);
-            }
+    for (int i = 0; i < size; i++)
+    {
+        int icw = isContactWall(*this->m_PCSCVX_shapeList[i]);
+        if (icw == WALLSIDE::TOP_BOTTOM)
+        {
+            this->m_PCSCVX_shapeList[i]->m_vel.y *= -1;
+        }
+        else if (icw == WALLSIDE::LEFT_RIGHT)
+        {
+            this->m_PCSCVX_shapeList[i]->m_vel.x *= -1;
         }
     }
 
@@ -171,10 +182,11 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
         for (int i = 0; i < _s1->m_points.size(); i++)
         {
 
-            Line l1(_s1->m_center, _s1->m_points[i]);
+            Line centerLine(_s1->m_center, _s1->m_points[i]);
 
             centerLineBoundsY[0] = std::min(_s1->m_center.y, _s1->m_points[i].y);
             centerLineBoundsY[1] = std::max(_s1->m_center.y, _s1->m_points[i].y);
+
             centerLineBoundsX[0] = std::min(_s1->m_center.x, _s1->m_points[i].x);
             centerLineBoundsX[1] = std::max(_s1->m_center.x, _s1->m_points[i].x);
 
@@ -184,11 +196,12 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
 
                 edgeLineBoundsY[0] = std::min(_s2->m_points[j].y, _s2->m_points[wrap].y);
                 edgeLineBoundsY[1] = std::max(_s2->m_points[j].y, _s2->m_points[wrap].y);
+
                 edgeLineBoundsX[0] = std::min(_s2->m_points[j].x, _s2->m_points[wrap].x);
                 edgeLineBoundsX[1] = std::max(_s2->m_points[j].x, _s2->m_points[wrap].x);
 
-                Line l2(_s2->m_points[j], _s2->m_points[wrap]);
-                Point intersection = Math::intersectionPt(l1, l2);
+                Line edgeLine(_s2->m_points[j], _s2->m_points[wrap]);
+                Point intersection = Math::intersectionPt(centerLine, edgeLine);
 
                 bool inCenterBoundsX = (intersection.x >= centerLineBoundsX[0] && intersection.x <= centerLineBoundsX[1]);
                 bool inCenterBoundsY = (intersection.y >= centerLineBoundsY[0] && intersection.y <= centerLineBoundsY[1]);
@@ -200,12 +213,21 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
                     float penetrationDepth = Math::dist(intersection, _s1->m_points[i]);
                     std::shared_ptr<PointCloudShape_Cvx> ptr1 = std::make_shared<PointCloudShape_Cvx>(s1);
                     std::shared_ptr<PointCloudShape_Cvx> ptr2 = std::make_shared<PointCloudShape_Cvx>(s2);
-                    return CollisionInfo_PCSCVX(true, intersection, {intersection - _s1->m_center}, l1, penetrationDepth, ptr1, ptr2);
+                    return CollisionInfo_PCSCVX(true, intersection, {intersection - _s1->m_center}, centerLine, penetrationDepth, ptr1, ptr2);
                 }
             }
         }
     }
     return CollisionInfo_PCSCVX(false);
+}
+
+void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX collisionInfo)
+{
+}
+
+void Model::resolveCollisionPCSCVX_Wall(PointCloudShape_Cvx &s, int wallSide)
+{
+
 }
 
 // Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
@@ -219,7 +241,8 @@ std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isCo
     return {};
 }
 
-bool Model::isContactWall(const PointCloudShape_Cvx &s1)
+// Returns if shape has contacted wall. 0 is no contact, 1 is top/bottom wall, 2 is left/right wall
+int Model::isContactWall(const PointCloudShape_Cvx &s1)
 {
     // Check if any of the vertices go beyond the walls
 
@@ -231,11 +254,15 @@ bool Model::isContactWall(const PointCloudShape_Cvx &s1)
         bool bottomCol = s1.m_points[i].y >= SCREEN_HEIGHT;
         bool topCol = s1.m_points[i].y <= 0;
 
-        if (bottomCol || topCol || leftCol || rightCol)
+        if(bottomCol || topCol)
         {
-            return true;
+            return WALLSIDE::TOP_BOTTOM;
+        }
+        if (leftCol || rightCol)
+        {
+            return WALLSIDE::LEFT_RIGHT;
         }
     }
 
-    return false;
+    return WALLSIDE::NONE;
 }

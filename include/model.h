@@ -11,16 +11,14 @@ struct CollisionInfo_PCSCVX
         this->hasCollided = hasCollided;
     }
 
-    CollisionInfo_PCSCVX
-    (
-    bool hasCollided, 
-    Point collisionPoint, 
-    Point penetrationVector, 
-    Line penetrationLine, 
-    float penetrationDepth,
-    std::shared_ptr<PointCloudShape_Cvx> s1,
-    std::shared_ptr<PointCloudShape_Cvx> s2
-    )
+    CollisionInfo_PCSCVX(
+        bool hasCollided,
+        Point collisionPoint,
+        Point penetrationVector,
+        Line penetrationLine,
+        float penetrationDepth,
+        std::shared_ptr<PointCloudShape_Cvx> s1,
+        std::shared_ptr<PointCloudShape_Cvx> s2)
     {
         this->hasCollided = hasCollided;
         this->collisionPoint = collisionPoint;
@@ -38,6 +36,18 @@ struct CollisionInfo_PCSCVX
     Point penetrationVector; // Penetration vector is always given in the direction of the penetrating shape to the penetrated one
     Line penetrationLine;
     float penetrationDepth;
+};
+
+enum WALLSIDE
+{
+    NONE = 0,
+    TOP_BOTTOM = 1,
+    LEFT_RIGHT = 2,
+
+    TOP = 3,
+    RIGHT = 4,
+    BOTTOM = 5,
+    LEFT = 6
 };
 
 class Model
@@ -69,9 +79,11 @@ public:
     bool m_isPaused;                    // ENGINE PAUSE CONDITIONAL
     SHAPE_TYPE_IDENTIFIERS m_shapeType; // CURRENT TYPE OF SHAPE THAT THE ENGINE IS DEALING WITH, E.G. POINT CLOUD SHAPES
 
-    void updatePCSL();                                                          // UPDATES THE POINT CLOUD SHAPE LIST (PCSL)
-    bool isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
-    CollisionInfo_PCSCVX isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2);
-    bool isContactWall(const PointCloudShape_Cvx &s1);                                     // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
-    std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> isContactBroad(); // BROAD PHASE COLLISION DETECTION. QUICKLY FILTERS OUT SHAPES THAT "OBVIOUSLY" WILL NOT COLLIDE
+    void updatePCSL();                                                                         // UPDATES THE POINT CLOUD SHAPE LIST (PCSL)
+    bool isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2);                // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
+    CollisionInfo_PCSCVX isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED AND RETURNS COLLISION INFORMATION
+    void resolveCollisionPCSCVX(CollisionInfo_PCSCVX collisionInfo);                           // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES
+    void resolveCollisionPCSCVX_Wall(PointCloudShape_Cvx &s, int wallSide);                    // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL
+    int isContactWall(const PointCloudShape_Cvx &s1);                                          // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
+    std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> isContactBroad();     // BROAD PHASE COLLISION DETECTION. QUICKLY FILTERS OUT SHAPES THAT "OBVIOUSLY" WILL NOT COLLIDE
 };
