@@ -228,13 +228,10 @@ void Model::resolveOverlapCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallColl
 {
     Line slidingLine;
 
-    ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
-
     // Gradient is the rise/run of the shapes velocity vector
     float gradient = wallCollisionInfo.shape->m_vel.y / wallCollisionInfo.shape->m_vel.x;
     // Collision point is just the point of the shape that came into contact with the wall
     Point collisionPoint = wallCollisionInfo.shape->m_points[wallCollisionInfo.pointIndex];
-    ShapeUtils::printPointInfo(collisionPoint);
     // The equation of the line we want to slide the shape back along is the line with our calculated gradient, which passes through the collision point
     // If the velocity of the shape is only up or down the line is simply vertical
     if (wallCollisionInfo.shape->m_vel.x == 0 && wallCollisionInfo.shape->m_vel.y != 0)
@@ -245,10 +242,8 @@ void Model::resolveOverlapCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallColl
     {
         slidingLine = Line(gradient, collisionPoint);
     }
-    ShapeUtils::printLineInfo(slidingLine);
     // Obtain where this line intersects with the wall
     Point wallIntersection = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.wallSide]);
-    ShapeUtils::printPointInfo(wallIntersection);
     // Change the position of the shape by the slideDelta
     Point slideDelta = wallIntersection - collisionPoint;
 
@@ -257,7 +252,12 @@ void Model::resolveOverlapCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallColl
         p = p + slideDelta;
     }
     wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + slideDelta;
-    ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
+
+    // TEMPORARY!!
+    if (wallCollisionInfo.wallSide == WALLSIDE::RIGHT || wallCollisionInfo.wallSide == WALLSIDE::LEFT)
+        wallCollisionInfo.shape->m_vel.x *= -1;
+    else
+        wallCollisionInfo.shape->m_vel.y *= -1;
 }
 
 // Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm

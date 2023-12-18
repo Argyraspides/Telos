@@ -145,6 +145,7 @@ namespace Math
 
 
     static Line WALLS[4] = {LEFT_WALL, TOP_WALL, RIGHT_WALL, BOTTOM_WALL};
+    static Point WALL_VECS[4] = {LEFT_WALL_VEC, TOP_WALL_VEC, RIGHT_WALL_VEC, BOTTOM_WALL_VEC};
 
     static Point getNormal2D(Point p)
     {

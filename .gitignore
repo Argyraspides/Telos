@@ -1,4 +1,5 @@
 # CMake builds
 build/
 debug/
+release/
 include/BUILD_EMCC.h
