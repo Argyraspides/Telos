@@ -62,19 +62,19 @@ void Model::updatePCSL()
         this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
     }
 
-    // for (int i = 0; i < size; i++)
-    // {
-    //     if (isContactWall(*this->m_PCSCVX_shapeList[i]))
-    //     {
-    //         this->m_PCSCVX_shapeList[i]->m_vel.x *= -1;
-    //     }
-    // }
-
     for (int i = 0; i < size - 1; i++)
     {
         for (int j = i + 1; j < size; j++)
         {
-            CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]).hasCollided;
+            CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]);
+            if(c.hasCollided)
+            {
+                ShapeUtils::printAllShapeInfo(*this->m_PCSCVX_shapeList[i]);
+                ShapeUtils::printAllShapeInfo(*this->m_PCSCVX_shapeList[j]);
+
+                ShapeUtils::printLineInfo(c.penetrationLine);
+                ShapeUtils::printPointInfo(c.collisionPoint);
+            }
         }
     }
 
@@ -95,7 +95,7 @@ std::vector<std::shared_ptr<PointCloudShape_Cvx>> &Model::getPCSCVXShapeList()
     return this->m_PCSCVX_shapeList;
 }
 
-// Uses the SAT (Separation Axis Theorem) to detect collision
+// Uses the SAT (Separation Axis Theorem) to detect collision. Cannot determine collision point nor penetration depth.
 bool Model::isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
 {
     PointCloudShape_Cvx *_s1 = &s1;
@@ -148,11 +148,17 @@ bool Model::isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2
     return true;
 }
 
+// Uses simple line intersections to detect collision, collision point, and penetration depth.
 CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
 {
 
     PointCloudShape_Cvx *_s1 = &s1;
     PointCloudShape_Cvx *_s2 = &s2;
+
+    float edgeLineBoundsX[2] = {0, 0};
+    float edgeLineBoundsY[2] = {0, 0};
+    float centerLineBoundsX[2] = {0, 0};
+    float centerLineBoundsY[2] = {0, 0};
 
     for (int s = 0; s < 2; s++)
     {
@@ -164,11 +170,6 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
 
         for (int i = 0; i < _s1->m_points.size(); i++)
         {
-            // Line formed from the center of the polygon to one of its vertices
-            float edgeLineBoundsX[2] = {0, 0};
-            float edgeLineBoundsY[2] = {0, 0};
-            float centerLineBoundsX[2] = {0, 0};
-            float centerLineBoundsY[2] = {0, 0};
 
             Line l1(_s1->m_center, _s1->m_points[i]);
 
@@ -177,16 +178,16 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
             centerLineBoundsX[0] = std::min(_s1->m_center.x, _s1->m_points[i].x);
             centerLineBoundsX[1] = std::max(_s1->m_center.x, _s1->m_points[i].x);
 
-
             for (int j = 0; j < _s2->m_points.size(); j++)
             {
                 int wrap = (j + 1) % _s2->m_points.size();
+
                 edgeLineBoundsY[0] = std::min(_s2->m_points[j].y, _s2->m_points[wrap].y);
                 edgeLineBoundsY[1] = std::max(_s2->m_points[j].y, _s2->m_points[wrap].y);
                 edgeLineBoundsX[0] = std::min(_s2->m_points[j].x, _s2->m_points[wrap].x);
                 edgeLineBoundsX[1] = std::max(_s2->m_points[j].x, _s2->m_points[wrap].x);
 
-                Line l2(_s2->m_points[j], _s2->m_points[(j + 1) % _s2->m_points.size()]);
+                Line l2(_s2->m_points[j], _s2->m_points[wrap]);
                 Point intersection = Math::intersectionPt(l1, l2);
 
                 bool inCenterBoundsX = (intersection.x >= centerLineBoundsX[0] && intersection.x <= centerLineBoundsX[1]);
