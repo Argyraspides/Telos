@@ -139,6 +139,19 @@ namespace Math
         // x_intersection = (c2 - c1) / (m1 - m2)
         // y_intersection = m1 * x_intersection + c1 or m2 * x_intersection + c2
 
+        // TODO: CHECK IF LINE IS VERTICAL
+
+        if (l1.isVertical)
+        {
+            // y2 = m2*x1 + c2
+            return {l1.x, l2.m * l1.x + l2.c};
+        }
+        else if (l2.isVertical)
+        {
+            // y1 = m1*x2 + c1
+            return {l2.x, l1.m * l2.x + l1.c};
+        }
+
         float x_intersection = (l2.c - l1.c) / (l1.m - l2.m);
         return {x_intersection, l1.m * x_intersection + l1.c};
     }

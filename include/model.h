@@ -3,6 +3,7 @@
 #include <mutex>
 #include <memory>
 
+// Information required to resolve collisions between convex point cloud polygons
 struct CollisionInfo_PCSCVX
 {
     CollisionInfo_PCSCVX(bool hasCollided)

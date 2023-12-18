@@ -75,14 +75,6 @@ void Model::updatePCSL()
         for (int j = i + 1; j < size; j++)
         {
             CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]).hasCollided;
-            if(c.hasCollided)
-            {
-                ShapeUtils::printAllShapeInfo(*c.s1);
-                ShapeUtils::printAllShapeInfo(*c.s2);
-
-                ShapeUtils::printLineInfo(c.penetrationLine);
-                ShapeUtils::printPointInfo(c.collisionPoint);
-            }
         }
     }
 
@@ -162,9 +154,6 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
     PointCloudShape_Cvx *_s1 = &s1;
     PointCloudShape_Cvx *_s2 = &s2;
 
-    ShapeUtils::printAllShapeInfo(s1);
-    ShapeUtils::printAllShapeInfo(s2);
-
     for (int s = 0; s < 2; s++)
     {
         if (s == 1)
@@ -176,33 +165,38 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
         for (int i = 0; i < _s1->m_points.size(); i++)
         {
             // Line formed from the center of the polygon to one of its vertices
-            Point bounds[2] = {_s1->m_center, _s1->m_points[i]};
-            Line l1(bounds[0], bounds[1]);
-            if (l1.isVertical)
-            {
-                bounds[0] = _s1->m_center.y < _s1->m_points[i].y ? _s1->m_center : _s1->m_points[i];
-                bounds[1] = _s1->m_center.y > _s1->m_points[i].y ? _s1->m_points[i] : _s1->m_center;
-            }
-            else
-            {
-                bounds[0] = _s1->m_center.x < _s1->m_points[i].x ? _s1->m_center : _s1->m_points[i];
-                bounds[1] = _s1->m_center.x > _s1->m_points[i].x ? _s1->m_points[i] : _s1->m_center;
-            }
+            float edgeLineBoundsX[2] = {0, 0};
+            float edgeLineBoundsY[2] = {0, 0};
+            float centerLineBoundsX[2] = {0, 0};
+            float centerLineBoundsY[2] = {0, 0};
 
-            ShapeUtils::printLineInfo(l1);
+            Line l1(_s1->m_center, _s1->m_points[i]);
+
+            centerLineBoundsY[0] = std::min(_s1->m_center.y, _s1->m_points[i].y);
+            centerLineBoundsY[1] = std::max(_s1->m_center.y, _s1->m_points[i].y);
+            centerLineBoundsX[0] = std::min(_s1->m_center.x, _s1->m_points[i].x);
+            centerLineBoundsX[1] = std::max(_s1->m_center.x, _s1->m_points[i].x);
+
 
             for (int j = 0; j < _s2->m_points.size(); j++)
             {
-                // Line formed from one vertex of the polygon to the next
+                int wrap = (j + 1) % _s2->m_points.size();
+                edgeLineBoundsY[0] = std::min(_s2->m_points[j].y, _s2->m_points[wrap].y);
+                edgeLineBoundsY[1] = std::max(_s2->m_points[j].y, _s2->m_points[wrap].y);
+                edgeLineBoundsX[0] = std::min(_s2->m_points[j].x, _s2->m_points[wrap].x);
+                edgeLineBoundsX[1] = std::max(_s2->m_points[j].x, _s2->m_points[wrap].x);
+
                 Line l2(_s2->m_points[j], _s2->m_points[(j + 1) % _s2->m_points.size()]);
-                ShapeUtils::printLineInfo(l2);
                 Point intersection = Math::intersectionPt(l1, l2);
 
-                if (intersection.x >= bounds[0].x && intersection.x <= bounds[1].x)
+                bool inCenterBoundsX = (intersection.x >= centerLineBoundsX[0] && intersection.x <= centerLineBoundsX[1]);
+                bool inCenterBoundsY = (intersection.y >= centerLineBoundsY[0] && intersection.y <= centerLineBoundsY[1]);
+                bool inEdgeBoundsX = (intersection.x >= edgeLineBoundsX[0] && intersection.x <= edgeLineBoundsX[1]);
+                bool inEdgeBoundsY = (intersection.y >= edgeLineBoundsY[0] && intersection.y <= edgeLineBoundsY[1]);
+
+                if (inCenterBoundsX && inCenterBoundsY && inEdgeBoundsX && inEdgeBoundsY)
                 {
                     float penetrationDepth = Math::dist(intersection, _s1->m_points[i]);
-                    ShapeUtils::printLineInfo(l2);
-                    ShapeUtils::printPointInfo(intersection);
                     std::shared_ptr<PointCloudShape_Cvx> ptr1 = std::make_shared<PointCloudShape_Cvx>(s1);
                     std::shared_ptr<PointCloudShape_Cvx> ptr2 = std::make_shared<PointCloudShape_Cvx>(s2);
                     return CollisionInfo_PCSCVX(true, intersection, {intersection - _s1->m_center}, l1, penetrationDepth, ptr1, ptr2);
@@ -210,7 +204,6 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
             }
         }
     }
-
     return CollisionInfo_PCSCVX(false);
 }
 
