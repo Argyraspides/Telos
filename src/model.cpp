@@ -2,6 +2,7 @@
 #include "application_params.h"
 #include <chrono>
 #include <iostream>
+#include <algorithm>
 
 Model::Model()
 {
@@ -78,14 +79,10 @@ void Model::updatePCSL()
 
     for (int i = 0; i < size; i++)
     {
-        int icw = isContactWall(*this->m_PCSCVX_shapeList[i]);
-        if (icw == WALLSIDE::TOP_BOTTOM)
+        WallCollisionInfo_PCSCVX wci = isContactWall(*this->m_PCSCVX_shapeList[i]);
+        if (wci.collided)
         {
-            this->m_PCSCVX_shapeList[i]->m_vel.y *= -1;
-        }
-        else if (icw == WALLSIDE::LEFT_RIGHT)
-        {
-            this->m_PCSCVX_shapeList[i]->m_vel.x *= -1;
+            resolveOverlapCollisionPCSCVX_Wall(wci);
         }
     }
 
@@ -225,9 +222,42 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX collisionInfo)
 {
 }
 
-void Model::resolveCollisionPCSCVX_Wall(PointCloudShape_Cvx &s, int wallSide)
+// Resolves initial collision by separating the object from the wall. Works by finding the distance between the point that collided
+// into the wall and the wall itself along the objects velocity vector, and slides the shape back along this vector.
+void Model::resolveOverlapCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallCollisionInfo)
 {
+    Line slidingLine;
 
+    ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
+
+    // Gradient is the rise/run of the shapes velocity vector
+    float gradient = wallCollisionInfo.shape->m_vel.y / wallCollisionInfo.shape->m_vel.x;
+    // Collision point is just the point of the shape that came into contact with the wall
+    Point collisionPoint = wallCollisionInfo.shape->m_points[wallCollisionInfo.pointIndex];
+    ShapeUtils::printPointInfo(collisionPoint);
+    // The equation of the line we want to slide the shape back along is the line with our calculated gradient, which passes through the collision point
+    // If the velocity of the shape is only up or down the line is simply vertical
+    if (wallCollisionInfo.shape->m_vel.x == 0 && wallCollisionInfo.shape->m_vel.y != 0)
+    {
+        slidingLine = Line(wallCollisionInfo.shape->m_points[wallCollisionInfo.pointIndex].x);
+    }
+    else
+    {
+        slidingLine = Line(gradient, collisionPoint);
+    }
+    ShapeUtils::printLineInfo(slidingLine);
+    // Obtain where this line intersects with the wall
+    Point wallIntersection = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.wallSide]);
+    ShapeUtils::printPointInfo(wallIntersection);
+    // Change the position of the shape by the slideDelta
+    Point slideDelta = wallIntersection - collisionPoint;
+
+    for (Point &p : wallCollisionInfo.shape->m_points)
+    {
+        p = p + slideDelta;
+    }
+    wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + slideDelta;
+    ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
 }
 
 // Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
@@ -241,28 +271,61 @@ std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isCo
     return {};
 }
 
-// Returns if shape has contacted wall. 0 is no contact, 1 is top/bottom wall, 2 is left/right wall
-int Model::isContactWall(const PointCloudShape_Cvx &s1)
+WallCollisionInfo_PCSCVX Model::isContactWall(PointCloudShape_Cvx &s1)
 {
-    // Check if any of the vertices go beyond the walls
+    // Check if any of the vertices go beyond the walls.
+    bool leftCol = false, rightCol = false, bottomCol = false, topCol = false;
+    for (int i = 0; i < s1.m_points.size(); i++)
+    {
+        leftCol = s1.m_points[i].x <= 0;
+        rightCol = s1.m_points[i].x >= SCREEN_WIDTH;
+
+        bottomCol = s1.m_points[i].y >= SCREEN_HEIGHT;
+        topCol = s1.m_points[i].y <= 0;
+        if (topCol || bottomCol || leftCol || rightCol)
+            goto beginDot;
+    }
+
+    return WallCollisionInfo_PCSCVX(false);
+
+beginDot:
+
+    Point wallVec;
+    int wallSide;
+    if (topCol)
+    {
+        wallVec = Math::TOP_WALL_VEC;
+        wallSide = WALLSIDE::TOP;
+    }
+    else if (bottomCol)
+    {
+        wallVec = Math::BOTTOM_WALL_VEC;
+        wallSide = WALLSIDE::BOTTOM;
+    }
+    else if (leftCol)
+    {
+        wallVec = Math::LEFT_WALL_VEC;
+        wallSide = WALLSIDE::LEFT;
+    }
+    else if (rightCol)
+    {
+        wallVec = Math::RIGHT_WALL_VEC;
+        wallSide = WALLSIDE::RIGHT;
+    }
+
+    float closestPtDotProd = -std::numeric_limits<float>::max();
+    float currentDotProd = 0;
+    int closestPtIndx = 0;
 
     for (int i = 0; i < s1.m_points.size(); i++)
     {
-        bool leftCol = s1.m_points[i].x <= 0;
-        bool rightCol = s1.m_points[i].x >= SCREEN_WIDTH;
-
-        bool bottomCol = s1.m_points[i].y >= SCREEN_HEIGHT;
-        bool topCol = s1.m_points[i].y <= 0;
-
-        if(bottomCol || topCol)
+        currentDotProd = Math::dotProd(wallVec, s1.m_points[i]);
+        if (currentDotProd > closestPtDotProd)
         {
-            return WALLSIDE::TOP_BOTTOM;
-        }
-        if (leftCol || rightCol)
-        {
-            return WALLSIDE::LEFT_RIGHT;
+            closestPtIndx = i;
+            closestPtDotProd = currentDotProd;
         }
     }
 
-    return WALLSIDE::NONE;
+    return WallCollisionInfo_PCSCVX(true, wallSide, &s1, closestPtIndx);
 }

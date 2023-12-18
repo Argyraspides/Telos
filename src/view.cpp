@@ -172,6 +172,7 @@ int View::UI_FetchID()
 {
     return this->ImGuiID++;
 }
+
 void View::UI_Interactive_CommonShapeSubMenu()
 {
 
@@ -189,7 +190,7 @@ void View::UI_Interactive_AddCircleButton()
     ImGui::Text("Circle");
     static float radius = 50;
     static float xVel = 0.0f;
-    static float yVel = 0.0f;
+    static float yVel = 11.0f;
     static float rot = 0.0f;
 
     ImGui::InputFloat(("Radius##ID" + std::to_string(UI_FetchID())).c_str(), &radius);

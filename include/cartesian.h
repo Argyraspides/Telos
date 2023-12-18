@@ -1,6 +1,7 @@
 #pragma once
 // Defines basic data structures and math functions for anything related to a cartesian plane.
 #include <cmath>
+#include "application_params.h"
 struct Point
 {
     float x = 0, y = 0, z = 0;
@@ -54,6 +55,7 @@ struct Line
     float m = 0, x = 0, c = 0;
     const float VERTICAL_THRESHOLD = 0.00001;
 
+    //  Constructs a line that passes through two points.
     Line(const Point &p1, const Point &p2)
     {
         // y = mx + c
@@ -84,6 +86,32 @@ struct Line
         }
     }
 
+    // Constructs a vertical line
+    Line(float x)
+    {
+        this->x = x;
+        isVertical = true;
+    }
+
+    // Constructs an ordinary line (non-vertical)
+    Line(float m, float c)
+    {
+        this->m = m;
+        this->c = c;
+        isVertical = false;
+    }
+
+    // Constructs a line with gradient 'm', that intersects with a point 'p'
+    Line(float m, Point p)
+    {
+        // y = mx + c
+        // p.y = m*p.x + c
+        // p.y - m*p.x = c
+        this->m = m;
+        this->c = p.y - m * p.x;
+        this->isVertical = false;
+    }
+
     Line()
     {
     }
@@ -99,8 +127,25 @@ struct Line
 
 namespace Math
 {
-    static Point origin = {0,0,0};
+
     
+    static Point origin = {0, 0, 0};
+
+    static Line LEFT_WALL = {{0, SCREEN_HEIGHT, 0}, {0, 0, 0}};
+    static Point LEFT_WALL_VEC = {-1,0,0};
+
+    static Line RIGHT_WALL = {{SCREEN_WIDTH, SCREEN_HEIGHT, 0}, {SCREEN_WIDTH, 0, 0}};
+    static Point RIGHT_WALL_VEC = {1,0,0};
+
+    static Line TOP_WALL = {{0, 0, 0}, {SCREEN_WIDTH, 0, 0}};
+    static Point TOP_WALL_VEC = {0,-1,0};
+
+    static Line BOTTOM_WALL = {{0, SCREEN_HEIGHT, 0}, {SCREEN_WIDTH, SCREEN_HEIGHT, 0}};
+    static Point BOTTOM_WALL_VEC = {0,1,0};
+
+
+    static Line WALLS[4] = {LEFT_WALL, TOP_WALL, RIGHT_WALL, BOTTOM_WALL};
+
     static Point getNormal2D(Point p)
     {
         return {-p.y, p.x, p.z};
