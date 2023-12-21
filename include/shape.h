@@ -42,6 +42,10 @@ public:
     {
     }
 
+    virtual void moveAndRotShape()
+    {
+    }
+
     virtual void setShapePos(const Point &p)
     {
     }
@@ -81,6 +85,7 @@ public:
     int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX; } // RETURNS THE TYPE OF SHAPE
 
     void moveShape(const Point &p) override;
+    void moveAndRotShape() override;
     void setShapePos(const Point &p) override;
     void rotShape(const float &rad, const Point &pivot) override;
 
@@ -93,6 +98,8 @@ public:
 
 public:
     std::vector<Point> m_points; // POINT CLOUD THAT REPRESENTS THE SHAPE
+    std::vector<Point> m_initPoints;
+    std::vector<float> m_pointsRadial; // REPRESENTS THE DISTANCE OF EACH POINT FROM THE SHAPES CENTER
 };
 
 // ***************************************************************************************************************************************************************

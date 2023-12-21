@@ -212,9 +212,9 @@ void View::UI_Interactive_AddRectangleButton()
 {
     ImGui::Text("Rectangle");
     static float w = 50, h = 50;
-    static float xVel = 0.0f;
-    static float yVel = 0.0f;
-    static float rot = 0.0f;
+    static float xVel = 3.0f;
+    static float yVel = 2.0f;
+    static float rot = 0.01f;
     ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
     ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);

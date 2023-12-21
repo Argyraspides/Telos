@@ -127,8 +127,6 @@ struct Line
 
 namespace Math
 {
-
-    
     static Point origin = {0, 0, 0};
 
     static Line LEFT_WALL = {{0, SCREEN_HEIGHT, 0}, {0, 0, 0}};

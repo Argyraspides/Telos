@@ -28,7 +28,7 @@ void Model::run()
     if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
         // Control the loop to execute at the desired frequency
-        const std::chrono::milliseconds frameDuration(1000 / ENGINE_POLLING_RATE);
+        const std::chrono::milliseconds frameDuration((long)(timeStep * 1000));
         auto startTime = std::chrono::high_resolution_clock::now();
 
         while (m_isRunning)
@@ -40,6 +40,7 @@ void Model::run()
             {
                 // Update all shapes including their positions, resolve their collisions, etc
                 updatePCSL();
+                time += timeStep;
                 startTime = std::chrono::high_resolution_clock::now();
             }
         }
@@ -58,19 +59,14 @@ void Model::updatePCSL()
     // Translate the shapes
     // Calling "getPCSCVXShapeList()" locks access to the shape list.
     int size = this->getPCSCVXShapeList().size();
-    for (int i = 0; i < size; i++)
-    {
-        this->m_PCSCVX_shapeList[i]->moveShape(m_PCSCVX_shapeList[i]->m_vel);
-    }
 
     for (int i = 0; i < size; i++)
     {
-        this->m_PCSCVX_shapeList[i]->rotShape(m_PCSCVX_shapeList[i]->m_rot, m_PCSCVX_shapeList[i]->m_center);
+        this->m_PCSCVX_shapeList[i]->moveAndRotShape();
     }
 
     for (int i = 0; i < size - 1; i++)
     {
-
         for (int j = i + 1; j < size; j++)
         {
             CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]);
@@ -79,10 +75,10 @@ void Model::updatePCSL()
 
     for (int i = 0; i < size; i++)
     {
-        WallCollisionInfo_PCSCVX wci = isContactWall(*this->m_PCSCVX_shapeList[i]);
+        WallCollisionInfo_PCSCVX wci = isContactWallLinear(*this->m_PCSCVX_shapeList[i]);
         if (wci.collided)
         {
-            resolveOverlapCollisionPCSCVX_Wall(wci);
+            resolveOverlapCollisionPCSCVX_Wall_Linear(wci);
         }
     }
 
@@ -224,8 +220,9 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX collisionInfo)
 
 // Resolves initial collision by separating the object from the wall. Works by finding the distance between the point that collided
 // into the wall and the wall itself along the objects velocity vector, and slides the shape back along this vector.
-void Model::resolveOverlapCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallCollisionInfo)
+void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX wallCollisionInfo)
 {
+    // TODO: TAKE INTO ACCOUNT ROTATION AS WELL, RATHER THAN SIMPLY VELOCITY FOR SEPARATION
     Line slidingLine;
 
     // Gradient is the rise/run of the shapes velocity vector
@@ -260,6 +257,10 @@ void Model::resolveOverlapCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallColl
         wallCollisionInfo.shape->m_vel.y *= -1;
 }
 
+// Resolves initial collision by separating the object from the wall. Takes into account both linear translation as well as rotation of the object
+void Model::resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCVX wallCollisionInfo)
+{
+}
 // Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
 std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isContactBroad()
 {
@@ -271,7 +272,7 @@ std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isCo
     return {};
 }
 
-WallCollisionInfo_PCSCVX Model::isContactWall(PointCloudShape_Cvx &s1)
+WallCollisionInfo_PCSCVX Model::isContactWallLinear(PointCloudShape_Cvx &s1)
 {
     // Check if any of the vertices go beyond the walls.
     bool leftCol = false, rightCol = false, bottomCol = false, topCol = false;
@@ -327,5 +328,27 @@ beginDot:
         }
     }
 
-    return WallCollisionInfo_PCSCVX(true, wallSide, &s1, closestPtIndx);
+    return WallCollisionInfo_PCSCVX(true, wallSide, &s1, closestPtIndx, 0);
+}
+
+WallCollisionInfo_PCSCVX Model::isContactWallLinearRot(PointCloudShape_Cvx &s1)
+{
+    // Check if any of the vertices go beyond the walls.
+    bool leftCol = false, rightCol = false, bottomCol = false, topCol = false;
+    for (int i = 0; i < s1.m_points.size(); i++)
+    {
+        leftCol = s1.m_points[i].x <= 0;
+        rightCol = s1.m_points[i].x >= SCREEN_WIDTH;
+
+        bottomCol = s1.m_points[i].y >= SCREEN_HEIGHT;
+        topCol = s1.m_points[i].y <= 0;
+        if (topCol || bottomCol || leftCol || rightCol)
+            goto beginDot;
+    }
+
+    return WallCollisionInfo_PCSCVX(false);
+
+beginDot:
+
+    return WallCollisionInfo_PCSCVX(false);
 }

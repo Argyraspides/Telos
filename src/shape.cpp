@@ -136,7 +136,12 @@ PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     this->m_points = points;
+    this->m_initPoints = points;
     this->m_center = ShapeUtils::getCentroid(this->m_points);
+    for (int i = 0; i < points.size(); i++)
+    {
+        this->m_pointsRadial.push_back(Math::dist(m_points[i], this->m_center));
+    }
 }
 
 // ***************************************************************************************************************************************************************
@@ -201,41 +206,53 @@ std::vector<Point> PointCloudShape_Cvx::generateTriangle(Point p1, Point p2, Poi
 
 void PointCloudShape_Cvx::moveShape(const Point &p)
 {
-    for (Point &shapePts : this->m_points)
+    for (Point &shapePts : m_points)
     {
         shapePts = shapePts + p;
     }
-    this->m_center = this->m_center + p;
+    m_center = m_center + p;
 }
 
 void PointCloudShape_Cvx::setShapePos(const Point &p)
 {
-    Point delta = this->m_center - p;
+    Point delta = m_center - p;
     delta = delta * -1;
 
-    for (Point &shapePts : this->m_points)
+    for (Point &shapePts : m_points)
     {
         shapePts = shapePts + delta;
     }
 
-    this->m_center = this->m_center + delta;
+    m_center = m_center + delta;
+}
+
+void PointCloudShape_Cvx::moveAndRotShape()
+{
+    for (int i = 0; i < m_points.size(); i++)
+    {
+        float xDelta = (m_points[i].x - m_center.x);
+        float yDelta = (m_points[i].y - m_center.y);
+
+        m_points[i].x = (cos(m_rot) * xDelta - sin(m_rot) * yDelta + m_center.x) + m_vel.x;
+        m_points[i].y = (sin(m_rot) * xDelta + cos(m_rot) * yDelta + m_center.y) + m_vel.y;
+    }
+    m_center = m_center + m_vel;
 }
 
 void PointCloudShape_Cvx::rotShape(const float &rad, const Point &pivot)
 {
-    for (Point &v : this->m_points)
-	{	
-		v = v - this->m_center;
+    for (Point &v : m_points)
+    {
+        v = v - m_center;
 
-		float sRot = sin(this->m_rot);
-		float cRot = cos(this->m_rot);
-		
-		Point shift =
-		{
-			v.x * cRot - v.y * sRot,
-			v.x * sRot + v.y * cRot
-		};
+        float sRot = sin(m_rot);
+        float cRot = cos(m_rot);
 
-		v = shift + this->m_center;
-	}
+        Point shift =
+            {
+                v.x * cRot - v.y * sRot,
+                v.x * sRot + v.y * cRot};
+
+        v = shift + m_center;
+    }
 }

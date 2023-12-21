@@ -53,12 +53,13 @@ enum WALLSIDE
 struct WallCollisionInfo_PCSCVX
 {
 
-    WallCollisionInfo_PCSCVX(bool collided, int wallSide, PointCloudShape_Cvx *shape, int pointIndex)
+    WallCollisionInfo_PCSCVX(bool collided, int wallSide, PointCloudShape_Cvx *shape, int pointIndex, double time)
     {
         this->collided = collided;
         this->wallSide = wallSide;
         this->shape = shape;
         this->pointIndex = pointIndex;
+        this->time = time;
     }
 
     WallCollisionInfo_PCSCVX(bool collided)
@@ -73,6 +74,8 @@ struct WallCollisionInfo_PCSCVX
     PointCloudShape_Cvx *shape;
     // Index of the point that came into contact with the wall
     int pointIndex;
+    // How long ago the *center* of the shape came into contact with the wall
+    double time;
 };
 
 class Model
@@ -109,10 +112,15 @@ public:
     bool isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2);                // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
     CollisionInfo_PCSCVX isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED AND RETURNS COLLISION INFORMATION
 
-    WallCollisionInfo_PCSCVX isContactWall(PointCloudShape_Cvx &s1);                       // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
+    WallCollisionInfo_PCSCVX isContactWallLinear(PointCloudShape_Cvx &s1);                       // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
+    WallCollisionInfo_PCSCVX isContactWallLinearRot(PointCloudShape_Cvx &s1);
     std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> isContactBroad(); // BROAD PHASE COLLISION DETECTION. QUICKLY FILTERS OUT SHAPES THAT "OBVIOUSLY" WILL NOT COLLIDE
 
     void resolveCollisionPCSCVX(CollisionInfo_PCSCVX collisionInfo);                     // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES
-    void resolveOverlapCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallCollisionInfo); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY)
+    void resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX wallCollisionInfo); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, ONLY TAKES INTO ACCOUNT TRANSLATION)
+    void resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCVX wallCollisionInfo); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, TAKES INTO ACCOUNT ROTATION)
     void resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallCollisionInfo);        // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (NORMAL RESOLUTION)
+public:
+    double time = 0.0;
+    double timeStep = 1.0 / ENGINE_POLLING_RATE;
 };
