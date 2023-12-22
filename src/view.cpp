@@ -47,6 +47,9 @@ void View::Render()
     ImGuiIO &io = SetupImGui();
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
+    ImGui::GetStyle().ScaleAllSizes(2.0f);
+    io.FontGlobalScale = 2.0f;
+
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
@@ -203,6 +206,7 @@ void View::UI_Interactive_AddCircleButton()
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
         circle.m_vel = {xVel, yVel};
         circle.m_rot = rot;
+        circle.m_center = {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F};
         std::shared_ptr<Shape> circleGeneric = std::make_shared<PointCloudShape_Cvx>(circle);
         this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
@@ -212,9 +216,9 @@ void View::UI_Interactive_AddRectangleButton()
 {
     ImGui::Text("Rectangle");
     static float w = 50, h = 50;
-    static float xVel = 3.0f;
-    static float yVel = 2.0f;
-    static float rot = 0.01f;
+    static float xVel = 10.0f;
+    static float yVel = 99.0f;
+    static float rot = 0.2f;
     ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
     ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
@@ -226,6 +230,7 @@ void View::UI_Interactive_AddRectangleButton()
         PointCloudShape_Cvx Rectangle(PointCloudShape_Cvx::generateRectangle(w, h));
         Rectangle.m_vel = {xVel, yVel};
         Rectangle.m_rot = rot;
+
         std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
         this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }

@@ -105,8 +105,8 @@ void ShapeUtils::printAllShapeInfo(PointCloudShape_Cvx s)
     }
     std::cout << ")\n";
 
-    // std::cout << "CENTER: "
-    //           << "(" << s.m_center.x << "," << s.m_center.y << ")\n";
+    std::cout //<< "CENTER: "
+        << "(" << s.m_center.x << "," << s.m_center.y << ")\n";
 
     // std::cout << "VELOCITY: (" << s.m_vel.x << "," << s.m_vel.y << ")\n";
 
@@ -138,9 +138,12 @@ PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Sha
     this->m_points = points;
     this->m_initPoints = points;
     this->m_center = ShapeUtils::getCentroid(this->m_points);
+    this->m_initPos = m_center;
+    this->m_time = 1.0;
     for (int i = 0; i < points.size(); i++)
     {
         this->m_pointsRadial.push_back(Math::dist(m_points[i], this->m_center));
+        this->m_Deltas.push_back(this->m_points[i] - this->m_center);
     }
 }
 
@@ -211,6 +214,8 @@ void PointCloudShape_Cvx::moveShape(const Point &p)
         shapePts = shapePts + p;
     }
     m_center = m_center + p;
+    m_initPos = m_center;
+    m_initPoints = m_points;
 }
 
 void PointCloudShape_Cvx::setShapePos(const Point &p)
@@ -226,17 +231,33 @@ void PointCloudShape_Cvx::setShapePos(const Point &p)
     m_center = m_center + delta;
 }
 
-void PointCloudShape_Cvx::moveAndRotShape()
+void PointCloudShape_Cvx::updateShape(const double &timeStep)
 {
+     float sinW = sin(m_rot);
+     float cosW = cos(m_rot);
+
+    //float sinW = sin(m_rot * m_time);
+    //float cosW = cos(m_rot * m_time);
+
+    float xDelta, yDelta;
     for (int i = 0; i < m_points.size(); i++)
     {
-        float xDelta = (m_points[i].x - m_center.x);
-        float yDelta = (m_points[i].y - m_center.y);
+        // Motion of a point cloud polygon rotating around center (ox, oy). Each point (px, py), where the velocity is (vx, vy) equals:
+        // px = (px - ox) • cos(wt) - (py - oy) • sin(wt) + ox + vx
+        // py = (px - ox) • sin(wt) + (py - oy) • cos(wt) + oy + vy
 
-        m_points[i].x = (cos(m_rot) * xDelta - sin(m_rot) * yDelta + m_center.x) + m_vel.x;
-        m_points[i].y = (sin(m_rot) * xDelta + cos(m_rot) * yDelta + m_center.y) + m_vel.y;
+        xDelta = m_points[i].x - m_center.x;
+        yDelta = m_points[i].y - m_center.y;
+
+        // xDelta = m_Deltas[i].x;
+        // yDelta = m_Deltas[i].y;
+
+        m_points[i].x = (xDelta * cosW - yDelta * sinW + m_center.x) + m_vel.x;
+        m_points[i].y = (xDelta * sinW + yDelta * cosW + m_center.y) + m_vel.y;
     }
     m_center = m_center + m_vel;
+   //m_center = m_initPos + m_vel * m_time;
+   m_time += timeStep;
 }
 
 void PointCloudShape_Cvx::rotShape(const float &rad, const Point &pivot)

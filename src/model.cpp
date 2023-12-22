@@ -41,6 +41,7 @@ void Model::run()
                 // Update all shapes including their positions, resolve their collisions, etc
                 updatePCSL();
                 time += timeStep;
+                // std::cout << "CURRENT TIME: " << time << "\n";
                 startTime = std::chrono::high_resolution_clock::now();
             }
         }
@@ -62,7 +63,7 @@ void Model::updatePCSL()
 
     for (int i = 0; i < size; i++)
     {
-        this->m_PCSCVX_shapeList[i]->moveAndRotShape();
+        this->m_PCSCVX_shapeList[i]->updateShape(timeStep);
     }
 
     for (int i = 0; i < size - 1; i++)
@@ -78,7 +79,7 @@ void Model::updatePCSL()
         WallCollisionInfo_PCSCVX wci = isContactWallLinear(*this->m_PCSCVX_shapeList[i]);
         if (wci.collided)
         {
-            resolveOverlapCollisionPCSCVX_Wall_Linear(wci);
+            resolveOverlapCollisionPCSCVX_Wall_LinearRot(wci);
         }
     }
 
@@ -260,6 +261,63 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
 // Resolves initial collision by separating the object from the wall. Takes into account both linear translation as well as rotation of the object
 void Model::resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCVX wallCollisionInfo)
 {
+
+    wallCollisionInfo.shape->m_initPos = wallCollisionInfo.shape->m_center;
+    ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
+
+    // Motion of a point cloud polygon rotating around center (ox, oy). Each point (px, py), where the velocity is (vx, vy) equals:
+    // px = (px - ox) • cos(w•t) - (py - oy) • sin(w•t) + ox + vx
+    // py = (px - ox) • sin(w•t) + (py - oy) • cos(w•t) + oy + vy
+    // Where the center is constantly moving (as the shape is constantly moving) as: o = i + v * t, where 'i' is the initial position of
+    // the shape.
+    // Therefore, t = (o - i)/v, or t = (ox - ix) / vx and t = (oy - iy) / vy
+    // Substitute within cos(w•t) and sin(w•t) and we get the 'timeCollided' equations below, which is how long ago
+
+    if (wallCollisionInfo.wallSide == WALLSIDE::TOP || wallCollisionInfo.wallSide == WALLSIDE::BOTTOM)
+    {
+        float yBoundary;
+        if (wallCollisionInfo.wallSide == WALLSIDE::TOP)
+            yBoundary = 0;
+        else
+            yBoundary = SCREEN_HEIGHT;
+
+        float minTime = std::numeric_limits<float>::max();
+        int collidedIndx = 0;
+
+        // trig term = w • (oy - iy) / vy
+        float trigTerm =
+            wallCollisionInfo.shape->m_rot * ((wallCollisionInfo.shape->m_center.y - wallCollisionInfo.shape->m_center.y) / (wallCollisionInfo.shape->m_vel.y));
+        // sin(w•t) and cos(w•t)
+        float sintt = sin(trigTerm);
+        float costt = cos(trigTerm);
+
+        for (int i = 0; i < wallCollisionInfo.shape->m_points.size(); i++)
+        {
+            // timeCollided = (py - xd•sin(w•t) - yd•cos(w•t) - iy) / 2vy
+            float numerator = (yBoundary - wallCollisionInfo.shape->m_Deltas[i].x * sintt - wallCollisionInfo.shape->m_Deltas[i].y * costt - wallCollisionInfo.shape->m_points[i].y);
+            float denominator = 2.0f * wallCollisionInfo.shape->m_vel.y;
+            float timeCollided = numerator / denominator;
+
+            if (timeCollided < minTime)
+            {
+                minTime = timeCollided;
+                collidedIndx = i;
+            }
+        }
+        Point resolutionDist = wallCollisionInfo.shape->m_vel * minTime;
+        float resolutionRot = wallCollisionInfo.shape->m_rot * minTime;
+
+        wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + resolutionDist;
+        for (int i = 0; i < wallCollisionInfo.shape->m_points.size(); i++)
+        {
+            wallCollisionInfo.shape->m_points[i] = wallCollisionInfo.shape->m_points[i] + resolutionDist;
+        }
+        wallCollisionInfo.shape->rotShape(-resolutionRot, wallCollisionInfo.shape->m_center);
+    }
+    else
+    {
+    }
+    ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
 }
 // Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
 std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isContactBroad()
