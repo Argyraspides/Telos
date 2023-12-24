@@ -286,7 +286,7 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
 
     Point impulse = n * j;
     wci.shape->m_vel = wci.shape->m_vel + (impulse / m_a);
-    wci.shape->m_rot = wci.shape->m_rot + ((Math::crossProd2D(r_ap, impulse)) / i_a);
+    wci.shape->m_rot = wci.shape->m_rot + ((-Math::crossProd3D(r_ap, impulse).z) / i_a);
 
     // translational kinetic energy (0.5mv^2)
     float ek = 0.5 * wci.shape->m_mass * wci.shape->m_vel.magnitude() * wci.shape->m_vel.magnitude(); 

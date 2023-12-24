@@ -192,9 +192,10 @@ namespace Math
     // See https://proofwiki.org/wiki/Square_of_Vector_Cross_Product 
     static float crossProdSquare(Point p1, Point p2)
     {
+        // square of a vector cross product axb equals:
+        // (a.a)(b.b) - (a.b)^2 where '.' is the dot product
         float a_2 = p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
         float b_2 = p2.x * p2.x + p2.y * p2.y + p2.z * p2.z;
-
         return a_2 * b_2 - pow(p1.x * p2.x + p1.y * p2.y + p1.z * p2.z, 2);
     }
 
