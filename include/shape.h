@@ -64,8 +64,10 @@ public:
     int m_bodyTypeID;        // TYPE OF BODY (E.G. RIGID BODY)
     long long m_shapeID;     // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
     float m_rot;             // ROTATION (RADIANS)
+    float m_rotInert;        // ROTATIONAL INERTIA
     Point m_center;          // CENTER OF SHAPE
     Point m_vel;             // VELOCITY
+    float m_mass;            // MASS
 };
 
 // ***************************************************************************************************************************************************************
@@ -113,6 +115,7 @@ class ShapeUtils
 public:
     static std::vector<Point> convertToPointCloud(const std::shared_ptr<Shape> &shape); // CONVERTS ANY SHAPE DATA STRUCTURE INTO A POINT CLOUD SHAPE
     static Point getCentroid(const std::vector<Point> &points);                         // CALCULATES CENTROID OF THE SHAPE
+    static float getRotInertia(const std::vector<Point> &points);                       // CALCULATES THE ROTATIONAL INTERTIA OF THE SHAPE
     static bool checkConvex(const std::vector<Point> &points);                          // CHECKS IF A SHAPE IS CONVEX
     static bool isInside(Point p, const std::shared_ptr<Shape> &shape);                 // CHECKS IF A POINT IS INSIDE OF A CONVEX POINT CLOUD
     static void printAllShapeInfo(PointCloudShape_Cvx s);                               // PRINTS SHAPE POINT COORDINATES, CENTER, VELOCITY, ROTATION, MASS

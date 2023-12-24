@@ -46,6 +46,22 @@ struct Point
             y * num,
             z * num};
     }
+
+    void normalize()
+    {
+        float len = sqrt(x * x + y * y + z * z);
+        if (len == 0)
+            return;
+        x /= len;
+        y /= len;
+        if (z > 0)
+            z /= len;
+    }
+
+    float magnitude()
+    {
+        return sqrt(x * x + y * y + z * z);
+    }
 };
 
 struct Line
@@ -130,17 +146,16 @@ namespace Math
     static Point origin = {0, 0, 0};
 
     static Line LEFT_WALL = {{0, SCREEN_HEIGHT, 0}, {0, 0, 0}};
-    static Point LEFT_WALL_VEC = {-1,0,0};
+    static Point LEFT_WALL_VEC = {-1, 0, 0};
 
     static Line RIGHT_WALL = {{SCREEN_WIDTH, SCREEN_HEIGHT, 0}, {SCREEN_WIDTH, 0, 0}};
-    static Point RIGHT_WALL_VEC = {1,0,0};
+    static Point RIGHT_WALL_VEC = {1, 0, 0};
 
     static Line TOP_WALL = {{0, 0, 0}, {SCREEN_WIDTH, 0, 0}};
-    static Point TOP_WALL_VEC = {0,-1,0};
+    static Point TOP_WALL_VEC = {0, -1, 0};
 
     static Line BOTTOM_WALL = {{0, SCREEN_HEIGHT, 0}, {SCREEN_WIDTH, SCREEN_HEIGHT, 0}};
-    static Point BOTTOM_WALL_VEC = {0,1,0};
-
+    static Point BOTTOM_WALL_VEC = {0, 1, 0};
 
     static Line WALLS[4] = {LEFT_WALL, TOP_WALL, RIGHT_WALL, BOTTOM_WALL};
     static Point WALL_VECS[4] = {LEFT_WALL_VEC, TOP_WALL_VEC, RIGHT_WALL_VEC, BOTTOM_WALL_VEC};

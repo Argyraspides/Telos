@@ -123,4 +123,5 @@ public:
 public:
     double time = 0.0;
     double timeStep = 1.0 / ENGINE_POLLING_RATE;
+    const float ORTHOGONAL_THRESHOLD = 0.0001;
 };

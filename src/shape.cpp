@@ -12,6 +12,7 @@ Shape::Shape(int shapeTypeID, int bodyTypeID)
     this->m_shapeID = (ID_CTR++);
     this->m_vel = {0, 0, 0};
     this->m_rot = 0;
+    this->m_mass = 1.0f;
 }
 
 // For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
@@ -120,9 +121,34 @@ void ShapeUtils::printLineInfo(Line l)
     else
         std::cout << "x = " << l.x << "\n";
 }
+
 void ShapeUtils::printPointInfo(Point p)
 {
     std::cout << "(" << p.x << "," << p.y << ")\n";
+}
+
+// Obtain the rotational inertia, "I", of an arbitrary polygon
+float ShapeUtils::getRotInertia(const std::vector<Point> &points)
+{
+    float jx = 0, jy = 0;
+
+    for (int i = 0; i < points.size(); i++)
+    {
+        int wrap = (i + 1) % points.size();
+
+        float prod1 = points[i].x * points[wrap].y - points[wrap].x * points[i].y;
+        float prod2 = pow(points[i].y, 2) + points[i].y * points[wrap].y + pow(points[wrap].y, 2);
+
+        jx += (prod1 * prod2);
+
+        prod2 = pow(points[i].x, 2) + points[i].x * points[wrap].x + pow(points[wrap].x, 2);
+    }
+
+    float frac = 1.0f / 12.0f;
+    jx *= frac;
+    jy *= frac;
+
+    return (jx + jy);
 }
 
 // ***************************************************************************************************************************************************************
@@ -131,6 +157,7 @@ void ShapeUtils::printPointInfo(Point p)
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     this->m_center = ShapeUtils::getCentroid(this->m_points);
+    this->m_rotInert = ShapeUtils::getRotInertia(this->m_points);
 }
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
@@ -139,7 +166,9 @@ PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Sha
     this->m_initPoints = points;
     this->m_center = ShapeUtils::getCentroid(this->m_points);
     this->m_initPos = m_center;
-    this->m_time = 1.0;
+    this->m_time = 0.0f;
+    this->m_rotInert = ShapeUtils::getRotInertia(this->m_points);
+
     for (int i = 0; i < points.size(); i++)
     {
         this->m_pointsRadial.push_back(Math::dist(m_points[i], this->m_center));
@@ -233,11 +262,11 @@ void PointCloudShape_Cvx::setShapePos(const Point &p)
 
 void PointCloudShape_Cvx::updateShape(const double &timeStep)
 {
-     float sinW = sin(m_rot);
-     float cosW = cos(m_rot);
+    float sinW = sin(m_rot);
+    float cosW = cos(m_rot);
 
-    //float sinW = sin(m_rot * m_time);
-    //float cosW = cos(m_rot * m_time);
+    // float sinW = sin(m_rot * m_time);
+    // float cosW = cos(m_rot * m_time);
 
     float xDelta, yDelta;
     for (int i = 0; i < m_points.size(); i++)
@@ -256,8 +285,8 @@ void PointCloudShape_Cvx::updateShape(const double &timeStep)
         m_points[i].y = (xDelta * sinW + yDelta * cosW + m_center.y) + m_vel.y;
     }
     m_center = m_center + m_vel;
-   //m_center = m_initPos + m_vel * m_time;
-   m_time += timeStep;
+    // m_center = m_initPos + m_vel * m_time;
+    m_time += timeStep;
 }
 
 void PointCloudShape_Cvx::rotShape(const float &rad, const Point &pivot)

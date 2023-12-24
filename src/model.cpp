@@ -79,7 +79,8 @@ void Model::updatePCSL()
         WallCollisionInfo_PCSCVX wci = isContactWallLinear(*this->m_PCSCVX_shapeList[i]);
         if (wci.collided)
         {
-            resolveOverlapCollisionPCSCVX_Wall_LinearRot(wci);
+            resolveOverlapCollisionPCSCVX_Wall_Linear(wci);
+            resolveCollisionPCSCVX_Wall(wci);
         }
     }
 
@@ -223,7 +224,6 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX collisionInfo)
 // into the wall and the wall itself along the objects velocity vector, and slides the shape back along this vector.
 void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX wallCollisionInfo)
 {
-    // TODO: TAKE INTO ACCOUNT ROTATION AS WELL, RATHER THAN SIMPLY VELOCITY FOR SEPARATION
     Line slidingLine;
 
     // Gradient is the rise/run of the shapes velocity vector
@@ -244,18 +244,58 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
     Point wallIntersection = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.wallSide]);
     // Change the position of the shape by the slideDelta
     Point slideDelta = wallIntersection - collisionPoint;
+    float padding = sqrt(pow(wallCollisionInfo.shape->m_vel.x, 2) + pow(wallCollisionInfo.shape->m_vel.y, 2));
+    float rotPadding = 2 * M_PI * wallCollisionInfo.shape->m_pointsRadial[wallCollisionInfo.pointIndex] * (wallCollisionInfo.shape->m_rot / 2 * M_PI);
+
+    // if (rotPadding > 1)
+    //     slideDelta = slideDelta * rotPadding;
+    // if (padding > 1)
+    //     slideDelta = slideDelta * padding;
+
+    slideDelta = slideDelta * 1.1;
 
     for (Point &p : wallCollisionInfo.shape->m_points)
     {
         p = p + slideDelta;
     }
     wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + slideDelta;
+}
 
-    // TEMPORARY!!
-    if (wallCollisionInfo.wallSide == WALLSIDE::RIGHT || wallCollisionInfo.wallSide == WALLSIDE::LEFT)
-        wallCollisionInfo.shape->m_vel.x *= -1;
+void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
+{
+
+    // p = mv
+    // L = mvr
+
+    if (wci.wallSide == WALLSIDE::TOP || wci.wallSide == WALLSIDE::BOTTOM)
+    {
+        wci.shape->m_vel.y *= -1;
+    }
     else
-        wallCollisionInfo.shape->m_vel.y *= -1;
+    {
+        wci.shape->m_vel.x *= -1;
+    }
+
+    float r = wci.shape->m_pointsRadial[wci.pointIndex];
+
+    Point armVec = wci.shape->m_points[wci.pointIndex] - wci.shape->m_center;
+    armVec.normalize();
+
+    float wt = wci.shape->m_rot * (float)wci.shape->m_time;
+    Point colVec = {cos(wt), sin(wt)};
+
+    float dotProd = Math::dotProd(armVec, colVec);
+
+    // translational kinetic energy for x and y components (0.5mv^2)
+    Point ek =
+        {
+            0.5 * wci.shape->m_mass * pow(wci.shape->m_vel.x, 2),
+            0.5 * wci.shape->m_mass * pow(wci.shape->m_vel.y, 2)};
+
+    // rotational kinetic energy (0.5Iw^2)
+    float ekRot = 0.5 * wci.shape->m_rotInert * pow(wci.shape->m_rot, 2);
+
+    float ekTotal = ek.magnitude() + ekRot;
 }
 
 // Resolves initial collision by separating the object from the wall. Takes into account both linear translation as well as rotation of the object
@@ -266,8 +306,8 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCV
     ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
 
     // Motion of a point cloud polygon rotating around center (ox, oy). Each point (px, py), where the velocity is (vx, vy) equals:
-    // px = (px - ox) • cos(w•t) - (py - oy) • sin(w•t) + ox + vx
-    // py = (px - ox) • sin(w•t) + (py - oy) • cos(w•t) + oy + vy
+    // px = (px - ox) • cos(w•t) - (py - oy) • sin(w•t) + ox + vx • t
+    // py = (px - ox) • sin(w•t) + (py - oy) • cos(w•t) + oy + vy • t
     // Where the center is constantly moving (as the shape is constantly moving) as: o = i + v * t, where 'i' is the initial position of
     // the shape.
     // Therefore, t = (o - i)/v, or t = (ox - ix) / vx and t = (oy - iy) / vy
@@ -294,8 +334,10 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCV
         for (int i = 0; i < wallCollisionInfo.shape->m_points.size(); i++)
         {
             // timeCollided = (py - xd•sin(w•t) - yd•cos(w•t) - iy) / 2vy
-            float numerator = (yBoundary - wallCollisionInfo.shape->m_Deltas[i].x * sintt - wallCollisionInfo.shape->m_Deltas[i].y * costt - wallCollisionInfo.shape->m_points[i].y);
-            float denominator = 2.0f * wallCollisionInfo.shape->m_vel.y;
+            float xd = wallCollisionInfo.shape->m_points[i].x - wallCollisionInfo.shape->m_center.x;
+            float xy = wallCollisionInfo.shape->m_points[i].y - wallCollisionInfo.shape->m_center.y;
+            float numerator = (yBoundary - xd * sintt - xy * costt - wallCollisionInfo.shape->m_points[i].y);
+            float denominator = wallCollisionInfo.shape->m_vel.y;
             float timeCollided = numerator / denominator;
 
             if (timeCollided < minTime)
@@ -312,12 +354,13 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCV
         {
             wallCollisionInfo.shape->m_points[i] = wallCollisionInfo.shape->m_points[i] + resolutionDist;
         }
-        wallCollisionInfo.shape->rotShape(-resolutionRot, wallCollisionInfo.shape->m_center);
+        wallCollisionInfo.shape->rotShape(resolutionRot, wallCollisionInfo.shape->m_center);
     }
     else
     {
     }
     ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
+    int x = 5;
 }
 // Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
 std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isContactBroad()
