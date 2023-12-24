@@ -244,16 +244,6 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
     Point wallIntersection = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.wallSide]);
     // Change the position of the shape by the slideDelta
     Point slideDelta = wallIntersection - collisionPoint;
-    float padding = sqrt(pow(wallCollisionInfo.shape->m_vel.x, 2) + pow(wallCollisionInfo.shape->m_vel.y, 2));
-    float rotPadding = 2 * M_PI * wallCollisionInfo.shape->m_pointsRadial[wallCollisionInfo.pointIndex] * (wallCollisionInfo.shape->m_rot / 2 * M_PI);
-
-    // if (rotPadding > 1)
-    //     slideDelta = slideDelta * rotPadding;
-    // if (padding > 1)
-    //     slideDelta = slideDelta * padding;
-
-    slideDelta = slideDelta * M_SQRT2;
-
     for (Point &p : wallCollisionInfo.shape->m_points)
     {
         p = p + slideDelta;
