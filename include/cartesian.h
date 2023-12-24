@@ -171,19 +171,30 @@ namespace Math
         return {};
     }
 
-    static float crossProd2D(const Point& p1, const Point& p2)
-	{
-		return p1.x * p2.y - p1.y * p2.x;
-	}
-
-    static Point crossProd3D(const Point& p1, const Point& p2)
+    static float crossProd2D(const Point &p1, const Point &p2)
     {
-        return
-		{
-			p2.y * p1.z - p2.z * p1.y,
-			p2.z * p1.x - p2.x * p1.z,
-			p2.x * p1.y - p2.y * p1.x
-		};
+        return p1.x * p2.y - p1.y * p2.x;
+    }
+
+    static Point crossProd3D(const Point &p1, const Point &p2)
+    {
+        return {
+            p2.y * p1.z - p2.z * p1.y,
+            p2.z * p1.x - p2.x * p1.z,
+            p2.x * p1.y - p2.y * p1.x};
+    }
+
+    static float dotProd(const Point &p1, const Point &p2)
+    {
+        return (p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z);
+    }
+
+    static float crossProdSquare(Point p1, Point p2)
+    {
+        float a_2 = p1.magnitude() * p1.magnitude();
+        float b_2 = p2.magnitude() * p2.magnitude();
+
+        return a_2 * b_2 - pow(p1.x * p2.x + p1.y * p2.y + p1.z * p2.z, 2);
     }
 
     static float dist(const Point &p1, const Point &p2)
@@ -191,11 +202,6 @@ namespace Math
         return sqrt(
             pow((p1.x - p2.x), 2) +
             pow((p1.y - p2.y), 2));
-    }
-
-    static float dotProd(const Point &p1, const Point &p2)
-    {
-        return (p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z);
     }
 
     static Point intersectionPt(const Line &l1, const Line &l2)
