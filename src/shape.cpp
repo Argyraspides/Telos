@@ -130,25 +130,57 @@ void ShapeUtils::printPointInfo(Point p)
 // Obtain the rotational inertia, "I", of an arbitrary polygon
 float ShapeUtils::getRotInertia(const std::vector<Point> &points)
 {
-    float jx = 0, jy = 0;
 
-    for (int i = 0; i < points.size(); i++)
-    {
-        int wrap = (i + 1) % points.size();
+    float j_x = 0, j_y = 0;
 
-        float prod1 = points[i].x * points[wrap].y - points[wrap].x * points[i].y;
-        float prod2 = pow(points[i].y, 2) + points[i].y * points[wrap].y + pow(points[wrap].y, 2);
+	for (int v = 0; v < points.size() - 1; v++)
+	{
+		int vpp = v + 1;
+		// (x_i * y_i+1 - x_i+1 * y_i)
+		float leftTerm =
+			points[v].x * points[vpp].y - points[vpp].x * points[v].y;
 
-        jx += (prod1 * prod2);
+		// (y_i^2 + y_i * y_i+1 + y_i+1^2)
+		float rightTerm =
+			pow(points[v].y, 2) + points[v].y * points[vpp].y + pow(points[vpp].y, 2);
 
-        prod2 = pow(points[i].x, 2) + points[i].x * points[wrap].x + pow(points[wrap].x, 2);
-    }
+		j_x += leftTerm + rightTerm;
+		j_y += leftTerm;
 
-    float frac = 1.0f / 12.0f;
-    jx *= frac;
-    jy *= frac;
+		// (x_i^2 + x_i * x_i+1 + x_i+1^2)
+		rightTerm = 
+			pow(points[v].x, 2) + points[v].x * points[vpp].x + pow(points[vpp].x, 2);
 
-    return (jx + jy);
+		j_y += rightTerm;
+
+	}
+
+	float oneTwelfth = 1.0f / 12.0f;
+	j_x *= oneTwelfth;
+	j_y *= oneTwelfth;
+
+	return (j_x + j_y);
+
+
+    // float jx = 0, jy = 0;
+
+    // for (int i = 0; i < points.size(); i++)
+    // {
+    //     int wrap = (i + 1) % points.size();
+
+    //     float prod1 = points[i].x * points[wrap].y - points[wrap].x * points[i].y;
+    //     float prod2 = pow(points[i].y, 2) + points[i].y * points[wrap].y + pow(points[wrap].y, 2);
+
+    //     jx += (prod1 * prod2);
+
+    //     prod2 = pow(points[i].x, 2) + points[i].x * points[wrap].x + pow(points[wrap].x, 2);
+    // }
+
+    // float frac = 1.0f / 12.0f;
+    // jx *= frac;
+    // jy *= frac;
+
+    // return (jx + jy);
 }
 
 // ***************************************************************************************************************************************************************

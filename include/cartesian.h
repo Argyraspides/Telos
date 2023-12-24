@@ -171,10 +171,19 @@ namespace Math
         return {};
     }
 
-    // TODO: IMPLEMENT
-    static Point crossProd(Point p)
+    static float crossProd2D(const Point& p1, const Point& p2)
+	{
+		return p1.x * p2.y - p1.y * p2.x;
+	}
+
+    static Point crossProd3D(const Point& p1, const Point& p2)
     {
-        return {};
+        return
+		{
+			p2.y * p1.z - p2.z * p1.y,
+			p2.z * p1.x - p2.x * p1.z,
+			p2.x * p1.y - p2.y * p1.x
+		};
     }
 
     static float dist(const Point &p1, const Point &p2)

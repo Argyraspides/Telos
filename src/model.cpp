@@ -252,7 +252,7 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
     // if (padding > 1)
     //     slideDelta = slideDelta * padding;
 
-    slideDelta = slideDelta * 1.1;
+    slideDelta = slideDelta * 1.33;
 
     for (Point &p : wallCollisionInfo.shape->m_points)
     {
@@ -264,38 +264,45 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
 void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
 {
 
-    // p = mv
-    // L = mvr
-
-    if (wci.wallSide == WALLSIDE::TOP || wci.wallSide == WALLSIDE::BOTTOM)
+    // perfect elasticity
+    float e = 1.0f;
+    Point v_ap1 = wci.shape->m_vel;
+    Point n;
+    switch(wci.wallSide)
     {
-        wci.shape->m_vel.y *= -1;
+        case WALLSIDE::LEFT:
+            n = {1.0f,0.0f};
+            break;
+        case WALLSIDE::RIGHT:
+            n = {-1.0f, 0.0f};
+            break;
+        case WALLSIDE::TOP:
+            n = {0.0f, 1.0f};
+            break;
+        case WALLSIDE::BOTTOM:
+            n = {0.0f, -1.0f};
+            break;
     }
-    else
-    {
-        wci.shape->m_vel.x *= -1;
-    }
+    Point r_ap = wci.shape->m_points[wci.pointIndex] - wci.shape->m_center;
+    float m_a = wci.shape->m_mass;
+    float i_a = wci.shape->m_rotInert;
 
-    float r = wci.shape->m_pointsRadial[wci.pointIndex];
+    float numerator = Math::dotProd(v_ap1 * -(1.0f + e), n);
+    Point cp = Math::crossProd3D(r_ap, n);
+    float denominator = (1.0f / m_a) + ((cp.magnitude()*cp.magnitude()) / i_a);
 
-    Point armVec = wci.shape->m_points[wci.pointIndex] - wci.shape->m_center;
-    armVec.normalize();
+    float j = numerator / denominator;
 
-    float wt = wci.shape->m_rot * (float)wci.shape->m_time;
-    Point colVec = {cos(wt), sin(wt)};
+    Point impulse = n * j;
+    wci.shape->m_vel = wci.shape->m_vel + (impulse / m_a);
+    wci.shape->m_rot = wci.shape->m_rot + ((Math::crossProd2D(r_ap, impulse)) / i_a);
 
-    float dotProd = Math::dotProd(armVec, colVec);
-
-    // translational kinetic energy for x and y components (0.5mv^2)
-    Point ek =
-        {
-            0.5 * wci.shape->m_mass * pow(wci.shape->m_vel.x, 2),
-            0.5 * wci.shape->m_mass * pow(wci.shape->m_vel.y, 2)};
+    // translational kinetic energy (0.5mv^2)
+    float ek = 0.5 * wci.shape->m_mass * wci.shape->m_vel.magnitude() * wci.shape->m_vel.magnitude(); 
 
     // rotational kinetic energy (0.5Iw^2)
     float ekRot = 0.5 * wci.shape->m_rotInert * pow(wci.shape->m_rot, 2);
 
-    float ekTotal = ek.magnitude() + ekRot;
 }
 
 // Resolves initial collision by separating the object from the wall. Takes into account both linear translation as well as rotation of the object
