@@ -256,27 +256,34 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
 
     // perfect elasticity
     float e = 1.0f;
-    Point v_ap1 = wci.shape->m_vel;
+    // X and Y components of the velocity of the collision point contributed to by rotation
+    Point v_ap_rot = Math::instantVelRot2D(wci.shape->m_points[wci.pointIndex], wci.shape->m_center, wci.shape->m_rot);
+    // Velocity of the collision point (shapes velocity + the points instantaneous rotational velocity)
+    Point v_ap1 = wci.shape->m_vel + v_ap_rot;
+    // Normal to the collision surface (collision surface is always the wall)
     Point n;
-    switch(wci.wallSide)
+    switch (wci.wallSide)
     {
-        case WALLSIDE::LEFT:
-            n = {1.0f,0.0f};
-            break;
-        case WALLSIDE::RIGHT:
-            n = {-1.0f, 0.0f};
-            break;
-        case WALLSIDE::TOP:
-            n = {0.0f, 1.0f};
-            break;
-        case WALLSIDE::BOTTOM:
-            n = {0.0f, -1.0f};
-            break;
+    case WALLSIDE::LEFT:
+        n = {1.0f, 0.0f};
+        break;
+    case WALLSIDE::RIGHT:
+        n = {-1.0f, 0.0f};
+        break;
+    case WALLSIDE::TOP:
+        n = {0.0f, 1.0f};
+        break;
+    case WALLSIDE::BOTTOM:
+        n = {0.0f, -1.0f};
+        break;
     }
+
+    // Vector pointing from the center of the shape to the collision point
     Point r_ap = wci.shape->m_points[wci.pointIndex] - wci.shape->m_center;
+    // Mass, rotational inertia
     float m_a = wci.shape->m_mass;
     float i_a = wci.shape->m_rotInert;
-
+    // Elasticity (e) part of the eq
     float elas = (1.0f + e) * -1;
     float numerator = Math::dotProd(v_ap1 * elas, n);
     float cp_2 = Math::crossProdSquare(r_ap, n);
@@ -286,15 +293,8 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
 
     Point impulse = n * j;
     wci.shape->m_vel = wci.shape->m_vel + (impulse / m_a);
-    wci.shape->m_rot = wci.shape->m_rot + ((-Math::crossProd3D(r_ap, impulse).z) / i_a);
+    wci.shape->m_rot = wci.shape->m_rot - ((Math::crossProd3D(r_ap, impulse).z) / i_a);
 
-    // translational kinetic energy (0.5mv^2)
-    float ek = 0.5 * wci.shape->m_mass * wci.shape->m_vel.magnitude() * wci.shape->m_vel.magnitude(); 
-
-    // rotational kinetic energy (0.5Iw^2)
-    float ekRot = 0.5 * wci.shape->m_rotInert * pow(wci.shape->m_rot, 2);
-
-    std::cout << ek + ekRot << "\n";
 }
 
 // Resolves initial collision by separating the object from the wall. Takes into account both linear translation as well as rotation of the object

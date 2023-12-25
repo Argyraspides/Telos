@@ -171,11 +171,13 @@ namespace Math
         return {};
     }
 
+    // A cross product of two, 2D vectors is also known as a 'wedge product'
     static float crossProd2D(const Point &p1, const Point &p2)
     {
         return p1.x * p2.y - p1.y * p2.x;
     }
 
+    static Point crossProd3D(const Point &p1, const Point &p2);
     static Point crossProd3D(const Point &p1, const Point &p2)
     {
         return {
@@ -184,26 +186,37 @@ namespace Math
             p2.x * p1.y - p2.y * p1.x};
     }
 
+    static float dotProd(const Point &p1, const Point &p2);
     static float dotProd(const Point &p1, const Point &p2)
     {
         return (p1.x * p2.x) + (p1.y * p2.y) + (p1.z * p2.z);
     }
 
-    // See https://proofwiki.org/wiki/Square_of_Vector_Cross_Product 
+    // See https://proofwiki.org/wiki/Square_of_Vector_Cross_Product
     static float crossProdSquare(Point p1, Point p2)
     {
         // square of a vector cross product axb equals:
         // (a.a)(b.b) - (a.b)^2 where '.' is the dot product
-        float a_2 = p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
-        float b_2 = p2.x * p2.x + p2.y * p2.y + p2.z * p2.z;
-        return a_2 * b_2 - pow(p1.x * p2.x + p1.y * p2.y + p1.z * p2.z, 2);
+        float a_2 = dotProd(p1, p1);
+        float b_2 = dotProd(p2, p2);
+        float ab = dotProd(p1, p2);
+        return a_2 * b_2 - pow(ab, 2);
     }
 
+    static float dist(const Point &p1, const Point &p2);
     static float dist(const Point &p1, const Point &p2)
     {
         return sqrt(
             pow((p1.x - p2.x), 2) +
             pow((p1.y - p2.y), 2));
+    }
+
+    // Calculates the instantaneous velocity of a point "p" rotating about an axis "c"
+    // Does not take into account any translational motion of the current point
+    static Point instantVelRot2D(const Point &p, const Point &c, float rot)
+    {
+        Point r_cp = p - c;
+        return crossProd3D(r_cp, {0, 0, rot});
     }
 
     static Point intersectionPt(const Line &l1, const Line &l2)
