@@ -143,8 +143,10 @@ struct Line
 
 namespace Math
 {
+    // Origin of the 3D cartesian space (x, y, and z = 0)
     static Point origin = {0, 0, 0};
 
+    // Position of the left, right, top and bottom walls, as well as their directional vectors
     static Line LEFT_WALL = {{0, SCREEN_HEIGHT, 0}, {0, 0, 0}};
     static Point LEFT_WALL_VEC = {-1, 0, 0};
 
@@ -160,6 +162,7 @@ namespace Math
     static Line WALLS[4] = {LEFT_WALL, TOP_WALL, RIGHT_WALL, BOTTOM_WALL};
     static Point WALL_VECS[4] = {LEFT_WALL_VEC, TOP_WALL_VEC, RIGHT_WALL_VEC, BOTTOM_WALL_VEC};
 
+    // Calculates the normal of a vector in 2D space (considers only the x and y axis)
     static Point getNormal2D(Point p)
     {
         return {-p.y, p.x, p.z};
@@ -171,12 +174,14 @@ namespace Math
         return {};
     }
 
-    // A cross product of two, 2D vectors is also known as a 'wedge product'
+    // Calcluates the cross product of two, 2D vectors is also known as a 'wedge product'
     static double crossProd2D(const Point &p1, const Point &p2)
     {
         return p1.x * p2.y - p1.y * p2.x;
     }
 
+    // Calculates the cross product of two vectors (x1, y1, z1)
+    // and (x2, y2, z2).
     static Point crossProd3D(const Point &p1, const Point &p2);
     static Point crossProd3D(const Point &p1, const Point &p2)
     {
@@ -186,6 +191,7 @@ namespace Math
             p2.x * p1.y - p2.y * p1.x};
     }
 
+    // Calculates the dot product of two vectors
     static double dotProd(const Point &p1, const Point &p2);
     static double dotProd(const Point &p1, const Point &p2)
     {
@@ -193,6 +199,7 @@ namespace Math
     }
 
     // See https://proofwiki.org/wiki/Square_of_Vector_Cross_Product
+    // Calculates the square of a cross product
     static double crossProdSquare(Point p1, Point p2)
     {
         // square of a vector cross product axb equals:
@@ -203,12 +210,14 @@ namespace Math
         return a_2 * b_2 - pow(ab, 2);
     }
 
+    // Calculates the distance between two points
     static double dist(const Point &p1, const Point &p2);
     static double dist(const Point &p1, const Point &p2)
     {
         return sqrt(
             pow((p1.x - p2.x), 2) +
-            pow((p1.y - p2.y), 2));
+            pow((p1.y - p2.y), 2) +
+            pow((p1.z - p2.z), 2));
     }
 
     // Calculates the instantaneous velocity of a point "p" rotating about an axis "c"
@@ -216,10 +225,11 @@ namespace Math
     static Point instantVelRot2D(const Point &p, const Point &c, double rot)
     {
         Point r_cp = p - c;
-        // The rotational axis in 2 dimensions is always perpendicular to the x-y plane 
+        // The rotational axis in 2 dimensions is always perpendicular to the x-y plane
         return crossProd3D(r_cp, {0, 0, rot});
     }
 
+    // Calculates the point of intersection of two lines (each y=mx + c, or x = c for a vertical line)
     static Point intersectionPt(const Line &l1, const Line &l2)
     {
         // y1 = m1*x + c1
@@ -230,8 +240,6 @@ namespace Math
 
         // x_intersection = (c2 - c1) / (m1 - m2)
         // y_intersection = m1 * x_intersection + c1 or m2 * x_intersection + c2
-
-        // TODO: CHECK IF LINE IS VERTICAL
 
         if (l1.isVertical)
         {

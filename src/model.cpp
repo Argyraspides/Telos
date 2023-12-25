@@ -124,7 +124,7 @@ bool Model::isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2
             Point projectionAxis = Math::getNormal2D(grad);
 
             double min1 = std::numeric_limits<double>::infinity(),
-                  max1 = -min1;
+                   max1 = -min1;
 
             // Obtain minimum and maximum points of projection for each shape
 
@@ -136,7 +136,7 @@ bool Model::isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2
             }
 
             double min2 = std::numeric_limits<double>::infinity(),
-                  max2 = -min2;
+                   max2 = -min2;
 
             for (int p = 0; p < _s2->m_points.size(); p++)
             {
@@ -249,7 +249,6 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
         p = p + slideDelta;
     }
     wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + slideDelta;
-
 }
 
 void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
@@ -292,7 +291,7 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
     // (1/m_a) + (r_ap x n)^2 / I_a
     double denominator = (1.0f / m_a) + (cp_2 / i_a);
 
-    // Impulse 'j' generated at the collision point 
+    // Impulse 'j' generated at the collision point
     double j = numerator / denominator;
     // Impulse acts in the opposite direction to the collision surface (wall)
     Point impulse = n * j;
@@ -302,10 +301,11 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
     wci.shape->m_rot = wci.shape->m_rot - ((Math::crossProd3D(r_ap, impulse).z) / i_a);
     double endE = wci.shape->getE();
 
-    if(fabs(endE - initE) > ENERGY_THRESHOLD)
+    if (fabs(endE - initE) > ENERGY_THRESHOLD)
     {
         std::cerr << "WARNING! ENERGY NOT CONSERVED! NET CHANGE (FINAL - INITIAL): " << (endE - initE) << "\n";
     }
+    std::cout << (endE - initE) << "\n";
 }
 
 // Resolves initial collision by separating the object from the wall. Takes into account both linear translation as well as rotation of the object
