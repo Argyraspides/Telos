@@ -16,7 +16,7 @@ struct CollisionInfo_PCSCVX
         Point collisionPoint,
         Point penetrationVector,
         Line penetrationLine,
-        float penetrationDepth,
+        double penetrationDepth,
         std::shared_ptr<PointCloudShape_Cvx> s1,
         std::shared_ptr<PointCloudShape_Cvx> s2)
     {
@@ -35,7 +35,7 @@ struct CollisionInfo_PCSCVX
     Point collisionPoint;
     Point penetrationVector; // Penetration vector is always given in the direction of the penetrating shape to the penetrated one
     Line penetrationLine;
-    float penetrationDepth;
+    double penetrationDepth;
 };
 
 enum WALLSIDE
@@ -123,5 +123,6 @@ public:
 public:
     double time = 0.0;
     double timeStep = 1.0 / ENGINE_POLLING_RATE;
-    const float ORTHOGONAL_THRESHOLD = 0.0001;
+    const double ENERGY_THRESHOLD = 0.00001; // CONSERVATION OF ENERGY CAN BE VIOLATED BY THIS MUCH AS PER THE NATURE OF doubleING POINT CALCULATIONS
+    const double SEPARATION_SAFETY_FACTOR = M_SQRT2;
 };

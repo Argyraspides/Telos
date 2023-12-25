@@ -50,7 +50,7 @@ public:
     {
     }
 
-    virtual void rotShape(const float &rad, const Point &pivot)
+    virtual void rotShape(const double &rad, const Point &pivot)
     {
     }
 
@@ -63,11 +63,11 @@ public:
     int m_shapeTypeID;       // TYPE OF SHAPE (E.G. POINT CLOUD)
     int m_bodyTypeID;        // TYPE OF BODY (E.G. RIGID BODY)
     long long m_shapeID;     // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
-    float m_rot;             // ROTATION (RADIANS)
-    float m_rotInert;        // ROTATIONAL INERTIA
+    double m_rot;             // ROTATION (RADIANS)
+    double m_rotInert;        // ROTATIONAL INERTIA
     Point m_center;          // CENTER OF SHAPE
     Point m_vel;             // VELOCITY
-    float m_mass;            // MASS
+    double m_mass;            // MASS
 };
 
 // ***************************************************************************************************************************************************************
@@ -83,25 +83,28 @@ public:
 
 public:
     std::vector<Point> getPoints() const; // RETURNS POINT CLOUD
-    void setPoint(const Point &p, const int &pointNum);
+    void setPoint(const Point &p, const int &pointNum); 
     int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX; } // RETURNS THE TYPE OF SHAPE
+    double getEkrot(); // GETS THE ROTATIONAL KINETIC ENERGY OF THE SHAPE
+    double getEk(); // GETS THE KINETIC ENERGY OF THE SHAPE
+    double getE(); // GETS THE TOTAL KINETIC ENERGY OF THE SHAPE
 
     void moveShape(const Point &p) override;
     void updateShape(const double &timeStep) override;
     void setShapePos(const Point &p) override;
-    void rotShape(const float &rad, const Point &pivot) override;
+    void rotShape(const double &rad, const Point &pivot) override;
 
 public:
-    static std::vector<Point> generateCircle(float radius);                   // CONSTRUCTS A CIRCLE USING RADIUS
-    static std::vector<Point> generateRectangle(float w, float h);            // CONSTRUCTS A RECTANGLE USING WIDTH AND HEIGHT
+    static std::vector<Point> generateCircle(double radius);                   // CONSTRUCTS A CIRCLE USING RADIUS
+    static std::vector<Point> generateRectangle(double w, double h);            // CONSTRUCTS A RECTANGLE USING WIDTH AND HEIGHT
     static std::vector<Point> generateTriangle(Point p1, Point p2, Point p3); // CONSTRUCTS A TRIANGLE USING THREE POINTS
-    static std::vector<Point> generateTriangle(float t1, float t2, float t3); // CONSTRUCTS A TRIANGLE USING THREE ANGLES FROM THE X AXIS OF A UNIT CIRCLE
+    static std::vector<Point> generateTriangle(double t1, double t2, double t3); // CONSTRUCTS A TRIANGLE USING THREE ANGLES FROM THE X AXIS OF A UNIT CIRCLE
     static const int CIRCLE_POINT_COUNT = 15;
 
 public:
     std::vector<Point> m_points; // POINT CLOUD THAT REPRESENTS THE SHAPE
     std::vector<Point> m_initPoints;
-    std::vector<float> m_pointsRadial; // REPRESENTS THE DISTANCE OF EACH POINT FROM THE SHAPES CENTER
+    std::vector<double> m_pointsRadial; // REPRESENTS THE DISTANCE OF EACH POINT FROM THE SHAPES CENTER
     std::vector<Point> m_Deltas;       // GIVES THE X AND Y DISTANCE OF EACH POINT FROM THE SHAPES CENTER
     Point m_initPos;                   // REPRESENTS THE INITIAL POSITION OF THE SHAPE'S CENTER
     double m_time;
@@ -115,7 +118,7 @@ class ShapeUtils
 public:
     static std::vector<Point> convertToPointCloud(const std::shared_ptr<Shape> &shape); // CONVERTS ANY SHAPE DATA STRUCTURE INTO A POINT CLOUD SHAPE
     static Point getCentroid(const std::vector<Point> &points);                         // CALCULATES CENTROID OF THE SHAPE
-    static float getRotInertia(const std::vector<Point> &points);                       // CALCULATES THE ROTATIONAL INTERTIA OF THE SHAPE
+    static double getRotInertia(const std::vector<Point> &points);                       // CALCULATES THE ROTATIONAL INTERTIA OF THE SHAPE
     static bool checkConvex(const std::vector<Point> &points);                          // CHECKS IF A SHAPE IS CONVEX
     static bool isInside(Point p, const std::shared_ptr<Shape> &shape);                 // CHECKS IF A POINT IS INSIDE OF A CONVEX POINT CLOUD
     static void printAllShapeInfo(PointCloudShape_Cvx s);                               // PRINTS SHAPE POINT COORDINATES, CENTER, VELOCITY, ROTATION, MASS

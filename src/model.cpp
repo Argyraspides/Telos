@@ -123,24 +123,24 @@ bool Model::isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2
             // Projection axis is the normal of the gradient vector
             Point projectionAxis = Math::getNormal2D(grad);
 
-            float min1 = std::numeric_limits<float>::infinity(),
+            double min1 = std::numeric_limits<double>::infinity(),
                   max1 = -min1;
 
             // Obtain minimum and maximum points of projection for each shape
 
             for (int p = 0; p < _s1->m_points.size(); p++)
             {
-                float dotProd = Math::dotProd(_s1->m_points[p], projectionAxis);
+                double dotProd = Math::dotProd(_s1->m_points[p], projectionAxis);
                 min1 = std::min(min1, dotProd);
                 max1 = std::max(max1, dotProd);
             }
 
-            float min2 = std::numeric_limits<float>::infinity(),
+            double min2 = std::numeric_limits<double>::infinity(),
                   max2 = -min2;
 
             for (int p = 0; p < _s2->m_points.size(); p++)
             {
-                float dotProd = Math::dotProd(_s2->m_points[p], projectionAxis);
+                double dotProd = Math::dotProd(_s2->m_points[p], projectionAxis);
                 min2 = std::min(min2, dotProd);
                 max2 = std::max(max2, dotProd);
             }
@@ -161,10 +161,10 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
     PointCloudShape_Cvx *_s1 = &s1;
     PointCloudShape_Cvx *_s2 = &s2;
 
-    float edgeLineBoundsX[2] = {0, 0};
-    float edgeLineBoundsY[2] = {0, 0};
-    float centerLineBoundsX[2] = {0, 0};
-    float centerLineBoundsY[2] = {0, 0};
+    double edgeLineBoundsX[2] = {0, 0};
+    double edgeLineBoundsY[2] = {0, 0};
+    double centerLineBoundsX[2] = {0, 0};
+    double centerLineBoundsY[2] = {0, 0};
 
     for (int s = 0; s < 2; s++)
     {
@@ -205,7 +205,7 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
 
                 if (inCenterBoundsX && inCenterBoundsY && inEdgeBoundsX && inEdgeBoundsY)
                 {
-                    float penetrationDepth = Math::dist(intersection, _s1->m_points[i]);
+                    double penetrationDepth = Math::dist(intersection, _s1->m_points[i]);
                     std::shared_ptr<PointCloudShape_Cvx> ptr1 = std::make_shared<PointCloudShape_Cvx>(s1);
                     std::shared_ptr<PointCloudShape_Cvx> ptr2 = std::make_shared<PointCloudShape_Cvx>(s2);
                     return CollisionInfo_PCSCVX(true, intersection, {intersection - _s1->m_center}, centerLine, penetrationDepth, ptr1, ptr2);
@@ -227,7 +227,7 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
     Line slidingLine;
 
     // Gradient is the rise/run of the shapes velocity vector
-    float gradient = wallCollisionInfo.shape->m_vel.y / wallCollisionInfo.shape->m_vel.x;
+    double gradient = wallCollisionInfo.shape->m_vel.y / wallCollisionInfo.shape->m_vel.x;
     // Collision point is just the point of the shape that came into contact with the wall
     Point collisionPoint = wallCollisionInfo.shape->m_points[wallCollisionInfo.pointIndex];
     // The equation of the line we want to slide the shape back along is the line with our calculated gradient, which passes through the collision point
@@ -243,19 +243,20 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
     // Obtain where this line intersects with the wall
     Point wallIntersection = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.wallSide]);
     // Change the position of the shape by the slideDelta
-    Point slideDelta = wallIntersection - collisionPoint;
+    Point slideDelta = (wallIntersection - collisionPoint) * SEPARATION_SAFETY_FACTOR;
     for (Point &p : wallCollisionInfo.shape->m_points)
     {
         p = p + slideDelta;
     }
     wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + slideDelta;
+
 }
 
 void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
 {
 
     // perfect elasticity
-    float e = 1.0f;
+    double e = 1.0f;
     // X and Y components of the velocity of the collision point contributed to by rotation
     Point v_ap_rot = Math::instantVelRot2D(wci.shape->m_points[wci.pointIndex], wci.shape->m_center, wci.shape->m_rot);
     // Velocity of the collision point (shapes velocity + the points instantaneous rotational velocity)
@@ -281,20 +282,30 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
     // Vector pointing from the center of the shape to the collision point
     Point r_ap = wci.shape->m_points[wci.pointIndex] - wci.shape->m_center;
     // Mass, rotational inertia
-    float m_a = wci.shape->m_mass;
-    float i_a = wci.shape->m_rotInert;
+    double m_a = wci.shape->m_mass;
+    double i_a = wci.shape->m_rotInert;
     // Elasticity (e) part of the eq
-    float elas = (1.0f + e) * -1;
-    float numerator = Math::dotProd(v_ap1 * elas, n);
-    float cp_2 = Math::crossProdSquare(r_ap, n);
-    float denominator = (1.0f / m_a) + (cp_2 / i_a);
+    double elas = (1.0f + e) * -1;
+    // -(1+e)*v_ap1 . n
+    double numerator = Math::dotProd(v_ap1 * elas, n);
+    double cp_2 = Math::crossProdSquare(r_ap, n);
+    // (1/m_a) + (r_ap x n)^2 / I_a
+    double denominator = (1.0f / m_a) + (cp_2 / i_a);
 
-    float j = numerator / denominator;
-
+    // Impulse 'j' generated at the collision point 
+    double j = numerator / denominator;
+    // Impulse acts in the opposite direction to the collision surface (wall)
     Point impulse = n * j;
+
+    double initE = wci.shape->getE();
     wci.shape->m_vel = wci.shape->m_vel + (impulse / m_a);
     wci.shape->m_rot = wci.shape->m_rot - ((Math::crossProd3D(r_ap, impulse).z) / i_a);
+    double endE = wci.shape->getE();
 
+    if(fabs(endE - initE) > ENERGY_THRESHOLD)
+    {
+        std::cerr << "WARNING! ENERGY NOT CONSERVED! NET CHANGE (FINAL - INITIAL): " << (endE - initE) << "\n";
+    }
 }
 
 // Resolves initial collision by separating the object from the wall. Takes into account both linear translation as well as rotation of the object
@@ -314,30 +325,30 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCV
 
     if (wallCollisionInfo.wallSide == WALLSIDE::TOP || wallCollisionInfo.wallSide == WALLSIDE::BOTTOM)
     {
-        float yBoundary;
+        double yBoundary;
         if (wallCollisionInfo.wallSide == WALLSIDE::TOP)
             yBoundary = 0;
         else
             yBoundary = SCREEN_HEIGHT;
 
-        float minTime = std::numeric_limits<float>::max();
+        double minTime = std::numeric_limits<double>::max();
         int collidedIndx = 0;
 
         // trig term = w • (oy - iy) / vy
-        float trigTerm =
+        double trigTerm =
             wallCollisionInfo.shape->m_rot * ((wallCollisionInfo.shape->m_center.y - wallCollisionInfo.shape->m_center.y) / (wallCollisionInfo.shape->m_vel.y));
         // sin(w•t) and cos(w•t)
-        float sintt = sin(trigTerm);
-        float costt = cos(trigTerm);
+        double sintt = sin(trigTerm);
+        double costt = cos(trigTerm);
 
         for (int i = 0; i < wallCollisionInfo.shape->m_points.size(); i++)
         {
             // timeCollided = (py - xd•sin(w•t) - yd•cos(w•t) - iy) / 2vy
-            float xd = wallCollisionInfo.shape->m_points[i].x - wallCollisionInfo.shape->m_center.x;
-            float xy = wallCollisionInfo.shape->m_points[i].y - wallCollisionInfo.shape->m_center.y;
-            float numerator = (yBoundary - xd * sintt - xy * costt - wallCollisionInfo.shape->m_points[i].y);
-            float denominator = wallCollisionInfo.shape->m_vel.y;
-            float timeCollided = numerator / denominator;
+            double xd = wallCollisionInfo.shape->m_points[i].x - wallCollisionInfo.shape->m_center.x;
+            double xy = wallCollisionInfo.shape->m_points[i].y - wallCollisionInfo.shape->m_center.y;
+            double numerator = (yBoundary - xd * sintt - xy * costt - wallCollisionInfo.shape->m_points[i].y);
+            double denominator = wallCollisionInfo.shape->m_vel.y;
+            double timeCollided = numerator / denominator;
 
             if (timeCollided < minTime)
             {
@@ -346,7 +357,7 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCV
             }
         }
         Point resolutionDist = wallCollisionInfo.shape->m_vel * minTime;
-        float resolutionRot = wallCollisionInfo.shape->m_rot * minTime;
+        double resolutionRot = wallCollisionInfo.shape->m_rot * minTime;
 
         wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + resolutionDist;
         for (int i = 0; i < wallCollisionInfo.shape->m_points.size(); i++)
@@ -367,7 +378,7 @@ std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isCo
     // Aspect ratios are universally in favor of a larger width. It is for this reason we will use the X-axis
     // to sweep as it provides a greater liklihood of eliminating shapes that won't collide.
 
-    std::vector<std::pair<float, PointCloudShape_Cvx &>> intervals;
+    std::vector<std::pair<double, PointCloudShape_Cvx &>> intervals;
 
     return {};
 }
@@ -414,8 +425,8 @@ beginDot:
         wallSide = WALLSIDE::RIGHT;
     }
 
-    float closestPtDotProd = -std::numeric_limits<float>::max();
-    float currentDotProd = 0;
+    double closestPtDotProd = -std::numeric_limits<double>::max();
+    double currentDotProd = 0;
     int closestPtIndx = 0;
 
     for (int i = 0; i < s1.m_points.size(); i++)

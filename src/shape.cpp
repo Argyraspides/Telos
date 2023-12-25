@@ -76,13 +76,13 @@ bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
 Point ShapeUtils::getCentroid(const std::vector<Point> &points)
 {
     // Assuming an even mass distribution the centroid is simply the average location of all the points
-    float sumX = 0.0, sumY = 0.0;
+    double sumX = 0.0, sumY = 0.0;
     for (const Point &p : points)
     {
         sumX += p.x;
         sumY += p.y;
     }
-    return Point(sumX / (float)points.size(), sumY / (float)points.size());
+    return Point(sumX / (double)points.size(), sumY / (double)points.size());
 }
 
 // TODO: IMPLEMENT
@@ -106,8 +106,8 @@ void ShapeUtils::printAllShapeInfo(PointCloudShape_Cvx s)
     }
     std::cout << ")\n";
 
-    std::cout //<< "CENTER: "
-        << "(" << s.m_center.x << "," << s.m_center.y << ")\n";
+    // std::cout //<< "CENTER: "
+    //     << "(" << s.m_center.x << "," << s.m_center.y << ")\n";
 
     // std::cout << "VELOCITY: (" << s.m_vel.x << "," << s.m_vel.y << ")\n";
 
@@ -128,20 +128,20 @@ void ShapeUtils::printPointInfo(Point p)
 }
 
 // Obtain the rotational inertia, "I", of an arbitrary polygon
-float ShapeUtils::getRotInertia(const std::vector<Point> &points)
+double ShapeUtils::getRotInertia(const std::vector<Point> &points)
 {
 
-    float j_x = 0, j_y = 0;
+    double j_x = 0, j_y = 0;
 
 	for (int v = 0; v < points.size() - 1; v++)
 	{
 		int vpp = v + 1;
 		// (x_i * y_i+1 - x_i+1 * y_i)
-		float leftTerm =
+		double leftTerm =
 			points[v].x * points[vpp].y - points[vpp].x * points[v].y;
 
 		// (y_i^2 + y_i * y_i+1 + y_i+1^2)
-		float rightTerm =
+		double rightTerm =
 			pow(points[v].y, 2) + points[v].y * points[vpp].y + pow(points[vpp].y, 2);
 
 		j_x += leftTerm + rightTerm;
@@ -155,28 +155,28 @@ float ShapeUtils::getRotInertia(const std::vector<Point> &points)
 
 	}
 
-	float oneTwelfth = 1.0f / 12.0f;
+	double oneTwelfth = 1.0f / 12.0f;
 	j_x *= oneTwelfth;
 	j_y *= oneTwelfth;
 
 	return (j_x + j_y);
 
 
-    // float jx = 0, jy = 0;
+    // double jx = 0, jy = 0;
 
     // for (int i = 0; i < points.size(); i++)
     // {
     //     int wrap = (i + 1) % points.size();
 
-    //     float prod1 = points[i].x * points[wrap].y - points[wrap].x * points[i].y;
-    //     float prod2 = pow(points[i].y, 2) + points[i].y * points[wrap].y + pow(points[wrap].y, 2);
+    //     double prod1 = points[i].x * points[wrap].y - points[wrap].x * points[i].y;
+    //     double prod2 = pow(points[i].y, 2) + points[i].y * points[wrap].y + pow(points[wrap].y, 2);
 
     //     jx += (prod1 * prod2);
 
     //     prod2 = pow(points[i].x, 2) + points[i].x * points[wrap].x + pow(points[wrap].x, 2);
     // }
 
-    // float frac = 1.0f / 12.0f;
+    // double frac = 1.0f / 12.0f;
     // jx *= frac;
     // jy *= frac;
 
@@ -216,21 +216,39 @@ std::vector<Point> PointCloudShape_Cvx::getPoints() const
     return this->m_points;
 }
 
+double PointCloudShape_Cvx::getEkrot()
+{
+    // 0.5 * I * w^2
+    return 0.5 * m_rotInert * m_rot * m_rot;
+}
+
+double PointCloudShape_Cvx::getEk()
+{
+    // 0.5 * m * v^2
+    double v = m_vel.magnitude();
+    return 0.5 * m_mass * v * v;
+}
+
+double PointCloudShape_Cvx::getE()
+{
+    return getEk() + getEkrot();
+}
+
 // ***************************************************************************************************************************************************************
 // SHAPE GENERATOR FUNCTIONS
 
-std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
+std::vector<Point> PointCloudShape_Cvx::generateCircle(double radius)
 {
 
     // Circle will be approximated with CIRCLE_POINT_COUNT number of points on each half
-    float increment = 2 * radius / (float)CIRCLE_POINT_COUNT;
+    double increment = 2 * radius / (double)CIRCLE_POINT_COUNT;
 
     std::vector<Point> circle;
     circle.reserve(CIRCLE_POINT_COUNT * 2);
 
     Point pt;
     // y = +sqrt(r^2 - x^2)
-    for (float x = -radius; x <= radius; x += increment)
+    for (double x = -radius; x <= radius; x += increment)
     {
         pt.x = x;
         pt.y = sqrt(radius * radius - x * x);
@@ -238,7 +256,7 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
     }
 
     // y = -sqrt(r^2 - x^2)
-    for (float x = radius; x >= -radius; x -= increment)
+    for (double x = radius; x >= -radius; x -= increment)
     {
         pt.x = x;
         pt.y = -sqrt(radius * radius - x * x);
@@ -248,7 +266,7 @@ std::vector<Point> PointCloudShape_Cvx::generateCircle(float radius)
     return circle;
 }
 
-std::vector<Point> PointCloudShape_Cvx::generateRectangle(float w, float h)
+std::vector<Point> PointCloudShape_Cvx::generateRectangle(double w, double h)
 {
     return {
         {0, 0},
@@ -294,13 +312,13 @@ void PointCloudShape_Cvx::setShapePos(const Point &p)
 
 void PointCloudShape_Cvx::updateShape(const double &timeStep)
 {
-    float sinW = sin(m_rot);
-    float cosW = cos(m_rot);
+    double sinW = sin(m_rot);
+    double cosW = cos(m_rot);
 
-    // float sinW = sin(m_rot * m_time);
-    // float cosW = cos(m_rot * m_time);
+    // double sinW = sin(m_rot * m_time);
+    // double cosW = cos(m_rot * m_time);
 
-    float xDelta, yDelta;
+    double xDelta, yDelta;
     for (int i = 0; i < m_points.size(); i++)
     {
         // Motion of a point cloud polygon rotating around center (ox, oy). Each point (px, py), where the velocity is (vx, vy) equals:
@@ -321,14 +339,14 @@ void PointCloudShape_Cvx::updateShape(const double &timeStep)
     m_time += timeStep;
 }
 
-void PointCloudShape_Cvx::rotShape(const float &rad, const Point &pivot)
+void PointCloudShape_Cvx::rotShape(const double &rad, const Point &pivot)
 {
     for (Point &v : m_points)
     {
         v = v - m_center;
 
-        float sRot = sin(m_rot);
-        float cRot = cos(m_rot);
+        double sRot = sin(m_rot);
+        double cRot = cos(m_rot);
 
         Point shift =
             {
