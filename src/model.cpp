@@ -206,8 +206,8 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
                 if (inCenterBoundsX && inCenterBoundsY && inEdgeBoundsX && inEdgeBoundsY)
                 {
                     double penetrationDepth = Math::dist(intersection, _s1->m_points[i]);
-                    std::shared_ptr<PointCloudShape_Cvx> ptr1 = std::make_shared<PointCloudShape_Cvx>(s1);
-                    std::shared_ptr<PointCloudShape_Cvx> ptr2 = std::make_shared<PointCloudShape_Cvx>(s2);
+                    PointCloudShape_Cvx* ptr1 = &s1;
+                    PointCloudShape_Cvx* ptr2 = &s2;
                     return CollisionInfo_PCSCVX(true, intersection, {intersection - _s1->m_center}, centerLine, penetrationDepth, ptr1, ptr2);
                 }
             }

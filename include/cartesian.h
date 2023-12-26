@@ -204,10 +204,8 @@ namespace Math
     {
         // square of a vector cross product axb equals:
         // (a.a)(b.b) - (a.b)^2 where '.' is the dot product
-        double a_2 = dotProd(p1, p1);
-        double b_2 = dotProd(p2, p2);
         double ab = dotProd(p1, p2);
-        return a_2 * b_2 - pow(ab, 2);
+        return dotProd(p1, p1) * dotProd(p2, p2) - ab*ab;
     }
 
     // Calculates the distance between two points

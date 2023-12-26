@@ -206,7 +206,6 @@ void View::UI_Interactive_AddCircleButton()
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
         circle.m_vel = {xVel, yVel};
         circle.m_rot = rot;
-        circle.m_center = {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F};
         std::shared_ptr<Shape> circleGeneric = std::make_shared<PointCloudShape_Cvx>(circle);
         this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
@@ -339,9 +338,7 @@ void View::SDL_DragShape(SDL_Event &event)
             if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
-                // #if !BUILD_EMCC
                 while (true)
-                // #endif
                 {
                     SDL_PollEvent(&event);
                     if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)

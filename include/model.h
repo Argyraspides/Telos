@@ -17,8 +17,8 @@ struct CollisionInfo_PCSCVX
         Point penetrationVector,
         Line penetrationLine,
         double penetrationDepth,
-        std::shared_ptr<PointCloudShape_Cvx> s1,
-        std::shared_ptr<PointCloudShape_Cvx> s2)
+        PointCloudShape_Cvx* s1,
+        PointCloudShape_Cvx* s2)
     {
         this->hasCollided = hasCollided;
         this->collisionPoint = collisionPoint;
@@ -31,7 +31,8 @@ struct CollisionInfo_PCSCVX
     }
 
     bool hasCollided;
-    std::shared_ptr<PointCloudShape_Cvx> s1, s2;
+    PointCloudShape_Cvx* s1;
+    PointCloudShape_Cvx* s2;
     Point collisionPoint;
     Point penetrationVector; // Penetration vector is always given in the direction of the penetrating shape to the penetrated one
     Line penetrationLine;
