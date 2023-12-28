@@ -42,7 +42,7 @@ public:
     {
     }
 
-    virtual void updateShape(const double &timeStep)
+    virtual void updateShape(const double &timeStep, const int &timeDir)
     {
     }
 
@@ -90,7 +90,7 @@ public:
     double getE(); // GETS THE TOTAL KINETIC ENERGY OF THE SHAPE
 
     void moveShape(const Point &p) override;
-    void updateShape(const double &timeStep) override;
+    void updateShape(const double &timeStep, const int &timeDir) override;
     void setShapePos(const Point &p) override;
     void rotShape(const double &rad, const Point &pivot) override;
 

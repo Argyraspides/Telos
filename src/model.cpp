@@ -28,7 +28,7 @@ void Model::run()
     if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
         // Control the loop to execute at the desired frequency
-        const std::chrono::milliseconds frameDuration((long)(timeStep * 1000));
+        const std::chrono::milliseconds frameDuration((long)(m_timeStep * 1000));
         auto startTime = std::chrono::high_resolution_clock::now();
 
         while (m_isRunning)
@@ -40,7 +40,7 @@ void Model::run()
             {
                 // Update all shapes including their positions, resolve their collisions, etc
                 updatePCSL();
-                time += timeStep;
+                m_time += m_timeStep;
                 // std::cout << "CURRENT TIME: " << time << "\n";
                 startTime = std::chrono::high_resolution_clock::now();
             }
@@ -63,7 +63,7 @@ void Model::updatePCSL()
 
     for (int i = 0; i < size; i++)
     {
-        this->m_PCSCVX_shapeList[i]->updateShape(timeStep);
+        this->m_PCSCVX_shapeList[i]->updateShape(m_timeStep, TIMEDIR::FORWARD);
     }
 
     for (int i = 0; i < size - 1; i++)
@@ -71,6 +71,11 @@ void Model::updatePCSL()
         for (int j = i + 1; j < size; j++)
         {
             CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]);
+            if (c.hasCollided)
+            {
+                resolveCollisionOverlapPCSCVX(c);
+                resolveCollisionPCSCVX(c);
+            }
         }
     }
 
@@ -101,7 +106,7 @@ std::vector<std::shared_ptr<PointCloudShape_Cvx>> &Model::getPCSCVXShapeList()
     return this->m_PCSCVX_shapeList;
 }
 
-// Uses the SAT (Separation Axis Theorem) to detect collision. Cannot determine collision point nor penetration depth.
+// Uses the SAT (Separation Axis Theorem) to detect collision
 bool Model::isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
 {
     PointCloudShape_Cvx *_s1 = &s1;
@@ -154,20 +159,25 @@ bool Model::isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2
     return true;
 }
 
-// Uses simple line intersections to detect collision, collision point, and penetration depth.
+// Uses simple line intersections to detect collision, collision point, collision surface, and penetration depth.
+// Skibidi toilet. Time complexity O(n^2)
 CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
 {
 
     PointCloudShape_Cvx *_s1 = &s1;
     PointCloudShape_Cvx *_s2 = &s2;
 
+    // X and Y bounds of the edge of the other polygon we are comparing against
     double edgeLineBoundsX[2] = {0, 0};
     double edgeLineBoundsY[2] = {0, 0};
+    // X and Y bounds of the line drawn from the center to a vertex of the polygon we are comparing with
     double centerLineBoundsX[2] = {0, 0};
     double centerLineBoundsY[2] = {0, 0};
 
     for (int s = 0; s < 2; s++)
     {
+
+        // Need to compare polygon 1's center lines against polygon 2's edge lines and vice versa
         if (s == 1)
         {
             _s1 = &s2;
@@ -176,9 +186,10 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
 
         for (int i = 0; i < _s1->m_points.size(); i++)
         {
-
+            // Center line is the line drawn from the center of the polygon to one of its vertices
             Line centerLine(_s1->m_center, _s1->m_points[i]);
 
+            // Its X and Y bounds are simply the start and end of this line
             centerLineBoundsY[0] = std::min(_s1->m_center.y, _s1->m_points[i].y);
             centerLineBoundsY[1] = std::max(_s1->m_center.y, _s1->m_points[i].y);
 
@@ -188,16 +199,21 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
             for (int j = 0; j < _s2->m_points.size(); j++)
             {
                 int wrap = (j + 1) % _s2->m_points.size();
-
+                // The bounds of the edge line is simply the beginning and end of the line that makes this edge of the polygon
                 edgeLineBoundsY[0] = std::min(_s2->m_points[j].y, _s2->m_points[wrap].y);
                 edgeLineBoundsY[1] = std::max(_s2->m_points[j].y, _s2->m_points[wrap].y);
 
                 edgeLineBoundsX[0] = std::min(_s2->m_points[j].x, _s2->m_points[wrap].x);
                 edgeLineBoundsX[1] = std::max(_s2->m_points[j].x, _s2->m_points[wrap].x);
 
+                // equation of the line that forms the polygon edge
                 Line edgeLine(_s2->m_points[j], _s2->m_points[wrap]);
+
+                // Intersection point of the line created by connecting the center of polygon _s1 to one of its vertices, and the line
+                // that defines the current edge of polygon _s2
                 Point intersection = Math::intersectionPt(centerLine, edgeLine);
 
+                // If this intersection is within the bounds of both lines, there is a collision
                 bool inCenterBoundsX = (intersection.x >= centerLineBoundsX[0] && intersection.x <= centerLineBoundsX[1]);
                 bool inCenterBoundsY = (intersection.y >= centerLineBoundsY[0] && intersection.y <= centerLineBoundsY[1]);
                 bool inEdgeBoundsX = (intersection.x >= edgeLineBoundsX[0] && intersection.x <= edgeLineBoundsX[1]);
@@ -205,10 +221,14 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
 
                 if (inCenterBoundsX && inCenterBoundsY && inEdgeBoundsX && inEdgeBoundsY)
                 {
+                    Point collisionSurfaceNormal = Math::getNormal2D((_s2->m_points[j] - _s2->m_points[wrap]));
+                    collisionSurfaceNormal.normalize();
+
+                    Point penetrationVector = intersection - _s1->m_center;
+                    penetrationVector.normalize();
                     double penetrationDepth = Math::dist(intersection, _s1->m_points[i]);
-                    PointCloudShape_Cvx* ptr1 = &s1;
-                    PointCloudShape_Cvx* ptr2 = &s2;
-                    return CollisionInfo_PCSCVX(true, intersection, {intersection - _s1->m_center}, centerLine, penetrationDepth, ptr1, ptr2);
+
+                    return CollisionInfo_PCSCVX(true, intersection, penetrationVector, centerLine, collisionSurfaceNormal, penetrationDepth, _s1, _s2);
                 }
             }
         }
@@ -216,13 +236,69 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
     return CollisionInfo_PCSCVX(false);
 }
 
-void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX collisionInfo)
+void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 {
+
+    double ekTot = collisionInfo.s1->getE() + collisionInfo.s2->getE();
+
+    double m_a = collisionInfo.s1->m_mass;
+    double m_b = collisionInfo.s2->m_mass;
+
+    double i_a = collisionInfo.s1->m_rotInert;
+    double i_b = collisionInfo.s2->m_rotInert;
+
+    double w_a1 = collisionInfo.s1->m_rot;
+    double w_b1 = collisionInfo.s2->m_rot;
+
+    Point n = collisionInfo.collisionSurfaceNormal;
+
+    Point r_ap = collisionInfo.collisionPoint - collisionInfo.s1->m_center;
+    Point r_bp = collisionInfo.collisionPoint - collisionInfo.s2->m_center;
+
+    Point v_a1 = collisionInfo.s1->m_vel;
+    Point v_b1 = collisionInfo.s2->m_vel;
+
+    Point v_ap_rot = Math::instantVelRot2D(collisionInfo.collisionPoint, collisionInfo.s1->m_center, w_a1);
+    Point v_ap1 = collisionInfo.s1->m_vel + v_ap_rot;
+
+    Point v_bp_rot = Math::instantVelRot2D(collisionInfo.collisionPoint, collisionInfo.s2->m_center, w_b1);
+    Point v_bp1 = collisionInfo.s2->m_vel + v_bp_rot;
+
+    Point v_p1 = v_ap1 - v_bp1;
+
+    double e = 1.0;
+    double elasExpr = (1.0f + e) * -1;
+    double numerator = Math::dotProd(v_p1 * elasExpr, n);
+    double denominator = (1.0 / m_a) + (1.0 / m_b) + (Math::crossProdSquare(r_ap, n) / i_a) + (Math::crossProdSquare(r_bp, n) / i_b);
+    double j = numerator / denominator;
+
+    Point impulse = n * j;
+    collisionInfo.s1->m_vel = v_a1 + (impulse / m_a);
+    collisionInfo.s2->m_vel = v_b1 - (impulse / m_b);
+
+    collisionInfo.s1->m_rot = w_a1 - (Math::crossProd3D(r_ap, impulse).z / i_a);
+    collisionInfo.s2->m_rot = w_b1 + (Math::crossProd3D(r_bp, impulse).z / i_b);
+
+    double ekTotF = collisionInfo.s1->getE() + collisionInfo.s2->getE();
+
+    double diff = ekTotF - ekTot;
+
+    if(fabs(diff) >  m_ENERGY_THRESHOLD)
+    {
+        std::cerr << "WARNING! ENERGY NOT CONSERVED AFTER SHAPE COLLISION! NET CHANGE (FINAL - INITIAL): " << diff << "\n";
+    }
+
+}
+
+void Model::resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
+{
+    Point separation = (collisionInfo.penetrationVector * collisionInfo.penetrationDepth) * -1 * m_SEPARATION_SAFETY_FACTOR;
+    collisionInfo.s1->moveShape(separation);
 }
 
 // Resolves initial collision by separating the object from the wall. Works by finding the distance between the point that collided
 // into the wall and the wall itself along the objects velocity vector, and slides the shape back along this vector.
-void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX wallCollisionInfo)
+void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX &wallCollisionInfo)
 {
     Line slidingLine;
 
@@ -243,7 +319,7 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
     // Obtain where this line intersects with the wall
     Point wallIntersection = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.wallSide]);
     // Change the position of the shape by the slideDelta
-    Point slideDelta = (wallIntersection - collisionPoint) * SEPARATION_SAFETY_FACTOR;
+    Point slideDelta = (wallIntersection - collisionPoint) * m_SEPARATION_SAFETY_FACTOR;
     for (Point &p : wallCollisionInfo.shape->m_points)
     {
         p = p + slideDelta;
@@ -251,7 +327,7 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX w
     wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + slideDelta;
 }
 
-void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
+void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
 {
 
     // perfect elasticity
@@ -301,77 +377,12 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wci)
     wci.shape->m_rot = wci.shape->m_rot - ((Math::crossProd3D(r_ap, impulse).z) / i_a);
     double endE = wci.shape->getE();
 
-    if (fabs(endE - initE) > ENERGY_THRESHOLD)
+    if (fabs(endE - initE) > m_ENERGY_THRESHOLD)
     {
-        std::cerr << "WARNING! ENERGY NOT CONSERVED! NET CHANGE (FINAL - INITIAL): " << (endE - initE) << "\n";
+        std::cerr << "WARNING! ENERGY NOT CONSERVED AFTER WALL COLLISION! NET CHANGE (FINAL - INITIAL): " << (endE - initE) << "\n";
     }
-    std::cout << (endE - initE) << "\n";
 }
 
-// Resolves initial collision by separating the object from the wall. Takes into account both linear translation as well as rotation of the object
-void Model::resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCVX wallCollisionInfo)
-{
-
-    wallCollisionInfo.shape->m_initPos = wallCollisionInfo.shape->m_center;
-    ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
-
-    // Motion of a point cloud polygon rotating around center (ox, oy). Each point (px, py), where the velocity is (vx, vy) equals:
-    // px = (px - ox) • cos(w•t) - (py - oy) • sin(w•t) + ox + vx • t
-    // py = (px - ox) • sin(w•t) + (py - oy) • cos(w•t) + oy + vy • t
-    // Where the center is constantly moving (as the shape is constantly moving) as: o = i + v * t, where 'i' is the initial position of
-    // the shape.
-    // Therefore, t = (o - i)/v, or t = (ox - ix) / vx and t = (oy - iy) / vy
-    // Substitute within cos(w•t) and sin(w•t) and we get the 'timeCollided' equations below, which is how long ago
-
-    if (wallCollisionInfo.wallSide == WALLSIDE::TOP || wallCollisionInfo.wallSide == WALLSIDE::BOTTOM)
-    {
-        double yBoundary;
-        if (wallCollisionInfo.wallSide == WALLSIDE::TOP)
-            yBoundary = 0;
-        else
-            yBoundary = SCREEN_HEIGHT;
-
-        double minTime = std::numeric_limits<double>::max();
-        int collidedIndx = 0;
-
-        // trig term = w • (oy - iy) / vy
-        double trigTerm =
-            wallCollisionInfo.shape->m_rot * ((wallCollisionInfo.shape->m_center.y - wallCollisionInfo.shape->m_center.y) / (wallCollisionInfo.shape->m_vel.y));
-        // sin(w•t) and cos(w•t)
-        double sintt = sin(trigTerm);
-        double costt = cos(trigTerm);
-
-        for (int i = 0; i < wallCollisionInfo.shape->m_points.size(); i++)
-        {
-            // timeCollided = (py - xd•sin(w•t) - yd•cos(w•t) - iy) / 2vy
-            double xd = wallCollisionInfo.shape->m_points[i].x - wallCollisionInfo.shape->m_center.x;
-            double xy = wallCollisionInfo.shape->m_points[i].y - wallCollisionInfo.shape->m_center.y;
-            double numerator = (yBoundary - xd * sintt - xy * costt - wallCollisionInfo.shape->m_points[i].y);
-            double denominator = wallCollisionInfo.shape->m_vel.y;
-            double timeCollided = numerator / denominator;
-
-            if (timeCollided < minTime)
-            {
-                minTime = timeCollided;
-                collidedIndx = i;
-            }
-        }
-        Point resolutionDist = wallCollisionInfo.shape->m_vel * minTime;
-        double resolutionRot = wallCollisionInfo.shape->m_rot * minTime;
-
-        wallCollisionInfo.shape->m_center = wallCollisionInfo.shape->m_center + resolutionDist;
-        for (int i = 0; i < wallCollisionInfo.shape->m_points.size(); i++)
-        {
-            wallCollisionInfo.shape->m_points[i] = wallCollisionInfo.shape->m_points[i] + resolutionDist;
-        }
-        wallCollisionInfo.shape->rotShape(resolutionRot, wallCollisionInfo.shape->m_center);
-    }
-    else
-    {
-    }
-    ShapeUtils::printAllShapeInfo(*wallCollisionInfo.shape);
-    int x = 5;
-}
 // Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
 std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isContactBroad()
 {
@@ -440,26 +451,4 @@ beginDot:
     }
 
     return WallCollisionInfo_PCSCVX(true, wallSide, &s1, closestPtIndx, 0);
-}
-
-WallCollisionInfo_PCSCVX Model::isContactWallLinearRot(PointCloudShape_Cvx &s1)
-{
-    // Check if any of the vertices go beyond the walls.
-    bool leftCol = false, rightCol = false, bottomCol = false, topCol = false;
-    for (int i = 0; i < s1.m_points.size(); i++)
-    {
-        leftCol = s1.m_points[i].x <= 0;
-        rightCol = s1.m_points[i].x >= SCREEN_WIDTH;
-
-        bottomCol = s1.m_points[i].y >= SCREEN_HEIGHT;
-        topCol = s1.m_points[i].y <= 0;
-        if (topCol || bottomCol || leftCol || rightCol)
-            goto beginDot;
-    }
-
-    return WallCollisionInfo_PCSCVX(false);
-
-beginDot:
-
-    return WallCollisionInfo_PCSCVX(false);
 }

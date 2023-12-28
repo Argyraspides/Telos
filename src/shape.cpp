@@ -288,9 +288,9 @@ std::vector<Point> PointCloudShape_Cvx::generateTriangle(Point p1, Point p2, Poi
 
 void PointCloudShape_Cvx::moveShape(const Point &p)
 {
-    for (Point &shapePts : m_points)
+    for(int i = 0; i < m_points.size(); i++)
     {
-        shapePts = shapePts + p;
+        m_points[i] = m_points[i] + p;
     }
     m_center = m_center + p;
     m_initPos = m_center;
@@ -310,10 +310,10 @@ void PointCloudShape_Cvx::setShapePos(const Point &p)
     m_center = m_center + delta;
 }
 
-void PointCloudShape_Cvx::updateShape(const double &timeStep)
+void PointCloudShape_Cvx::updateShape(const double &timeStep, const int &timeDir)
 {
-    double sinW = sin(m_rot);
-    double cosW = cos(m_rot);
+    double sinW = sin(timeDir * m_rot);
+    double cosW = cos(timeDir * m_rot);
 
     // double sinW = sin(m_rot * m_time);
     // double cosW = cos(m_rot * m_time);
@@ -331,12 +331,12 @@ void PointCloudShape_Cvx::updateShape(const double &timeStep)
         // xDelta = m_Deltas[i].x;
         // yDelta = m_Deltas[i].y;
 
-        m_points[i].x = (xDelta * cosW - yDelta * sinW + m_center.x) + m_vel.x;
-        m_points[i].y = (xDelta * sinW + yDelta * cosW + m_center.y) + m_vel.y;
+        m_points[i].x = (xDelta * cosW - yDelta * sinW + m_center.x) + timeDir * m_vel.x;
+        m_points[i].y = (xDelta * sinW + yDelta * cosW + m_center.y) + timeDir * m_vel.y;
     }
-    m_center = m_center + m_vel;
+    m_center = m_center + m_vel * timeDir;
     // m_center = m_initPos + m_vel * m_time;
-    m_time += timeStep;
+    m_time -= timeStep;
 }
 
 void PointCloudShape_Cvx::rotShape(const double &rad, const Point &pivot)

@@ -16,14 +16,16 @@ struct CollisionInfo_PCSCVX
         Point collisionPoint,
         Point penetrationVector,
         Line penetrationLine,
+        Point collisionSurfaceNormal,
         double penetrationDepth,
-        PointCloudShape_Cvx* s1,
-        PointCloudShape_Cvx* s2)
+        PointCloudShape_Cvx *s1,
+        PointCloudShape_Cvx *s2)
     {
         this->hasCollided = hasCollided;
         this->collisionPoint = collisionPoint;
         this->penetrationVector = penetrationVector;
         this->penetrationLine = penetrationLine;
+        this->collisionSurfaceNormal = collisionSurfaceNormal;
         this->penetrationDepth = penetrationDepth;
 
         this->s1 = s1;
@@ -31,11 +33,12 @@ struct CollisionInfo_PCSCVX
     }
 
     bool hasCollided;
-    PointCloudShape_Cvx* s1;
-    PointCloudShape_Cvx* s2;
+    PointCloudShape_Cvx *s1; // The two shapes that have collided. The first one is always the penetrator, the second penetrated.
+    PointCloudShape_Cvx *s2;
     Point collisionPoint;
     Point penetrationVector; // Penetration vector is always given in the direction of the penetrating shape to the penetrated one
     Line penetrationLine;
+    Point collisionSurfaceNormal; // Describes the surface line that the collision point contacted
     double penetrationDepth;
 };
 
@@ -48,7 +51,13 @@ enum WALLSIDE
 
     NONE = 4,
     TOP_BOTTOM = 5,
-    LEFT_RIGHT = 6,
+    LEFT_RIGHT = 6
+};
+
+enum TIMEDIR {
+    STILL = 0,
+    FORWARD = 1,
+    BACKWARD = -1
 };
 
 struct WallCollisionInfo_PCSCVX
@@ -113,17 +122,18 @@ public:
     bool isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2);                // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
     CollisionInfo_PCSCVX isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED AND RETURNS COLLISION INFORMATION
 
-    WallCollisionInfo_PCSCVX isContactWallLinear(PointCloudShape_Cvx &s1);                       // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
+    WallCollisionInfo_PCSCVX isContactWallLinear(PointCloudShape_Cvx &s1); // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
     WallCollisionInfo_PCSCVX isContactWallLinearRot(PointCloudShape_Cvx &s1);
     std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> isContactBroad(); // BROAD PHASE COLLISION DETECTION. QUICKLY FILTERS OUT SHAPES THAT "OBVIOUSLY" WILL NOT COLLIDE
 
-    void resolveCollisionPCSCVX(CollisionInfo_PCSCVX collisionInfo);                     // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES
-    void resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX wallCollisionInfo); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, ONLY TAKES INTO ACCOUNT TRANSLATION)
-    void resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCVX wallCollisionInfo); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, TAKES INTO ACCOUNT ROTATION)
-    void resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX wallCollisionInfo);        // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (NORMAL RESOLUTION)
+    void resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo);                               // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES
+    void resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo);                        // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES (OVERLAP SEPARATION)
+    void resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX &wallCollisionInfo);    // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, ONLY TAKES INTO ACCOUNT TRANSLATION)
+    void resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCVX &wallCollisionInfo); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, TAKES INTO ACCOUNT ROTATION)
+    void resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wallCollisionInfo);                  // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (NORMAL RESOLUTION)
 public:
-    double time = 0.0;
-    double timeStep = 1.0 / ENGINE_POLLING_RATE;
-    const double ENERGY_THRESHOLD = 0.0000000001; // CONSERVATION OF ENERGY CAN BE VIOLATED BY THIS MUCH AS PER THE NATURE OF DOUBLE CALCULATIONS
-    const double SEPARATION_SAFETY_FACTOR = M_SQRT2;
+    double m_time = 0.0;
+    double m_timeStep = 1.0 / ENGINE_POLLING_RATE;
+    const double m_ENERGY_THRESHOLD = 0.0000000001; // CONSERVATION OF ENERGY CAN BE VIOLATED BY THIS MUCH AS PER THE NATURE OF DOUBLE CALCULATIONS
+    const double m_SEPARATION_SAFETY_FACTOR = 1.0;
 };

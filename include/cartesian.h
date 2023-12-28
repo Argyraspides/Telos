@@ -66,10 +66,8 @@ struct Point
 
 struct Line
 {
-    // x exists as a means to tell if the line is completely vertical or not
     bool isVertical = false;
     double m = 0, x = 0, c = 0;
-    const double VERTICAL_THRESHOLD = 0.00001;
 
     //  Constructs a line that passes through two points.
     Line(const Point &p1, const Point &p2)
@@ -81,16 +79,17 @@ struct Line
 
         double rise = p1.y - p2.y;
         double run = p1.x - p2.x;
+        double grad = rise / run;
 
         // Only have to check if run is too small to prevent dividing by zero errors (m = rise/run)
-        if (abs(run - 0) < VERTICAL_THRESHOLD)
+        if (std::isinf(grad))
         {
             x = p1.x;
             isVertical = true;
         }
         else
         {
-            this->m = rise / run;
+            this->m = grad;
             if (rise == 0)
             {
                 c = p1.y;
@@ -123,9 +122,19 @@ struct Line
         // y = mx + c
         // p.y = m*p.x + c
         // p.y - m*p.x = c
-        this->m = m;
-        this->c = p.y - m * p.x;
-        this->isVertical = false;
+        // OR x = c, where c = p.x
+
+        if (std::isinf(m))
+        {
+            this->isVertical = true;
+            this->x = p.x;
+        }
+        else
+        {
+            this->m = m;
+            this->c = p.y - m * p.x;
+            this->isVertical = false;
+        }
     }
 
     Line()
@@ -162,10 +171,25 @@ namespace Math
     static Line WALLS[4] = {LEFT_WALL, TOP_WALL, RIGHT_WALL, BOTTOM_WALL};
     static Point WALL_VECS[4] = {LEFT_WALL_VEC, TOP_WALL_VEC, RIGHT_WALL_VEC, BOTTOM_WALL_VEC};
 
-    // Calculates the normal of a vector in 2D space (considers only the x and y axis)
+    // Calculates the normal of a vector in 2D space
     static Point getNormal2D(Point p)
     {
         return {-p.y, p.x, p.z};
+    }
+
+    // Calculates the normal of a 2D line
+    static Line getNormal2D(Line l)
+    {
+        if (l.isVertical)
+        {
+            l.m = 0;
+            l.x = 0;
+            l.isVertical = false;
+            return l;
+        }
+
+        l.m = -(1.0 / l.m);
+        return l;
     }
 
     // TODO: IMPLEMENT
@@ -205,7 +229,7 @@ namespace Math
         // square of a vector cross product axb equals:
         // (a.a)(b.b) - (a.b)^2 where '.' is the dot product
         double ab = dotProd(p1, p2);
-        return dotProd(p1, p1) * dotProd(p2, p2) - ab*ab;
+        return dotProd(p1, p1) * dotProd(p2, p2) - ab * ab;
     }
 
     // Calculates the distance between two points
