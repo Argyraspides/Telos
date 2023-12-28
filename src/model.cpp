@@ -1,4 +1,5 @@
 #include "model.h"
+#include "engine_math.h"
 #include "application_params.h"
 #include <chrono>
 #include <iostream>

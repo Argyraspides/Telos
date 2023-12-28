@@ -1,4 +1,5 @@
 #include "shape.h"
+#include "engine_math.h"
 #include <iostream>
 #include <cmath>
 #include <algorithm>
@@ -37,35 +38,61 @@ bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
     if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
 
-        // Treating the point as the origin of a cartesian plane, if the polygon takes up all four quadrants, the point lies within the polygon
-        // Remember that convention has it that the top left corner of the screen is the origin, and positive Y values are downwards from it (X values are still
-        // positive going right and negative going left)
+        // // Treating the point as the origin of a cartesian plane, if the polygon takes up all four quadrants, the point lies within the polygon
+
+        // std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(s);
+
+        // int quadrantCount[4] = {0, 0, 0, 0};
+
+        // std::vector<Point> shapePoints = pointCloudShape_Cvx->getPoints();
+
+        // for (int i = 0; i < shapePoints.size(); i++)
+        // {
+        //     // Quadrants 1, 2, 3, and 4 (not in order)
+
+        //     int sx = shapePoints[i].x;
+        //     int sy = shapePoints[i].y;
+
+        //     if (sx < p.x && sy < p.y)
+        //     {
+        //         quadrantCount[0]++;
+        //     }
+        //     else if (sx < p.x && sy > p.y)
+        //     {
+        //         quadrantCount[1]++;
+        //     }
+        //     else if (sx > p.x && sy < p.y)
+        //     {
+        //         quadrantCount[2]++;
+        //     }
+        //     else if (sx > p.x && sy > p.y)
+        //     {
+        //         quadrantCount[3]++;
+        //     }
+        // }
+
+        // // If the points cover all four quadrants, the point is inside the polygon.
+        // return quadrantCount[0] > 0 && quadrantCount[1] > 0 && quadrantCount[2] > 0 && quadrantCount[3] > 0;
 
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(s);
-
-        int quadrantCount[4] = {0, 0, 0, 0};
-
         std::vector<Point> shapePoints = pointCloudShape_Cvx->getPoints();
 
-        for (size_t i = 0; i < shapePoints.size(); i++)
+        int numVertices = shapePoints.size();
+        bool inside = false;
+
+        for (int i = 0; i < numVertices; ++i)
         {
-            // Quadrants 1, 2, 3, and 4
+            const Point &v1 = shapePoints[i];
+            const Point &v2 = shapePoints[(i + 1) % numVertices];
 
-            if (shapePoints[i].x < p.x && shapePoints[i].y < p.y)
-                quadrantCount[0]++;
-
-            else if (shapePoints[i].x > p.x && shapePoints[i].y < p.y)
-                quadrantCount[1]++;
-
-            else if (shapePoints[i].x < p.x && shapePoints[i].y > p.y)
-                quadrantCount[2]++;
-
-            else
-                quadrantCount[3]++;
+            if ((v1.y > p.y) != (v2.y > p.y) &&
+                p.x < (v2.x - v1.x) * (p.y - v1.y) / (v2.y - v1.y) + v1.x)
+            {
+                inside = !inside;
+            }
         }
 
-        // If the points cover all four quadrants, the point is inside the polygon.
-        return quadrantCount[0] > 0 && quadrantCount[1] > 0 && quadrantCount[2] > 0 && quadrantCount[3] > 0;
+        return inside;
     }
 
     std::cerr << "SHAPE TYPE IS INVALID. ERROR IN FUNCTION: " << __func__ << " IN CLASS " << typeid(ShapeUtils).name() << std::endl;
@@ -133,34 +160,32 @@ double ShapeUtils::getRotInertia(const std::vector<Point> &points)
 
     double j_x = 0, j_y = 0;
 
-	for (int v = 0; v < points.size() - 1; v++)
-	{
-		int vpp = v + 1;
-		// (x_i * y_i+1 - x_i+1 * y_i)
-		double leftTerm =
-			points[v].x * points[vpp].y - points[vpp].x * points[v].y;
+    for (int v = 0; v < points.size() - 1; v++)
+    {
+        int vpp = v + 1;
+        // (x_i * y_i+1 - x_i+1 * y_i)
+        double leftTerm =
+            points[v].x * points[vpp].y - points[vpp].x * points[v].y;
 
-		// (y_i^2 + y_i * y_i+1 + y_i+1^2)
-		double rightTerm =
-			pow(points[v].y, 2) + points[v].y * points[vpp].y + pow(points[vpp].y, 2);
+        // (y_i^2 + y_i * y_i+1 + y_i+1^2)
+        double rightTerm =
+            pow(points[v].y, 2) + points[v].y * points[vpp].y + pow(points[vpp].y, 2);
 
-		j_x += leftTerm + rightTerm;
-		j_y += leftTerm;
+        j_x += leftTerm + rightTerm;
+        j_y += leftTerm;
 
-		// (x_i^2 + x_i * x_i+1 + x_i+1^2)
-		rightTerm = 
-			pow(points[v].x, 2) + points[v].x * points[vpp].x + pow(points[vpp].x, 2);
+        // (x_i^2 + x_i * x_i+1 + x_i+1^2)
+        rightTerm =
+            pow(points[v].x, 2) + points[v].x * points[vpp].x + pow(points[vpp].x, 2);
 
-		j_y += rightTerm;
+        j_y += rightTerm;
+    }
 
-	}
+    double oneTwelfth = 1.0f / 12.0f;
+    j_x *= oneTwelfth;
+    j_y *= oneTwelfth;
 
-	double oneTwelfth = 1.0f / 12.0f;
-	j_x *= oneTwelfth;
-	j_y *= oneTwelfth;
-
-	return (j_x + j_y);
-
+    return (j_x + j_y);
 
     // double jx = 0, jy = 0;
 
@@ -288,7 +313,7 @@ std::vector<Point> PointCloudShape_Cvx::generateTriangle(Point p1, Point p2, Poi
 
 void PointCloudShape_Cvx::moveShape(const Point &p)
 {
-    for(int i = 0; i < m_points.size(); i++)
+    for (int i = 0; i < m_points.size(); i++)
     {
         m_points[i] = m_points[i] + p;
     }

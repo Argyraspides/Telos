@@ -55,8 +55,6 @@ void View::Render()
     ImGui_ImplSDLRenderer2_Init(renderer);
     // Color is #1e1e1e
     ImVec4 clear_color = ImVec4(30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f);
-    // Main loop
-    bool done = false;
 
     pthread_t inputThreadId;
     pthread_create(&inputThreadId, nullptr, &View::threadEntry, this);
@@ -292,7 +290,7 @@ void View::EventHandlingLoop()
 {
     const std::chrono::milliseconds frameDuration(1000 / VIEW_INPUT_POLLING_RATE);
     auto startTime = std::chrono::high_resolution_clock::now();
-    while (true)
+    while (!done)
     {
         auto endTime = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
@@ -335,7 +333,7 @@ void View::SDL_DragShape(SDL_Event &event)
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
 
-            if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
+            if (ShapeUtils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
                 while (true)
