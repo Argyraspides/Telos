@@ -293,8 +293,9 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 
 void Model::resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 {
-    Point separation = (collisionInfo.penetrationVector * collisionInfo.penetrationDepth) * -1 * m_SEPARATION_SAFETY_FACTOR;
-    collisionInfo.s1->moveShape(separation);
+    Point separation = (collisionInfo.penetrationVector * collisionInfo.penetrationDepth) * m_SEPARATION_SAFETY_FACTOR;
+    collisionInfo.s1->moveShape(separation / -2.0);
+    collisionInfo.s2->moveShape(separation / 2.0);
 }
 
 // Resolves initial collision by separating the object from the wall. Works by finding the distance between the point that collided

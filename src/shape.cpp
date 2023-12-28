@@ -50,8 +50,8 @@ bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
         // {
         //     // Quadrants 1, 2, 3, and 4 (not in order)
 
-        //     int sx = shapePoints[i].x;
-        //     int sy = shapePoints[i].y;
+        //     double sx = shapePoints[i].x;
+        //     double sy = shapePoints[i].y;
 
         //     if (sx < p.x && sy < p.y)
         //     {
@@ -72,18 +72,18 @@ bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
         // }
 
         // // If the points cover all four quadrants, the point is inside the polygon.
-        // return quadrantCount[0] > 0 && quadrantCount[1] > 0 && quadrantCount[2] > 0 && quadrantCount[3] > 0;
+        // bool isInside = quadrantCount[0] > 0 && quadrantCount[1] > 0 && quadrantCount[2] > 0 && quadrantCount[3] > 0;
+        // std::cout << isInside << "\n";
+        // return isInside ;
 
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(s);
         std::vector<Point> shapePoints = pointCloudShape_Cvx->getPoints();
 
-        int numVertices = shapePoints.size();
         bool inside = false;
-
-        for (int i = 0; i < numVertices; ++i)
+        for (int i = 0; i < shapePoints.size(); ++i)
         {
             const Point &v1 = shapePoints[i];
-            const Point &v2 = shapePoints[(i + 1) % numVertices];
+            const Point &v2 = shapePoints[(i + 1) % shapePoints.size()];
 
             if ((v1.y > p.y) != (v2.y > p.y) &&
                 p.x < (v2.x - v1.x) * (p.y - v1.y) / (v2.y - v1.y) + v1.x)
@@ -340,9 +340,6 @@ void PointCloudShape_Cvx::updateShape(const double &timeStep, const int &timeDir
     double sinW = sin(timeDir * m_rot);
     double cosW = cos(timeDir * m_rot);
 
-    // double sinW = sin(m_rot * m_time);
-    // double cosW = cos(m_rot * m_time);
-
     double xDelta, yDelta;
     for (int i = 0; i < m_points.size(); i++)
     {
@@ -353,15 +350,11 @@ void PointCloudShape_Cvx::updateShape(const double &timeStep, const int &timeDir
         xDelta = m_points[i].x - m_center.x;
         yDelta = m_points[i].y - m_center.y;
 
-        // xDelta = m_Deltas[i].x;
-        // yDelta = m_Deltas[i].y;
-
         m_points[i].x = (xDelta * cosW - yDelta * sinW + m_center.x) + timeDir * m_vel.x;
         m_points[i].y = (xDelta * sinW + yDelta * cosW + m_center.y) + timeDir * m_vel.y;
     }
     m_center = m_center + m_vel * timeDir;
-    // m_center = m_initPos + m_vel * m_time;
-    m_time -= timeStep;
+    m_time += timeStep * timeDir;
 }
 
 void PointCloudShape_Cvx::rotShape(const double &rad, const Point &pivot)
