@@ -42,7 +42,7 @@ struct CollisionInfo_PCSCVX
     double penetrationDepth;
 };
 
-enum WALLSIDE
+enum WALL_SIDE
 {
     LEFT = 0,
     TOP = 1,
@@ -54,7 +54,7 @@ enum WALLSIDE
     LEFT_RIGHT = 6
 };
 
-enum TIMEDIR {
+enum TIME_DIRECTION {
     STILL = 0,
     FORWARD = 1,
     BACKWARD = -1
@@ -135,5 +135,5 @@ public:
     double m_time = 0.0;
     double m_timeStep = 1.0 / ENGINE_POLLING_RATE;
     const double m_ENERGY_THRESHOLD = 0.0000000001; // CONSERVATION OF ENERGY CAN BE VIOLATED BY THIS MUCH AS PER THE NATURE OF DOUBLE CALCULATIONS
-    const double m_SEPARATION_SAFETY_FACTOR = M_SQRT2;
+    const double m_SEPARATION_SAFETY_FACTOR = 1.0;
 };

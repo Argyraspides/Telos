@@ -47,8 +47,6 @@ void View::Render()
     ImGuiIO &io = SetupImGui();
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    ImGui::GetStyle().ScaleAllSizes(2.0f);
-    io.FontGlobalScale = 2.0f;
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
@@ -204,6 +202,7 @@ void View::UI_Interactive_AddCircleButton()
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
         circle.m_vel = {xVel, yVel};
         circle.m_rot = rot;
+        circle.m_points.push_back(circle.m_center);
         std::shared_ptr<Shape> circleGeneric = std::make_shared<PointCloudShape_Cvx>(circle);
         this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }

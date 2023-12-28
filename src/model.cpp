@@ -42,7 +42,6 @@ void Model::run()
                 // Update all shapes including their positions, resolve their collisions, etc
                 updatePCSL();
                 m_time += m_timeStep;
-                // std::cout << "CURRENT TIME: " << time << "\n";
                 startTime = std::chrono::high_resolution_clock::now();
             }
         }
@@ -64,7 +63,7 @@ void Model::updatePCSL()
 
     for (int i = 0; i < size; i++)
     {
-        this->m_PCSCVX_shapeList[i]->updateShape(m_timeStep, TIMEDIR::FORWARD);
+        this->m_PCSCVX_shapeList[i]->updateShape(m_timeStep, TIME_DIRECTION::FORWARD);
     }
 
     for (int i = 0; i < size - 1; i++)
@@ -342,16 +341,16 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
     Point n;
     switch (wci.wallSide)
     {
-    case WALLSIDE::LEFT:
+    case WALL_SIDE::LEFT:
         n = {1.0f, 0.0f};
         break;
-    case WALLSIDE::RIGHT:
+    case WALL_SIDE::RIGHT:
         n = {-1.0f, 0.0f};
         break;
-    case WALLSIDE::TOP:
+    case WALL_SIDE::TOP:
         n = {0.0f, 1.0f};
         break;
-    case WALLSIDE::BOTTOM:
+    case WALL_SIDE::BOTTOM:
         n = {0.0f, -1.0f};
         break;
     }
@@ -420,22 +419,22 @@ beginDot:
     if (topCol)
     {
         wallVec = Math::TOP_WALL_VEC;
-        wallSide = WALLSIDE::TOP;
+        wallSide = WALL_SIDE::TOP;
     }
     else if (bottomCol)
     {
         wallVec = Math::BOTTOM_WALL_VEC;
-        wallSide = WALLSIDE::BOTTOM;
+        wallSide = WALL_SIDE::BOTTOM;
     }
     else if (leftCol)
     {
         wallVec = Math::LEFT_WALL_VEC;
-        wallSide = WALLSIDE::LEFT;
+        wallSide = WALL_SIDE::LEFT;
     }
     else if (rightCol)
     {
         wallVec = Math::RIGHT_WALL_VEC;
-        wallSide = WALLSIDE::RIGHT;
+        wallSide = WALL_SIDE::RIGHT;
     }
 
     double closestPtDotProd = -std::numeric_limits<double>::max();
