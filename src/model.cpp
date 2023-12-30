@@ -283,11 +283,10 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 
     double diff = ekTotF - ekTot;
 
-    if(fabs(diff) >  m_ENERGY_THRESHOLD)
+    if (fabs(diff) > m_ENERGY_THRESHOLD)
     {
         std::cerr << "WARNING! ENERGY NOT CONSERVED AFTER SHAPE COLLISION! NET CHANGE (FINAL - INITIAL): " << diff << "\n";
     }
-
 }
 
 void Model::resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
@@ -306,12 +305,12 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX &
     // Gradient is the rise/run of the shapes velocity vector
     double gradient = wallCollisionInfo.shape->m_vel.y / wallCollisionInfo.shape->m_vel.x;
     // Collision point is just the point of the shape that came into contact with the wall
-    Point collisionPoint = wallCollisionInfo.shape->m_points[wallCollisionInfo.pointIndex];
+    Point collisionPoint = wallCollisionInfo.collisionPoint;
     // The equation of the line we want to slide the shape back along is the line with our calculated gradient, which passes through the collision point
     // If the velocity of the shape is only up or down the line is simply vertical
     if (wallCollisionInfo.shape->m_vel.x == 0 && wallCollisionInfo.shape->m_vel.y != 0)
     {
-        slidingLine = Line(wallCollisionInfo.shape->m_points[wallCollisionInfo.pointIndex].x);
+        slidingLine = Line(collisionPoint.x);
     }
     else
     {
@@ -334,7 +333,7 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
     // perfect elasticity
     double e = 1.0f;
     // X and Y components of the velocity of the collision point contributed to by rotation
-    Point v_ap_rot = Math::instantVelRot2D(wci.shape->m_points[wci.pointIndex], wci.shape->m_center, wci.shape->m_rot);
+    Point v_ap_rot = Math::instantVelRot2D(wci.collisionPoint, wci.shape->m_center, wci.shape->m_rot);
     // Velocity of the collision point (shapes velocity + the points instantaneous rotational velocity)
     Point v_ap1 = wci.shape->m_vel + v_ap_rot;
     // Normal to the collision surface (collision surface is always the wall)
@@ -356,7 +355,7 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
     }
 
     // Vector pointing from the center of the shape to the collision point
-    Point r_ap = wci.shape->m_points[wci.pointIndex] - wci.shape->m_center;
+    Point r_ap = wci.collisionPoint - wci.shape->m_center;
     // Mass, rotational inertia
     double m_a = wci.shape->m_mass;
     double i_a = wci.shape->m_rotInert;
@@ -399,6 +398,10 @@ WallCollisionInfo_PCSCVX Model::isContactWallLinear(PointCloudShape_Cvx &s1)
 {
     // Check if any of the vertices go beyond the walls.
     bool leftCol = false, rightCol = false, bottomCol = false, topCol = false;
+
+    std::vector<std::pair<Point, int>> colPoints;
+    colPoints.reserve(s1.m_points.size());
+
     for (int i = 0; i < s1.m_points.size(); i++)
     {
         leftCol = s1.m_points[i].x <= 0;
@@ -406,50 +409,55 @@ WallCollisionInfo_PCSCVX Model::isContactWallLinear(PointCloudShape_Cvx &s1)
 
         bottomCol = s1.m_points[i].y >= SCREEN_HEIGHT;
         topCol = s1.m_points[i].y <= 0;
-        if (topCol || bottomCol || leftCol || rightCol)
-            goto beginDot;
-    }
 
-    return WallCollisionInfo_PCSCVX(false);
-
-beginDot:
-
-    Point wallVec;
-    int wallSide;
-    if (topCol)
-    {
-        wallVec = Math::TOP_WALL_VEC;
-        wallSide = WALL_SIDE::TOP;
-    }
-    else if (bottomCol)
-    {
-        wallVec = Math::BOTTOM_WALL_VEC;
-        wallSide = WALL_SIDE::BOTTOM;
-    }
-    else if (leftCol)
-    {
-        wallVec = Math::LEFT_WALL_VEC;
-        wallSide = WALL_SIDE::LEFT;
-    }
-    else if (rightCol)
-    {
-        wallVec = Math::RIGHT_WALL_VEC;
-        wallSide = WALL_SIDE::RIGHT;
-    }
-
-    double closestPtDotProd = -std::numeric_limits<double>::max();
-    double currentDotProd = 0;
-    int closestPtIndx = 0;
-
-    for (int i = 0; i < s1.m_points.size(); i++)
-    {
-        currentDotProd = Math::dotProd(wallVec, s1.m_points[i]);
-        if (currentDotProd > closestPtDotProd)
+        if (topCol)
         {
-            closestPtIndx = i;
-            closestPtDotProd = currentDotProd;
+            colPoints.push_back({s1.m_points[i], WALL_SIDE::TOP});
+        }
+        else if (bottomCol)
+        {
+            colPoints.push_back({s1.m_points[i], WALL_SIDE::BOTTOM});
+        }
+        else if (leftCol)
+        {
+            colPoints.push_back({s1.m_points[i], WALL_SIDE::LEFT});
+        }
+        else if (rightCol)
+        {
+            colPoints.push_back({s1.m_points[i], WALL_SIDE::RIGHT});
         }
     }
 
-    return WallCollisionInfo_PCSCVX(true, wallSide, &s1, closestPtIndx, 0);
+    // No collision
+    if (colPoints.size() == 0)
+    {
+        return WallCollisionInfo_PCSCVX(false);
+    }
+    // Collision of only a single point
+    else if (colPoints.size() == 1)
+    {
+        return WallCollisionInfo_PCSCVX(true, colPoints[0].second, &s1, colPoints[0].first);
+    }
+    // Flat collision, we take the average of the two points
+    else if (colPoints.size() == 2)
+    {
+        Point avg = (colPoints[0].first + colPoints[1].first) / 2.0;
+        return WallCollisionInfo_PCSCVX(true, colPoints[0].second, &s1, avg);
+    }
+    // GGWP. In this scenario we will just take the point that is furthest away from the wall.
+    double closestPtDotProd = -std::numeric_limits<double>::max();
+    double currentDotProd = 0;
+    Point closestPoint = 0;
+
+    for (int i = 0; i < s1.m_points.size(); i++)
+    {
+        // We will take the side of the wall as whatever the first collison point was
+        currentDotProd = Math::dotProd(Math::WALL_VECS[colPoints[0].second], s1.m_points[i]);
+        if (currentDotProd > closestPtDotProd)
+        {
+            closestPoint = s1.m_points[i];
+            closestPtDotProd = currentDotProd;
+        }
+    }
+    return WallCollisionInfo_PCSCVX(true, colPoints[0].second, &s1, closestPoint);
 }

@@ -95,7 +95,7 @@ public:
     void rotShape(const double &rad, const Point &pivot) override;
 
 public:
-    static std::vector<Point> generateCircle(double radius);                   // CONSTRUCTS A CIRCLE USING RADIUS
+    static std::vector<Point> generateRegularPolygon(double radius, int sides);                   // CONSTRUCTS A CIRCLE USING RADIUS
     static std::vector<Point> generateRectangle(double w, double h);            // CONSTRUCTS A RECTANGLE USING WIDTH AND HEIGHT
     static std::vector<Point> generateTriangle(Point p1, Point p2, Point p3); // CONSTRUCTS A TRIANGLE USING THREE POINTS
     static std::vector<Point> generateTriangle(double t1, double t2, double t3); // CONSTRUCTS A TRIANGLE USING THREE ANGLES FROM THE X AXIS OF A UNIT CIRCLE

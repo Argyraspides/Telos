@@ -186,31 +186,56 @@ void View::UI_Interactive_CommonShapeSubMenu()
 
 void View::UI_Interactive_AddCircleButton()
 {
-    ImGui::Text("Circle");
+    ImGui::Text("Regular Polygon");
     static float radius = 50;
+    static float sides = 5;
     static float xVel = 0.0f;
     static float yVel = 11.0f;
     static float rot = 0.0f;
 
     ImGui::InputFloat(("Radius##ID" + std::to_string(UI_FetchID())).c_str(), &radius);
+    ImGui::InputFloat(("Sides##ID" + std::to_string(UI_FetchID())).c_str(), &sides);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
     ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
 
-    if (ImGui::Button("Add Circle"))
+    if (ImGui::Button("Add RP"))
     {
-        PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
-        circle.m_vel = {xVel, yVel};
-        circle.m_rot = rot;
-        circle.m_points.push_back(circle.m_center);
-        std::shared_ptr<Shape> circleGeneric = std::make_shared<PointCloudShape_Cvx>(circle);
-        this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+        PointCloudShape_Cvx regularPoly(PointCloudShape_Cvx::generateRegularPolygon(radius, sides));
+        regularPoly.m_vel = {xVel, yVel};
+        regularPoly.m_rot = rot;
+        std::shared_ptr<Shape> polyGeneric = std::make_shared<PointCloudShape_Cvx>(regularPoly);
+        this->m_controller->UpdateModel_AddShape(polyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }
 
 void View::UI_Interactive_AddRectangleButton()
 {
     ImGui::Text("Rectangle");
+    static float w = 250, h = 50;
+    static float xVel = 3.0f;
+    static float yVel = 2.0f;
+    static float rot = 0.02f;
+    ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
+    ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
+    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
+    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
+    ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+
+    if (ImGui::Button("Add Rect"))
+    {
+        PointCloudShape_Cvx Rectangle(PointCloudShape_Cvx::generateRectangle(w, h));
+        Rectangle.m_vel = {xVel, yVel};
+        Rectangle.m_rot = rot;
+
+        std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
+        this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+    }
+}
+
+void View::UI_Interactive_AddTriangleButton()
+{
+    ImGui::Text("Triangle");
     static float w = 250, h = 50;
     static float xVel = 3.0f;
     static float yVel = 2.0f;

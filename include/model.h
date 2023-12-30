@@ -63,13 +63,12 @@ enum TIME_DIRECTION {
 struct WallCollisionInfo_PCSCVX
 {
 
-    WallCollisionInfo_PCSCVX(bool collided, int wallSide, PointCloudShape_Cvx *shape, int pointIndex, double time)
+    WallCollisionInfo_PCSCVX(bool collided, int wallSide, PointCloudShape_Cvx *shape, Point collisionPoint)
     {
         this->collided = collided;
         this->wallSide = wallSide;
         this->shape = shape;
-        this->pointIndex = pointIndex;
-        this->time = time;
+        this->collisionPoint = collisionPoint;
     }
 
     WallCollisionInfo_PCSCVX(bool collided)
@@ -82,10 +81,8 @@ struct WallCollisionInfo_PCSCVX
     int wallSide;
     // The shape that collided with the wall
     PointCloudShape_Cvx *shape;
-    // Index of the point that came into contact with the wall
-    int pointIndex;
-    // How long ago the *center* of the shape came into contact with the wall
-    double time;
+    // Point of collision
+    Point collisionPoint;
 };
 
 class Model
