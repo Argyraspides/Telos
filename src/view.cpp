@@ -177,19 +177,19 @@ void View::UI_Interactive_CommonShapeSubMenu()
 
     if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        UI_Interactive_AddCircleButton();
+        UI_Interactive_AddRegularPolygonButton();
         UI_Interactive_AddRectangleButton();
     }
 
     ImGui::End();
 }
 
-void View::UI_Interactive_AddCircleButton()
+void View::UI_Interactive_AddRegularPolygonButton()
 {
     ImGui::Text("Regular Polygon");
     static float radius = 50;
     static float sides = 5;
-    static float xVel = 0.0f;
+    static float xVel = 2.0f;
     static float yVel = 11.0f;
     static float rot = 0.0f;
 
@@ -202,8 +202,11 @@ void View::UI_Interactive_AddCircleButton()
     if (ImGui::Button("Add RP"))
     {
         PointCloudShape_Cvx regularPoly(PointCloudShape_Cvx::generateRegularPolygon(radius, sides));
-        regularPoly.m_vel = {xVel, yVel};
-        regularPoly.m_rot = rot;
+        // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
+        // on the order of once per second, so we divide the values by the engines polling rate.
+        // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
+        regularPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
+        regularPoly.m_rot = rot / ENGINE_POLLING_RATE;
         std::shared_ptr<Shape> polyGeneric = std::make_shared<PointCloudShape_Cvx>(regularPoly);
         this->m_controller->UpdateModel_AddShape(polyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
@@ -225,32 +228,8 @@ void View::UI_Interactive_AddRectangleButton()
     if (ImGui::Button("Add Rect"))
     {
         PointCloudShape_Cvx Rectangle(PointCloudShape_Cvx::generateRectangle(w, h));
-        Rectangle.m_vel = {xVel, yVel};
-        Rectangle.m_rot = rot;
-
-        std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
-        this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
-    }
-}
-
-void View::UI_Interactive_AddTriangleButton()
-{
-    ImGui::Text("Triangle");
-    static float w = 250, h = 50;
-    static float xVel = 3.0f;
-    static float yVel = 2.0f;
-    static float rot = 0.02f;
-    ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
-    ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
-    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
-    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
-    ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
-
-    if (ImGui::Button("Add Rect"))
-    {
-        PointCloudShape_Cvx Rectangle(PointCloudShape_Cvx::generateRectangle(w, h));
-        Rectangle.m_vel = {xVel, yVel};
-        Rectangle.m_rot = rot;
+        Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
+        Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
 
         std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
         this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});

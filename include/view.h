@@ -50,7 +50,7 @@ private:
     // THESE ARE ALL FUNCTIONS WHICH DEFINE UI COMPONENTS OF IMGUI, INCLUDING MENUS, BUTTONS, TEXT BOXES, ETC
     int UI_FetchID();
     void UI_Interactive_CommonShapeSubMenu();
-    void UI_Interactive_AddCircleButton();
+    void UI_Interactive_AddRegularPolygonButton();
     void UI_Interactive_AddRectangleButton();
     void UI_Interactive_AddTriangleButton();
 
