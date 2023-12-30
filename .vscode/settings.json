@@ -93,6 +93,10 @@
         "__availability": "cpp",
         "*.inc": "cpp",
         "__errc": "cpp",
-        "queue": "cpp"
-    }
+        "queue": "cpp",
+        "__mutex_base": "cpp",
+        "__tree": "cpp",
+        "stack": "cpp"
+    },
+    "cmake.configureOnOpen": false
 }

@@ -11,8 +11,10 @@ int main()
     pthread_create(&modelThreadId, nullptr, &Model::threadEntry, &m);
 
     Controller c(&m);
+    
     View v(&c);
-
     v.Render();
+
+
     pthread_join(modelThreadId, nullptr);
 }

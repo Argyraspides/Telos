@@ -47,13 +47,12 @@ void View::Render()
     ImGuiIO &io = SetupImGui();
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
+
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
     // Color is #1e1e1e
     ImVec4 clear_color = ImVec4(30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f);
-    // Main loop
-    bool done = false;
 
     pthread_t inputThreadId;
     pthread_create(&inputThreadId, nullptr, &View::threadEntry, this);
@@ -203,6 +202,7 @@ void View::UI_Interactive_AddCircleButton()
         PointCloudShape_Cvx circle(PointCloudShape_Cvx::generateCircle(radius));
         circle.m_vel = {xVel, yVel};
         circle.m_rot = rot;
+        circle.m_points.push_back(circle.m_center);
         std::shared_ptr<Shape> circleGeneric = std::make_shared<PointCloudShape_Cvx>(circle);
         this->m_controller->UpdateModel_AddShape(circleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
@@ -211,10 +211,10 @@ void View::UI_Interactive_AddCircleButton()
 void View::UI_Interactive_AddRectangleButton()
 {
     ImGui::Text("Rectangle");
-    static float w = 50, h = 50;
-    static float xVel = 0.0f;
-    static float yVel = 0.0f;
-    static float rot = 0.0f;
+    static float w = 250, h = 50;
+    static float xVel = 3.0f;
+    static float yVel = 2.0f;
+    static float rot = 0.02f;
     ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
     ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
@@ -226,6 +226,7 @@ void View::UI_Interactive_AddRectangleButton()
         PointCloudShape_Cvx Rectangle(PointCloudShape_Cvx::generateRectangle(w, h));
         Rectangle.m_vel = {xVel, yVel};
         Rectangle.m_rot = rot;
+
         std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
         this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
@@ -288,7 +289,7 @@ void View::EventHandlingLoop()
 {
     const std::chrono::milliseconds frameDuration(1000 / VIEW_INPUT_POLLING_RATE);
     auto startTime = std::chrono::high_resolution_clock::now();
-    while (true)
+    while (!done)
     {
         auto endTime = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
@@ -331,12 +332,10 @@ void View::SDL_DragShape(SDL_Event &event)
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
 
-            if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
+            if (ShapeUtils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
-                // #if !BUILD_EMCC
                 while (true)
-                // #endif
                 {
                     SDL_PollEvent(&event);
                     if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)

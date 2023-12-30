@@ -17,3 +17,5 @@ echo "$header_file definition changed to: $new_string"
 
 cmake -DMY_COMPILER=gcc -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
+
+./Telos
