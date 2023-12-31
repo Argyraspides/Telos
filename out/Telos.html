@@ -4,19 +4,28 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        #canvas {
+            position: absolute;
+            top: 2.5%;
+            left: 2.5%;
+            width: 95%;
+            height: 95%;
+            overflow: hidden;
+            display: block;
+        }
+    </style>
+
 </head>
 
 <body style="background-color: #171717;">
-    <center>
-        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-        <script type='text/javascript'>
-            var Module = {
-                canvas: (function () { return document.getElementById('canvas'); })()
-            };
-        </script>
-        <script src="Telos.js"></script>
-    </center>
-    
+    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <script type='text/javascript'>
+        var Module = {
+            canvas: (function () { return document.getElementById('canvas'); })()
+        };
+    </script>
+    <script src="Telos.js"></script>
 </body>
 
 </html>

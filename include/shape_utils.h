@@ -17,6 +17,9 @@ public:
     static void printAllShapeInfo(PointCloudShape_Cvx s);                               // PRINTS SHAPE POINT COORDINATES, CENTER, VELOCITY, ROTATION, MASS
     static void printLineInfo(Line l);
     static void printPointInfo(Point p);
+    static double getTotalKineticEnergy(const Shape &s);
+    static double getTranslationalKineticEnergy(const Shape &s);
+    static double getRotationalKineticEnergy(const Shape &s);
 
 public:
     static std::vector<Point> generateRegularPolygon(double radius, int sides);  // CONSTRUCTS A CIRCLE USING RADIUS
@@ -26,5 +29,4 @@ public:
 
 public:
     static std::vector<Point> generateArbPoly2D(const std::string &s);
-
 };

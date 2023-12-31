@@ -56,6 +56,9 @@ private:
     void UI_Interactive_AddTriangleButton();
     void UI_Interactive_AddArbPolygonInput();
 
+    void UI_Tutorial();
+    void UI_ShapeInfo();
+
     void UI_ConstructMenuModule();
 
     void UI_Update(); // UPDATES ALL THE UI CONTENTS

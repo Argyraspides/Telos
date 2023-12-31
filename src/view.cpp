@@ -1,4 +1,5 @@
 #include "view.h"
+#include "telos_imgui_colors.h"
 #include "shape_utils.h"
 #include "model.h"
 #include "BUILD_EMCC.h"
@@ -8,6 +9,11 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
+#include <filesystem>
+
+#if BUILD_EMCC
+#include <emscripten/emscripten.h>
+#endif
 
 int View::ImGuiID = 1;
 
@@ -162,6 +168,18 @@ ImGuiIO &View::SetupImGui()
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+    io.FontGlobalScale = 0.75f;
+
+    std::string fontPathS;
+
+#if !BUILD_EMCC
+    fontPathS = std::filesystem::current_path().string() + "/assets/Roboto/Roboto-Black.ttf";
+#else
+    fontPathS = "assets/Roboto/Roboto-Black.ttf";
+#endif
+
+    io.Fonts->AddFontFromFileTTF(fontPathS.c_str(), 25.0f);
+
     return io;
 }
 
@@ -179,11 +197,12 @@ void View::UI_Interactive_CommonShapeSubMenu()
     if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
     {
         UI_Interactive_AddRegularPolygonButton();
+        ImGui::NewLine();
         UI_Interactive_AddRectangleButton();
+        ImGui::NewLine();
         UI_Interactive_AddArbPolygonInput();
+        ImGui::NewLine();
     }
-
-    ImGui::End();
 }
 
 void View::UI_Interactive_AddRegularPolygonButton()
@@ -194,12 +213,14 @@ void View::UI_Interactive_AddRegularPolygonButton()
     static float xVel = 2.0f;
     static float yVel = 11.0f;
     static float rot = 0.0f;
+    static float mass = 1.0f;
 
     ImGui::InputFloat(("Radius##ID" + std::to_string(UI_FetchID())).c_str(), &radius);
     ImGui::InputFloat(("Sides##ID" + std::to_string(UI_FetchID())).c_str(), &sides);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
     ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+    ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 
     if (ImGui::Button("Add RP"))
     {
@@ -209,6 +230,7 @@ void View::UI_Interactive_AddRegularPolygonButton()
         // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
         regularPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         regularPoly.m_rot = rot / ENGINE_POLLING_RATE;
+        regularPoly.m_mass = mass;
         std::shared_ptr<Shape> polyGeneric = std::make_shared<PointCloudShape_Cvx>(regularPoly);
         this->m_controller->UpdateModel_AddShape(polyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
@@ -221,17 +243,21 @@ void View::UI_Interactive_AddRectangleButton()
     static float xVel = 3.0f;
     static float yVel = 2.0f;
     static float rot = 0.02f;
+    static float mass = 1.0f;
     ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
     ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
     ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+    ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
+
 
     if (ImGui::Button("Add Rect"))
     {
         PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h));
         Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
+        Rectangle.m_mass = mass;
 
         std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
         this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
@@ -245,17 +271,20 @@ void View::UI_Interactive_AddArbPolygonInput()
     static float xVel = 3.0f;
     static float yVel = 2.0f;
     static float rot = 0.02f;
+    static float mass = 1.0f;
 
     ImGui::InputText(("Points##ID" + std::to_string(UI_FetchID())).c_str(), inputBuf, sizeof(inputBuf));
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
     ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+    ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 
     if (ImGui::Button("Add AS"))
     {
         PointCloudShape_Cvx arbPoly(Utils::generateArbPoly2D(std::string(inputBuf)));
         arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
+        arbPoly.m_mass = mass;
 
         std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
         this->m_controller->UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
@@ -264,14 +293,67 @@ void View::UI_Interactive_AddArbPolygonInput()
 
 void View::UI_ConstructMenuModule()
 {
+    static float windowWidth = SCREEN_WIDTH * 0.25;
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
-    ImGui::SetWindowSize(ImVec2(300, ImGui::GetIO().DisplaySize.y));
+    ImGui::SetWindowSize(ImVec2(windowWidth, ImGui::GetIO().DisplaySize.y));
     UI_Interactive_CommonShapeSubMenu();
+    UI_ShapeInfo();
+    ImGui::End();
 }
 
 void View::UI_Update()
 {
+}
+
+void View::UI_Tutorial()
+{
+    static bool showTutorial = true;
+    static Point center = {SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0};
+
+    if (showTutorial)
+    {
+        ImGui::SetNextWindowPos(ImVec2(center.x, center.y), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Tutorial", &showTutorial); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::Text("Welcome to Telos! A 2D rigidbody physics engine\n\n");
+        ImGui::Text("While largely incomplete, with many features to come,\nthe engine is functional and you may play around with \nit as development progresses\n\n");
+        ImGui::Text("Controls:\n");
+        ImGui::Text("Esc: Pause the engine\nLeft click hold: Drag shapes around\nRight click: Delete a shape\n\nEnjoy!");
+
+        if (ImGui::Button("Close"))
+            showTutorial = false;
+        ImGui::End();
+    }
+}
+
+void View::UI_ShapeInfo()
+{
+    if (ImGui::CollapsingHeader("Shape Info", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        std::vector<std::shared_ptr<Shape>> shapeList = this->m_controller->RetrieveModel_ReadShapes();
+        for (const auto& shape : shapeList)
+        {
+            const Point& center = shape->m_center;
+            const Point& vel = shape->m_vel;
+            const double mass = shape->m_mass;
+            const long long id = shape->m_shapeID;
+            const double rotInert = shape->m_rotInert;
+            const double ek = Utils::getTranslationalKineticEnergy(*shape);
+            const double ekrot = Utils::getRotationalKineticEnergy(*shape);
+
+            ImGui::TextColored(TELOS_IMGUI_RED, "Shape #%lld", id);
+            ImGui::TextColored(TELOS_IMGUI_WHITE, "Center: (%f, %f)", center.x, center.y);
+            ImGui::TextColored(TELOS_IMGUI_BLUE, "Velocity: (%f, %f) px/s", vel.x, vel.y);
+            ImGui::TextColored(TELOS_IMGUI_GREEN, "Mass: %f kg", mass);
+            ImGui::TextColored(TELOS_IMGUI_PURPLE, "Rotational Inertia: %f ML^2", rotInert);
+            ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Rotational Kinetic Energy: %f J", ekrot);
+            ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Translational Kinetic Energy: %f J", ek);
+            ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Total Kinetic Energy: %f J", ek+ekrot);
+
+            ImGui::Text("\n");
+        }
+
+    }
 }
 
 // **************************************************************************************************************************************************************************
@@ -310,6 +392,7 @@ void View::Render_Model(SDL_Renderer *renderer)
 void View::Render_GUI()
 {
     UI_ConstructMenuModule();
+    UI_Tutorial();
 }
 
 // **************************************************************************************************************************************************************************

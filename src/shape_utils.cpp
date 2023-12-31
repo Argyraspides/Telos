@@ -142,6 +142,23 @@ void Utils::printPointInfo(Point p)
     std::cout << "(" << p.x << "," << p.y << ")\n";
 }
 
+double Utils::getTranslationalKineticEnergy(const Shape &s)
+{
+    double v = s.m_vel.magnitude();
+    double ekTrans = 0.5 * s.m_mass * v * v;
+    return ekTrans;
+}
+
+double Utils::getRotationalKineticEnergy(const Shape &s)
+{
+    return 0.5 * s.m_rotInert * s.m_rot * s.m_rot;
+}
+
+double Utils::getTotalKineticEnergy(const Shape &s)
+{
+    return getTranslationalKineticEnergy(s) + getRotationalKineticEnergy(s);
+}
+
 // Obtain the rotational inertia, "I", of an arbitrary polygon
 double Utils::getRotInertia(const std::vector<Point> &points)
 {

@@ -46,7 +46,12 @@ if(MY_COMPILER STREQUAL "emcc")
     # For this particular build, the model is run in a separate thread from the view and controller,
     # so we enable multi-threaded support by passing in -pthread and the max number of threads we are allowed
     # to allocate (in this case as many threads as there are CPU cores)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -pthread -s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency")
+    # Obviously, any files outside of what is included by the compiler, that would be accessible on our local machine (as they still exist
+    # on the computer), will not be accessible by the web browser once we compile to web assembly. Any extra files that we want to access
+    # must be preloaded in order for us to access them, hence --preload-file
+    # -O2 is the compiler optimization. For the web, we want our WASM and JS files to be as small as possible, but also balance for 
+    # performance, -O2 is a good tradeoff from -O3 for this reason 
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_SDL=2 -pthread -s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/assets/Roboto@assets/Roboto -O2")
 
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2")
     target_link_libraries(${PROJECT_NAME} "imgui")
