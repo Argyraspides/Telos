@@ -1,11 +1,12 @@
 #pragma once
 #include "shape.h"
+#include <string>
 #include "point_cloud_convex.h"
 
 // Utilities class for various operations on shapes, e.g. converting a unique shape data structure into the principle point cloud,
 // calculating the centroid of various shapes, checking if a shape is convex, etc
 
-class ShapeUtils
+class Utils
 {
 public:
     static std::vector<Point> convertToPointCloud(const std::shared_ptr<Shape> &shape); // CONVERTS ANY SHAPE DATA STRUCTURE INTO A POINT CLOUD SHAPE
@@ -22,4 +23,8 @@ public:
     static std::vector<Point> generateRectangle(double w, double h);             // CONSTRUCTS A RECTANGLE USING WIDTH AND HEIGHT
     static std::vector<Point> generateTriangle(Point p1, Point p2, Point p3);    // CONSTRUCTS A TRIANGLE USING THREE POINTS
     static std::vector<Point> generateTriangle(double t1, double t2, double t3); // CONSTRUCTS A TRIANGLE USING THREE ANGLES FROM THE X AXIS OF A UNIT CIRCLE
+
+public:
+    static std::vector<Point> generateArbPoly2D(const std::string &s);
+
 };

@@ -180,6 +180,7 @@ void View::UI_Interactive_CommonShapeSubMenu()
     {
         UI_Interactive_AddRegularPolygonButton();
         UI_Interactive_AddRectangleButton();
+        UI_Interactive_AddArbPolygonInput();
     }
 
     ImGui::End();
@@ -202,7 +203,7 @@ void View::UI_Interactive_AddRegularPolygonButton()
 
     if (ImGui::Button("Add RP"))
     {
-        PointCloudShape_Cvx regularPoly(ShapeUtils::generateRegularPolygon(radius, sides));
+        PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides));
         // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
         // on the order of once per second, so we divide the values by the engines polling rate.
         // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
@@ -228,12 +229,36 @@ void View::UI_Interactive_AddRectangleButton()
 
     if (ImGui::Button("Add Rect"))
     {
-        PointCloudShape_Cvx Rectangle(ShapeUtils::generateRectangle(w, h));
+        PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h));
         Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
 
         std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
         this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+    }
+}
+
+void View::UI_Interactive_AddArbPolygonInput()
+{
+    ImGui::Text("Arbitrary Shape");
+    static char inputBuf[256] = "(0,0),(5,0),(5,5),(0,5)";
+    static float xVel = 3.0f;
+    static float yVel = 2.0f;
+    static float rot = 0.02f;
+
+    ImGui::InputText(("Points##ID" + std::to_string(UI_FetchID())).c_str(), inputBuf, sizeof(inputBuf));
+    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
+    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
+    ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+
+    if (ImGui::Button("Add AS"))
+    {
+        PointCloudShape_Cvx arbPoly(Utils::generateArbPoly2D(std::string(inputBuf)));
+        arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
+        arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
+
+        std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
+        this->m_controller->UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
 }
 
@@ -277,7 +302,7 @@ void View::Render_Model(SDL_Renderer *renderer)
         {
             Render_PointCloudShape(
                 renderer,
-                ShapeUtils::convertToPointCloud(shapeList[i]));
+                Utils::convertToPointCloud(shapeList[i]));
         }
     }
 }
@@ -337,7 +362,7 @@ void View::SDL_DragShape(SDL_Event &event)
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
 
-            if (ShapeUtils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
+            if (Utils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
                 while (true)
@@ -366,7 +391,7 @@ void View::SDL_RemoveShape(SDL_Event &event)
         const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
-            if (ShapeUtils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
+            if (Utils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 this->m_controller->UpdateModel_RemoveShape(shapePtr);
                 break;

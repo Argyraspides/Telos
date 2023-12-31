@@ -5,18 +5,18 @@
 
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
-    this->m_center = ShapeUtils::getCentroid(this->m_points);
-    this->m_rotInert = ShapeUtils::getRotInertia(this->m_points);
+    this->m_center = Utils::getCentroid(this->m_points);
+    this->m_rotInert = Utils::getRotInertia(this->m_points);
 }
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     this->m_points = points;
     this->m_initPoints = points;
-    this->m_center = ShapeUtils::getCentroid(this->m_points);
+    this->m_center = Utils::getCentroid(this->m_points);
     this->m_initPos = m_center;
     this->m_time = 0.0f;
-    this->m_rotInert = ShapeUtils::getRotInertia(this->m_points);
+    this->m_rotInert = Utils::getRotInertia(this->m_points);
 
     for (int i = 0; i < points.size(); i++)
     {

@@ -54,6 +54,7 @@ private:
     void UI_Interactive_AddRegularPolygonButton();
     void UI_Interactive_AddRectangleButton();
     void UI_Interactive_AddTriangleButton();
+    void UI_Interactive_AddArbPolygonInput();
 
     void UI_ConstructMenuModule();
 

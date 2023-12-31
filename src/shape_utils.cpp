@@ -3,7 +3,7 @@
 #include <iostream>
 
 // For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
-std::vector<Point> ShapeUtils::convertToPointCloud(const std::shared_ptr<Shape> &shape)
+std::vector<Point> Utils::convertToPointCloud(const std::shared_ptr<Shape> &shape)
 {
     int shapeTypeID = shape->getShapeTypeID();
     if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
@@ -12,12 +12,12 @@ std::vector<Point> ShapeUtils::convertToPointCloud(const std::shared_ptr<Shape> 
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(shape);
         return pointCloudShape_Cvx->getPoints();
     }
-    std::cerr << "SHAPE TYPE IS INVALID. ERROR IN FUNCTION: " << __func__ << " IN CLASS " << typeid(ShapeUtils).name() << std::endl;
+    std::cerr << "SHAPE TYPE IS INVALID. ERROR IN FUNCTION: " << __func__ << " IN CLASS " << typeid(Utils).name() << std::endl;
     return {};
 }
 
 // Checks if a point lies within a shape
-bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
+bool Utils::isInside(Point p, const std::shared_ptr<Shape> &s)
 {
 
     int shapeTypeID = s->getShapeTypeID();
@@ -81,35 +81,36 @@ bool ShapeUtils::isInside(Point p, const std::shared_ptr<Shape> &s)
         return inside;
     }
 
-    std::cerr << "SHAPE TYPE IS INVALID. ERROR IN FUNCTION: " << __func__ << " IN CLASS " << typeid(ShapeUtils).name() << std::endl;
+    std::cerr << "SHAPE TYPE IS INVALID. ERROR IN FUNCTION: " << __func__ << " IN CLASS " << typeid(Utils).name() << std::endl;
     return false;
 }
 
 // Calculates the centroid of a polygon given its vertices (assumes that the polygon has an even mass distribution)
-Point ShapeUtils::getCentroid(const std::vector<Point> &points)
+Point Utils::getCentroid(const std::vector<Point> &points)
 {
     // Assuming an even mass distribution the centroid is simply the average location of all the points
-    double sumX = 0.0, sumY = 0.0;
+    double sumX = 0.0, sumY = 0.0, sumZ = 0.0;
     for (const Point &p : points)
     {
         sumX += p.x;
         sumY += p.y;
+        sumZ += p.z;
     }
-    return Point(sumX / (double)points.size(), sumY / (double)points.size());
+    double size = (double)points.size();
+    return Point(sumX / size, sumY / size, sumZ / size);
 }
 
 // TODO: IMPLEMENT
-bool ShapeUtils::checkConvex(const std::vector<Point> &points)
+bool Utils::checkConvex(const std::vector<Point> &points)
 {
     for (size_t i = 0; i < points.size(); i++)
     {
-        
     }
 
     return true;
 }
 
-void ShapeUtils::printAllShapeInfo(PointCloudShape_Cvx s)
+void Utils::printAllShapeInfo(PointCloudShape_Cvx s)
 {
     std::cout << "polygon(";
     for (int i = 0; i < s.m_points.size(); i++)
@@ -128,7 +129,7 @@ void ShapeUtils::printAllShapeInfo(PointCloudShape_Cvx s)
     // std::cout << "\n";
 }
 
-void ShapeUtils::printLineInfo(Line l)
+void Utils::printLineInfo(Line l)
 {
     if (!l.isVertical)
         std::cout << "y = " << l.m << "x + " << l.c << "\n";
@@ -136,13 +137,13 @@ void ShapeUtils::printLineInfo(Line l)
         std::cout << "x = " << l.x << "\n";
 }
 
-void ShapeUtils::printPointInfo(Point p)
+void Utils::printPointInfo(Point p)
 {
     std::cout << "(" << p.x << "," << p.y << ")\n";
 }
 
 // Obtain the rotational inertia, "I", of an arbitrary polygon
-double ShapeUtils::getRotInertia(const std::vector<Point> &points)
+double Utils::getRotInertia(const std::vector<Point> &points)
 {
 
     double j_x = 0, j_y = 0;
@@ -173,11 +174,9 @@ double ShapeUtils::getRotInertia(const std::vector<Point> &points)
     j_y *= oneTwelfth;
 
     return (j_x + j_y);
-
 }
 
-
-std::vector<Point> ShapeUtils::generateRegularPolygon(double radius, int sides)
+std::vector<Point> Utils::generateRegularPolygon(double radius, int sides)
 {
     double increment = 2.0 * M_PI / (double)sides;
     std::vector<Point> regularPolygon;
@@ -193,7 +192,7 @@ std::vector<Point> ShapeUtils::generateRegularPolygon(double radius, int sides)
     return regularPolygon;
 }
 
-std::vector<Point> ShapeUtils::generateRectangle(double w, double h)
+std::vector<Point> Utils::generateRectangle(double w, double h)
 {
     return {
         {0, 0},
@@ -202,10 +201,67 @@ std::vector<Point> ShapeUtils::generateRectangle(double w, double h)
         {0, h}};
 }
 
-std::vector<Point> ShapeUtils::generateTriangle(Point p1, Point p2, Point p3)
+std::vector<Point> Utils::generateTriangle(Point p1, Point p2, Point p3)
 {
     std::vector<Point> pts = {p1, p2, p3};
     std::sort(pts.begin(), pts.end(), [](const Point &a, const Point &b)
               { return a.x < b.x; });
+    return pts;
+}
+
+std::vector<Point> Utils::generateArbPoly2D(const std::string &s)
+{
+
+    // Inputs are defined as:
+    // (x,y),(x,y),(x,y) ... to generate an arbitrary polygon
+
+    // A polygon must have at least three points. Minimum amount of characters as per the input
+    // rules is 17
+
+    if (s.size() < 17)
+        return {{0, 0, 0}};
+
+    std::vector<Point> pts;
+    std::vector<Point> fail = {{0, 0, 0}};
+
+    int i = 0;
+    while (i < s.size())
+    {
+        if (s[i] != '(')
+            return fail;
+        i++;
+
+        Point inputPt;
+        double xy[2] = {0, 0};
+
+        for (int n = 0; n < 2; n++)
+        {
+
+            std::string num;
+
+            while (s[i] != ',' && s[i] != ')')
+            {
+                num += s[i];
+                i++;
+            }
+
+            try
+            {
+                xy[n] = std::stod(num);
+            }
+            catch (const std::invalid_argument &e)
+            {
+                std::cerr << "Invalid input: " << e.what() << std::endl;
+            }
+
+            i++;
+        }
+        inputPt.x = xy[0];
+        inputPt.y = xy[1];
+        pts.push_back(inputPt);
+
+        i++;
+    }
+
     return pts;
 }

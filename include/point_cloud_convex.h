@@ -24,8 +24,6 @@ public:
     void setShapePos(const Point &p) override;
     void rotShape(const double &rad, const Point &pivot) override;
 
-    static const int CIRCLE_POINT_COUNT = 15;
-
 public:
     std::vector<Point> m_points; // POINT CLOUD THAT REPRESENTS THE SHAPE
     std::vector<Point> m_initPoints;
