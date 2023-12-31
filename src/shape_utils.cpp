@@ -237,7 +237,6 @@ std::vector<Point> Utils::generateArbPoly2D(const std::string &s)
 
     std::vector<Point> fail = {{0, 0, 0}};
 
-
     if (s.size() < 17)
         return fail;
 
@@ -258,19 +257,22 @@ std::vector<Point> Utils::generateArbPoly2D(const std::string &s)
 
             std::string num;
 
-            while (s[i] != ',' && s[i] != ')')
+            while (s[i] != ',' && s[i] != ')' && i < s.size())
             {
                 num += s[i];
                 i++;
             }
 
-            try
+            if(num.size() == 0)
             {
-                xy[n] = std::stod(num);
+                return fail;
             }
-            catch (const std::invalid_argument &e)
+
+            size_t pos;
+            xy[n] = std::stod(num, &pos);
+
+            if(pos == 0)
             {
-                std::cerr << "Invalid input: " << e.what() << std::endl;
                 return fail;
             }
 

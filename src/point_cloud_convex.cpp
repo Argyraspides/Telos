@@ -12,10 +12,6 @@ PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
-    if (points.size() < 3)
-    {
-        throw std::invalid_argument("A polygon cannot have less than three points.");
-    }
     this->m_points = points;
     this->m_initPoints = points;
     this->m_center = Utils::getCentroid(this->m_points);
