@@ -16,6 +16,7 @@
 #endif
 
 int View::ImGuiID = 1;
+ImVec4 View::currentShapeColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 View::View(Controller *controller)
 {
@@ -196,11 +197,21 @@ void View::UI_Interactive_CommonShapeSubMenu()
 
     if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
     {
+        ImGui::ColorEdit3("Shape Color", (float *)&currentShapeColor);
+
+        ImGui::NewLine();
+        ImGui::NewLine();
+
         UI_Interactive_AddRegularPolygonButton();
+
         ImGui::NewLine();
+
         UI_Interactive_AddRectangleButton();
+
         ImGui::NewLine();
+
         UI_Interactive_AddArbPolygonInput();
+        
         ImGui::NewLine();
     }
 }
@@ -250,7 +261,6 @@ void View::UI_Interactive_AddRectangleButton()
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
     ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
-
 
     if (ImGui::Button("Add Rect"))
     {
@@ -331,10 +341,10 @@ void View::UI_ShapeInfo()
     if (ImGui::CollapsingHeader("Shape Info", ImGuiTreeNodeFlags_DefaultOpen))
     {
         std::vector<std::shared_ptr<Shape>> shapeList = this->m_controller->RetrieveModel_ReadShapes();
-        for (const auto& shape : shapeList)
+        for (const auto &shape : shapeList)
         {
-            const Point& center = shape->m_center;
-            const Point& vel = shape->m_vel;
+            const Point &center = shape->m_center;
+            const Point &vel = shape->m_vel;
             const double mass = shape->m_mass;
             const long long id = shape->m_shapeID;
             const double rotInert = shape->m_rotInert;
@@ -348,11 +358,10 @@ void View::UI_ShapeInfo()
             ImGui::TextColored(TELOS_IMGUI_PURPLE, "Rotational Inertia: %f ML^2", rotInert);
             ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Rotational Kinetic Energy: %f J", ekrot);
             ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Translational Kinetic Energy: %f J", ek);
-            ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Total Kinetic Energy: %f J", ek+ekrot);
+            ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Total Kinetic Energy: %f J", ek + ekrot);
 
             ImGui::Text("\n");
         }
-
     }
 }
 
@@ -361,7 +370,7 @@ void View::UI_ShapeInfo()
 
 void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
 {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(renderer, currentShapeColor.x * pixelLimit, currentShapeColor.y * pixelLimit, currentShapeColor.z * pixelLimit, currentShapeColor.w * pixelLimit);
 
     for (size_t i = 0; i < points.size() - 1; ++i)
     {

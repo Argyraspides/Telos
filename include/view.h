@@ -87,4 +87,6 @@ private:
     bool inputDone = false;
     bool renderDone = false;
     static int ImGuiID;
+
+    static ImVec4 currentShapeColor;
 };

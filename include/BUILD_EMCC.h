@@ -1,1 +1,1 @@
-#define BUILD_EMCC 0
+#define BUILD_EMCC 1
