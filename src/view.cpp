@@ -202,7 +202,7 @@ void View::UI_Interactive_AddRegularPolygonButton()
 
     if (ImGui::Button("Add RP"))
     {
-        PointCloudShape_Cvx regularPoly(PointCloudShape_Cvx::generateRegularPolygon(radius, sides));
+        PointCloudShape_Cvx regularPoly(ShapeUtils::generateRegularPolygon(radius, sides));
         // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
         // on the order of once per second, so we divide the values by the engines polling rate.
         // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
@@ -228,7 +228,7 @@ void View::UI_Interactive_AddRectangleButton()
 
     if (ImGui::Button("Add Rect"))
     {
-        PointCloudShape_Cvx Rectangle(PointCloudShape_Cvx::generateRectangle(w, h));
+        PointCloudShape_Cvx Rectangle(ShapeUtils::generateRectangle(w, h));
         Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
 

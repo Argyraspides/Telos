@@ -51,38 +51,6 @@ double PointCloudShape_Cvx::getE()
 // ***************************************************************************************************************************************************************
 // SHAPE GENERATOR FUNCTIONS
 
-std::vector<Point> PointCloudShape_Cvx::generateRegularPolygon(double radius, int sides)
-{
-    double increment = 2.0 * M_PI / (double)sides;
-    std::vector<Point> regularPolygon;
-    regularPolygon.reserve(sides);
-
-    double start = -M_PI / 2.0;
-
-    for (int i = 0; i < sides; i++)
-    {
-        double ang = start + (i * increment);
-        regularPolygon.push_back({radius * cos(ang), radius * sin(ang), 0});
-    }
-    return regularPolygon;
-}
-
-std::vector<Point> PointCloudShape_Cvx::generateRectangle(double w, double h)
-{
-    return {
-        {0, 0},
-        {w, 0},
-        {w, h},
-        {0, h}};
-}
-
-std::vector<Point> PointCloudShape_Cvx::generateTriangle(Point p1, Point p2, Point p3)
-{
-    std::vector<Point> pts = {p1, p2, p3};
-    std::sort(pts.begin(), pts.end(), [](const Point &a, const Point &b)
-              { return a.x < b.x; });
-    return pts;
-}
 
 void PointCloudShape_Cvx::moveShape(const Point &p)
 {

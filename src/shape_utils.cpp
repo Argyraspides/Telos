@@ -1,4 +1,5 @@
 #include "shape_utils.h"
+#include <algorithm>
 #include <iostream>
 
 // For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
@@ -175,3 +176,36 @@ double ShapeUtils::getRotInertia(const std::vector<Point> &points)
 
 }
 
+
+std::vector<Point> ShapeUtils::generateRegularPolygon(double radius, int sides)
+{
+    double increment = 2.0 * M_PI / (double)sides;
+    std::vector<Point> regularPolygon;
+    regularPolygon.reserve(sides);
+
+    double start = -M_PI / 2.0;
+
+    for (int i = 0; i < sides; i++)
+    {
+        double ang = start + (i * increment);
+        regularPolygon.push_back({radius * cos(ang), radius * sin(ang), 0});
+    }
+    return regularPolygon;
+}
+
+std::vector<Point> ShapeUtils::generateRectangle(double w, double h)
+{
+    return {
+        {0, 0},
+        {w, 0},
+        {w, h},
+        {0, h}};
+}
+
+std::vector<Point> ShapeUtils::generateTriangle(Point p1, Point p2, Point p3)
+{
+    std::vector<Point> pts = {p1, p2, p3};
+    std::sort(pts.begin(), pts.end(), [](const Point &a, const Point &b)
+              { return a.x < b.x; });
+    return pts;
+}
