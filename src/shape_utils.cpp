@@ -235,11 +235,13 @@ std::vector<Point> Utils::generateArbPoly2D(const std::string &s)
     // A polygon must have at least three points. Minimum amount of characters as per the input
     // rules is 17
 
+    std::vector<Point> fail = {{0, 0, 0}};
+
+
     if (s.size() < 17)
-        return {{0, 0, 0}};
+        return fail;
 
     std::vector<Point> pts;
-    std::vector<Point> fail = {{0, 0, 0}};
 
     int i = 0;
     while (i < s.size())
@@ -269,6 +271,7 @@ std::vector<Point> Utils::generateArbPoly2D(const std::string &s)
             catch (const std::invalid_argument &e)
             {
                 std::cerr << "Invalid input: " << e.what() << std::endl;
+                return fail;
             }
 
             i++;

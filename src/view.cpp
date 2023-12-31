@@ -211,7 +211,7 @@ void View::UI_Interactive_CommonShapeSubMenu()
         ImGui::NewLine();
 
         UI_Interactive_AddArbPolygonInput();
-        
+
         ImGui::NewLine();
     }
 }
@@ -282,22 +282,35 @@ void View::UI_Interactive_AddArbPolygonInput()
     static float yVel = 2.0f;
     static float rot = 0.02f;
     static float mass = 1.0f;
+    static ImVec4 invalidInputTxtColor = TELOS_IMGUI_CLEAR;
 
     ImGui::InputText(("Points##ID" + std::to_string(UI_FetchID())).c_str(), inputBuf, sizeof(inputBuf));
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
     ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
+    ImGui::TextColored(invalidInputTxtColor, "Invalid input!");
+
 
     if (ImGui::Button("Add AS"))
     {
-        PointCloudShape_Cvx arbPoly(Utils::generateArbPoly2D(std::string(inputBuf)));
-        arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
-        arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
-        arbPoly.m_mass = mass;
+        std::vector<Point> pts = Utils::generateArbPoly2D(std::string(inputBuf));
+        if (pts.size() > 1)
+        {
+            PointCloudShape_Cvx arbPoly(pts);
+            arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
+            arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
+            arbPoly.m_mass = mass;
 
-        std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
-        this->m_controller->UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+            std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
+            this->m_controller->UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+
+            invalidInputTxtColor = TELOS_IMGUI_CLEAR;
+        }
+        else
+        {
+            invalidInputTxtColor = TELOS_IMGUI_RED;
+        }
     }
 }
 

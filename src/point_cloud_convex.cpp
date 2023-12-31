@@ -1,6 +1,7 @@
 #include "point_cloud_convex.h"
 #include "shape_utils.h"
 #include "engine_math.h"
+#include "stdexcept"
 #include <algorithm>
 
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
@@ -11,6 +12,10 @@ PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
+    if (points.size() < 3)
+    {
+        throw std::invalid_argument("A polygon cannot have less than three points.");
+    }
     this->m_points = points;
     this->m_initPoints = points;
     this->m_center = Utils::getCentroid(this->m_points);
@@ -50,7 +55,6 @@ double PointCloudShape_Cvx::getE()
 
 // ***************************************************************************************************************************************************************
 // SHAPE GENERATOR FUNCTIONS
-
 
 void PointCloudShape_Cvx::moveShape(const Point &p)
 {
