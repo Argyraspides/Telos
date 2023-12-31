@@ -1,4 +1,5 @@
 #include "view.h"
+#include "shape_utils.h"
 #include "model.h"
 #include "BUILD_EMCC.h"
 #include <functional>

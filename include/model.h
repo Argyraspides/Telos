@@ -1,5 +1,6 @@
 #pragma once
 #include "shape.h"
+#include "point_cloud_convex.h"
 #include <mutex>
 #include <memory>
 

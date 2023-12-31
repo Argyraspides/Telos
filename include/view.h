@@ -5,6 +5,7 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
 #include "shape.h"
+#include "point_cloud_convex.h"
 #include "model.h"
 #include "application_params.h"
 #include <vector>
