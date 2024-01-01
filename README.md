@@ -8,7 +8,7 @@
 
 
 This is the source code for a highly improved version of my previous physics engine, which will also be able to run on any modern browser through the Emscripten toolchain (compilation into WebAssembly).
-It uses the SDL2 graphics library for graphics output and ImGui for the UI. Upon completion, you may use the engine in its full glory on my website [here](https://gaugamela.me). The engine is currently on the site
+It uses the SDL2 graphics library for graphics output and ImGui for the UI. Upon completion, you may use the engine in its full glory on my website [here](https://gaugamela.me/telos). The engine is currently on the site
 in an unfinished state, if you'd like to check it out.
 
 If you are using VSCode to check out the project, I have included the .vscode folder to take care of IntelliSense and all necessary include directories for both the emcc and gcc compiler for you :)
