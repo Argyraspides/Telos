@@ -7,7 +7,7 @@ class Controller
 {
 
 private:
-    Model *model;
+    Model *m_model;
 
 public:
     Controller(Model *model);
@@ -17,6 +17,7 @@ public:
     void UpdateModel_RemoveShape(long long shapeID);                       // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID
     void UpdateModel_ForwardTick();
     void UpdateModel_BackwardTick();
+    void UpdateModel_ChangeElasticity(double e);
 
     void ShutModel();         // SHUTS OFF THE MODEL
     void PauseUnpauseModel(); // FLIPS THE MODELS PAUSE STATE

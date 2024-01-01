@@ -9,7 +9,7 @@
 
 Controller::Controller(Model *model)
 {
-    this->model = model;
+    m_model = model;
 }
 
 void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset)
@@ -24,12 +24,12 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset
         pointCloudShape_Cvx->moveShape(offset);
 
         // Add to the models point cloud shape convex (PCSVX) list and generic shape list
-        this->model->getPCSCVXShapeList().push_back(pointCloudShape_Cvx);
-        this->model->getShapeList().push_back(shape);
+        m_model->getPCSCVXShapeList().push_back(pointCloudShape_Cvx);
+        m_model->getShapeList().push_back(shape);
 
         // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
-        pthread_mutex_unlock(&this->model->shapeListMutex);
-        pthread_mutex_unlock(&this->model->PCSCVXShapeListMutex);
+        pthread_mutex_unlock(&m_model->shapeListMutex);
+        pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
     }
     else if (id == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
@@ -43,9 +43,9 @@ void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
     long long shapeID = shape->getShapeID();
     if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
-        std::vector<std::shared_ptr<Shape>> &shapeList = this->model->getShapeList();
+        std::vector<std::shared_ptr<Shape>> &shapeList = m_model->getShapeList();
         // PCSCVX means "Point Cloud Shape Convex"
-        std::vector<std::shared_ptr<PointCloudShape_Cvx>> &PCSCVXList = this->model->getPCSCVXShapeList();
+        std::vector<std::shared_ptr<PointCloudShape_Cvx>> &PCSCVXList = m_model->getPCSCVXShapeList();
 
         // Free the pointers to the shapes and erase them from the vector
         shapeList[shapeID].reset();
@@ -63,8 +63,8 @@ void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
         Shape::ID_CTR--;
 
         // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
-        pthread_mutex_unlock(&this->model->shapeListMutex);
-        pthread_mutex_unlock(&this->model->PCSCVXShapeListMutex);
+        pthread_mutex_unlock(&m_model->shapeListMutex);
+        pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
     }
     else if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
@@ -78,78 +78,83 @@ void Controller::UpdateModel_RemoveShape(long long shapeID)
 
 void Controller::UpdateModel_ForwardTick()
 {
-    if (this->model->m_isPaused)
+    if (m_model->m_isPaused)
     {
-        this->model->updatePCSL(TIME_DIRECTION::FORWARD);
+        m_model->updatePCSL(TIME_DIRECTION::FORWARD);
     }
 }
 
 void Controller::UpdateModel_BackwardTick()
 {
-    if (this->model->m_isPaused)
+    if (m_model->m_isPaused)
     {
-        this->model->updatePCSL(TIME_DIRECTION::BACKWARD);
+        m_model->updatePCSL(TIME_DIRECTION::BACKWARD);
     }
+}
+
+void Controller::UpdateModel_ChangeElasticity(double e)
+{
+    m_model->m_collisionElasticity = e;
 }
 
 const std::vector<std::shared_ptr<Shape>> &Controller::RetrieveModel_ReadShapes()
 {
     // We don't need to lock the mutex as this is read-only
-    return this->model->m_shapeList;
+    return m_model->m_shapeList;
 }
 
 const int Controller::RetrieveModel_GetShapeCount()
 {
     // We don't need to lock the mutex as this is read-only
-    return this->model->m_shapeList.size();
+    return m_model->m_shapeList.size();
 }
 
 const Point Controller::RetrieveModel_GetMaxVelocity()
 {
-    return this->model->m_maxVel;
+    return m_model->m_maxVel;
 }
 
 const double Controller::RetrieveModel_GetMaxRotVelocity()
 {
-    return this->model->m_rotMax;
+    return m_model->m_rotMax;
 }
 
 const double Controller::RetrieveModel_GetTimeStep()
 {
-    return this->model->m_timeStep;
+    return m_model->m_timeStep;
 }
 
 const double Controller::RetrieveModel_GetCurrentTime()
 {
-    return this->model->m_time;
+    return m_model->m_time;
 }
 
 const double Controller::RetrieveModel_GetMaxEnergyViolation()
 {
-    return this->model->m_ENERGY_THRESHOLD;
+    return m_model->m_ENERGY_THRESHOLD;
 }
 
 const int Controller::RetrieveModel_GetMaxPCSPoints()
 {
-    return this->model->m_maxPCSPoints;
+    return m_model->m_maxPCSPoints;
 }
 
 void Controller::ShutModel()
 {
-    this->model->m_isRunning = false;
+    m_model->m_isRunning = false;
 }
 
 void Controller::PauseUnpauseModel()
 {
-    this->model->m_isPaused = !this->model->m_isPaused;
+    m_model->m_isPaused = !m_model->m_isPaused;
 }
 
 void Controller::PauseModel()
 {
-    this->model->m_isPaused = true;
+    m_model->m_isPaused = true;
 }
 
 void Controller::UnpauseModel()
 {
-    this->model->m_isPaused = false;
+    m_model->m_isPaused = false;
 }

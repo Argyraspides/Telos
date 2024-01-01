@@ -134,8 +134,10 @@ public:
     double m_timeStep = 1.0 / ENGINE_POLLING_RATE;
     const double m_ENERGY_THRESHOLD = 0.0000000001; // CONSERVATION OF ENERGY CAN BE VIOLATED BY THIS MUCH AS PER THE NATURE OF DOUBLE CALCULATIONS
     const double m_SEPARATION_SAFETY_FACTOR = 1.0;
+    double m_collisionElasticity = 1.0;
 
     Point m_maxVel = {2500.0, 2500.0};
     const double m_rotMax = 10.0f;
     const int m_maxPCSPoints = 100;
+
 };

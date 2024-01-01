@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <string>
 #include "cartesian.h"
 
 enum SHAPE_TYPE_IDENTIFIERS
@@ -69,4 +70,5 @@ public:
     Point m_vel;             // VELOCITY
     double m_mass;            // MASS
     double m_timeSpawned;   
+    std::string m_name;
 };

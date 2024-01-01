@@ -6,30 +6,35 @@
 
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
-    this->m_center = Utils::getCentroid(this->m_points);
-    this->m_rotInert = Utils::getRotInertia(this->m_points);
+    m_center = Utils::getCentroid(m_points);
+    m_rotInert = Utils::getRotInertia(m_points);
 }
 
 PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points, double timeSpawned) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
-    this->m_points = points;
-    this->m_initPoints = points;
-    this->m_center = Utils::getCentroid(this->m_points);
-    this->m_initPos = m_center;
-    this->m_time = 0.0f;
-    this->m_rotInert = Utils::getRotInertia(this->m_points);
-    this->m_timeSpawned = timeSpawned;
+    m_points = points;
+    m_initPoints = points;
+    m_center = Utils::getCentroid(m_points);
+    m_initPos = m_center;
+    m_time = 0.0f;
+    m_rotInert = Utils::getRotInertia(m_points);
+    m_timeSpawned = timeSpawned;
+
+    if (m_points.size() > Utils::shapeNames.size())
+        m_name = "Approximate Circle";
+    else
+        m_name = Utils::shapeNames.at(m_points.size());
 
     for (int i = 0; i < points.size(); i++)
     {
-        this->m_pointsRadial.push_back(Math::dist(m_points[i], this->m_center));
-        this->m_Deltas.push_back(this->m_points[i] - this->m_center);
+        m_pointsRadial.push_back(Math::dist(m_points[i], m_center));
+        m_Deltas.push_back(m_points[i] - m_center);
     }
 }
 
 std::vector<Point> PointCloudShape_Cvx::getPoints() const
 {
-    return this->m_points;
+    return m_points;
 }
 
 double PointCloudShape_Cvx::getEkrot()

@@ -2,6 +2,76 @@
 #include <algorithm>
 #include <iostream>
 
+const std::unordered_map<int, std::string> Utils::shapeNames =
+    {
+        {3, "Triangle"},
+        {4, "Rectangle"},
+        {5, "Pentagon"},
+        {6, "Hexagon"},
+        {7, "Heptagon"},
+        {8, "Octagon"},
+        {9, "Nonagon"},
+        {10, "Decagon"},
+        {11, "Hendecagon"},
+        {12, "Dodecagon"},
+        {13, "Tridecagon"},
+        {14, "Tetradecagon"},
+        {15, "Pentadecagon"},
+        {16, "Hexadecagon"},
+        {17, "Heptadecagon"},
+        {18, "Octadecagon"},
+        {19, "Enneadecagon"},
+        {20, "Icosagon"},
+        {21, "Icosikaihenagon"},
+        {22, "Icosikaidiagon"},
+        {23, "Icosikaitriagon"},
+        {24, "Icosikaitetragon"},
+        {25, "Icosikaipentagon"},
+        {26, "Icosikaihexagon"},
+        {27, "Icosikaiheptagon"},
+        {28, "Icosikaioctagon"},
+        {29, "Icosikaienneagon"},
+        {30, "Triacontagon"},
+        {31, "Triacontakaihenagon"},
+        {32, "Triacontakaidiagon"},
+        {33, "Triacontakaitriagon"},
+        {34, "Triacontakaitetragon"},
+        {35, "Triacontakaipentagon"},
+        {36, "Triacontakaihexagon"},
+        {37, "Triacontakaiheptagon"},
+        {38, "Triacontakaioctagon"},
+        {39, "Triacontakaienneagon"},
+        {40, "Tetracontagon"},
+        {41, "Tetracontakaihenagon"},
+        {42, "Tetracontakaidiagon"},
+        {43, "Tetracontakaitriagon"},
+        {44, "Tetracontakaitetragon"},
+        {45, "Tetracontakaipentagon"},
+        {46, "Tetracontakaihexagon"},
+        {47, "Tetracontakaiheptagon"},
+        {48, "Tetracontakaioctagon"},
+        {49, "Tetracontakaienneagon"},
+        {50, "Pentacontagon"},
+        {51, "Pentacontakaihenagon"},
+        {52, "Pentacontakaidiagon"},
+        {53, "Pentacontakaitriagon"},
+        {54, "Pentacontakaitetragon"},
+        {55, "Pentacontakaipentagon"},
+        {56, "Pentacontakaihexagon"},
+        {57, "Pentacontakaiheptagon"},
+        {58, "Pentacontakaioctagon"},
+        {59, "Pentacontakaienneagon"},
+        {60, "Hexacontagon"},
+        {61, "Heptacontagon"},
+        {62, "Octacontagon"},
+        {63, "Enneacontagon"},
+        {64, "Tetracontakaitetragon"},
+        {65, "Pentacontakaitetragon"},
+        {66, "Hexacontakaihexagon"},
+        {67, "Heptacontakaiheptagon"},
+        {68, "Octacontakaitoctagon"},
+        {69, "Enneacontakaienneagon"}};
+
 // For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
 std::vector<Point> Utils::convertToPointCloud(const std::shared_ptr<Shape> &shape)
 {
@@ -263,7 +333,7 @@ std::vector<Point> Utils::generateArbPoly2D(const std::string &s)
                 i++;
             }
 
-            if(num.size() == 0)
+            if (num.size() == 0)
             {
                 return fail;
             }
@@ -271,7 +341,7 @@ std::vector<Point> Utils::generateArbPoly2D(const std::string &s)
             size_t pos;
             xy[n] = std::stod(num, &pos);
 
-            if(pos == 0)
+            if (pos == 0)
             {
                 return fail;
             }

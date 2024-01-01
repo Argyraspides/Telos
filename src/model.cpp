@@ -7,16 +7,16 @@
 
 Model::Model()
 {
-    this->m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
+    m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
 
-    pthread_mutex_init(&this->shapeListMutex, nullptr);
-    pthread_mutex_init(&this->PCSCVXShapeListMutex, nullptr);
+    pthread_mutex_init(&shapeListMutex, nullptr);
+    pthread_mutex_init(&PCSCVXShapeListMutex, nullptr);
 }
 
 Model::~Model()
 {
-    pthread_mutex_destroy(&this->shapeListMutex);
-    pthread_mutex_destroy(&this->PCSCVXShapeListMutex);
+    pthread_mutex_destroy(&shapeListMutex);
+    pthread_mutex_destroy(&PCSCVXShapeListMutex);
 }
 
 // The engine can only handle shapes of one particular data structure at a time. Here we resolve what
@@ -24,9 +24,9 @@ Model::~Model()
 // types of shapes. By default the shape type is of type point cloud.
 void Model::run()
 {
-    this->m_isRunning = true;
-    this->m_isPaused = false;
-    if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    m_isRunning = true;
+    m_isPaused = false;
+    if (m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {
         // Control the loop to execute at the desired frequency
         const std::chrono::milliseconds frameDuration((long)(m_timeStep * 1000));
@@ -46,7 +46,7 @@ void Model::run()
         }
     }
 
-    else if (this->m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
+    else if (m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
         while (m_isRunning)
         {
@@ -60,18 +60,18 @@ void Model::updatePCSL(int timeDirection)
     // Calling "getPCSCVXShapeList()" locks access to the shape list.
     m_time += (m_timeStep * timeDirection);
 
-    int size = this->getPCSCVXShapeList().size();
+    int size = getPCSCVXShapeList().size();
 
     for (int i = 0; i < size; i++)
     {
-        this->m_PCSCVX_shapeList[i]->updateShape(m_timeStep, timeDirection);
+        m_PCSCVX_shapeList[i]->updateShape(m_timeStep, timeDirection);
     }
 
     for (int i = 0; i < size - 1; i++)
     {
         for (int j = i + 1; j < size; j++)
         {
-            CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*this->m_PCSCVX_shapeList[i], *this->m_PCSCVX_shapeList[j]);
+            CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*m_PCSCVX_shapeList[i], *m_PCSCVX_shapeList[j]);
             if (c.hasCollided)
             {
                 resolveCollisionOverlapPCSCVX(c);
@@ -82,7 +82,7 @@ void Model::updatePCSL(int timeDirection)
 
     for (int i = 0; i < size; i++)
     {
-        WallCollisionInfo_PCSCVX wci = isContactWallLinear(*this->m_PCSCVX_shapeList[i]);
+        WallCollisionInfo_PCSCVX wci = isContactWallLinear(*m_PCSCVX_shapeList[i]);
         if (wci.collided)
         {
             resolveOverlapCollisionPCSCVX_Wall_Linear(wci);
@@ -98,13 +98,13 @@ void Model::updatePCSL(int timeDirection)
 std::vector<std::shared_ptr<Shape>> &Model::getShapeList()
 {
     pthread_mutex_lock(&shapeListMutex);
-    return this->m_shapeList;
+    return m_shapeList;
 }
 // MAKE SURE TO CALL pthread_mutex_unlock() ONCE YOU ARE DONE ACCESSING THE LIST
 std::vector<std::shared_ptr<PointCloudShape_Cvx>> &Model::getPCSCVXShapeList()
 {
     pthread_mutex_lock(&PCSCVXShapeListMutex);
-    return this->m_PCSCVX_shapeList;
+    return m_PCSCVX_shapeList;
 }
 
 // Uses the SAT (Separation Axis Theorem) to detect collision
@@ -267,8 +267,7 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 
     Point v_p1 = v_ap1 - v_bp1;
 
-    double e = 1.0;
-    double elasExpr = (1.0f + e) * -1;
+    double elasExpr = (1.0f + m_collisionElasticity) * -1;
     double numerator = Math::dotProd(v_p1 * elasExpr, n);
     double denominator = (1.0 / m_a) + (1.0 / m_b) + (Math::crossProdSquare(r_ap, n) / i_a) + (Math::crossProdSquare(r_bp, n) / i_b);
     double j = numerator / denominator;
@@ -331,8 +330,6 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX &
 void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
 {
 
-    // perfect elasticity
-    double e = 1.0f;
     // X and Y components of the velocity of the collision point contributed to by rotation
     Point v_ap_rot = Math::instantVelRot2D(wci.collisionPoint, wci.shape->m_center, wci.shape->m_rot);
     // Velocity of the collision point (shapes velocity + the points instantaneous rotational velocity)
@@ -361,9 +358,9 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
     double m_a = wci.shape->m_mass;
     double i_a = wci.shape->m_rotInert;
     // Elasticity (e) part of the eq
-    double elas = (1.0f + e) * -1;
+    double elasExpr = (1.0f + m_collisionElasticity) * -1;
     // -(1+e)*v_ap1 . n
-    double numerator = Math::dotProd(v_ap1 * elas, n);
+    double numerator = Math::dotProd(v_ap1 * elasExpr, n);
     double cp_2 = Math::crossProdSquare(r_ap, n);
     // (1/m_a) + (r_ap x n)^2 / I_a
     double denominator = (1.0f / m_a) + (cp_2 / i_a);

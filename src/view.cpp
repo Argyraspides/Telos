@@ -232,8 +232,8 @@ void View::UI_Interactive_AddRegularPolygonButton()
     ImGui::Text("Regular Polygon");
     static float radius = 50;
     static float sides = 5;
-    static float xVel = 2.0f;
-    static float yVel = 11.0f;
+    static float xVel = 750.0f;
+    static float yVel = 250.0f;
     static float rot = 0.0f;
     static float mass = 1.0f;
 
@@ -246,6 +246,10 @@ void View::UI_Interactive_AddRegularPolygonButton()
 
     if (ImGui::Button("Add RP"))
     {
+        UI_HandleMaxInputs(xVel, yVel, rot);
+        if (sides > m_controller->RetrieveModel_GetMaxPCSPoints())
+            sides = m_controller->RetrieveModel_GetMaxPCSPoints();
+
         PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), this->m_controller->RetrieveModel_GetCurrentTime());
         // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
         // on the order of once per second, so we divide the values by the engines polling rate.
@@ -253,8 +257,6 @@ void View::UI_Interactive_AddRegularPolygonButton()
 
         // It shouldn't really be the views job to determine what is a maximum input -- that should be decided for the engine.
         // Think of a better solution in future.
-
-        UI_HandleMaxInputs(xVel, yVel, rot);
 
         Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
         Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
@@ -276,9 +278,9 @@ void View::UI_Interactive_AddRectangleButton()
 {
     ImGui::Text("Rectangle");
     static float w = 250, h = 50;
-    static float xVel = 3.0f;
-    static float yVel = 2.0f;
-    static float rot = 0.02f;
+    static float xVel = 1000.0f;
+    static float yVel = 2500.0f;
+    static float rot = 0.5f;
     static float mass = 1.0f;
     ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
     ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
@@ -312,10 +314,10 @@ void View::UI_Interactive_AddRectangleButton()
 void View::UI_Interactive_AddArbPolygonInput()
 {
     ImGui::Text("Arbitrary Shape");
-    static char inputBuf[256] = "(0,0),(5,0),(5,5),(0,5)";
-    static float xVel = 3.0f;
-    static float yVel = 2.0f;
-    static float rot = 0.02f;
+    static char inputBuf[256] = "(0,0),(200,100),(400,300),(500,500),(300,700),(100,600)";
+    static float xVel = 69.0f;
+    static float yVel = 69.0f;
+    static float rot = 1.0f;
     static float mass = 1.0f;
     static ImVec4 invalidInputTxtColor = TELOS_IMGUI_CLEAR;
 
@@ -328,7 +330,7 @@ void View::UI_Interactive_AddArbPolygonInput()
     if (ImGui::Button("Add AS"))
     {
         std::vector<Point> pts = Utils::generateArbPoly2D(std::string(inputBuf));
-        if (pts.size() > 1)
+        if (pts.size() > 1 && pts.size() <= m_controller->RetrieveModel_GetMaxPCSPoints())
         {
             UI_HandleMaxInputs(xVel, yVel, rot);
 
@@ -362,7 +364,7 @@ void View::UI_Interactive_AddArbPolygonInput()
 
 void View::UI_ConstructMenuModule()
 {
-    static float windowWidth = SCREEN_WIDTH * 0.25;
+    static float windowWidth = SCREEN_WIDTH * 0.275;
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
     ImGui::SetWindowSize(ImVec2(windowWidth, ImGui::GetIO().DisplaySize.y));
@@ -386,7 +388,7 @@ void View::UI_HandleMaxInputs(float &xVel, float &yVel, float &rot)
 
 void View::UI_ModelInfo()
 {
-
+    static float e = 1.0f;
     if (ImGui::CollapsingHeader("Engine Parameters", ImGuiTreeNodeFlags_CollapsingHeader))
     {
         ImGui::TextColored(TELOS_IMGUI_WHITE, "Engine time step: %.3fs", m_controller->RetrieveModel_GetTimeStep());
@@ -395,8 +397,11 @@ void View::UI_ModelInfo()
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed velocities: (%.3f, %.3f) px/s", m_controller->RetrieveModel_GetMaxVelocity().x, m_controller->RetrieveModel_GetMaxVelocity().y);
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed rotational velocity: %.3f rad/s", m_controller->RetrieveModel_GetMaxRotVelocity());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
+        ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum shape vertices: %i", m_controller->RetrieveModel_GetMaxPCSPoints());
         ImGui::NewLine();
         ImGui::ColorEdit3("Background Color", (float *)&clearColor);
+        ImGui::SliderFloat("Collision Elasticity", &e, 0.0f, 1.0f);
+        m_controller->UpdateModel_ChangeElasticity(e);
     }
 }
 
@@ -420,6 +425,7 @@ void View::UI_FPS(ImGuiIO &io)
         ImVec2 textPosition = ImVec2((ImGui::GetWindowWidth() - textSize.x) * 0.5f, (ImGui::GetWindowHeight() - textSize.y) * 0.5f);
         ImGui::SetCursorPos(textPosition);
 
+        //
         ImGui::Text("%.1f FPS", io.Framerate);
 
         ImGui::End();
@@ -473,8 +479,9 @@ void View::UI_ShapeInfo()
             const double ek = Utils::getTranslationalKineticEnergy(*shape);
             const double ekrot = Utils::getRotationalKineticEnergy(*shape);
             const double timeSpawned = shape->m_timeSpawned;
+            std::string shapeName = shape->m_name;
 
-            ImGui::TextColored(TELOS_IMGUI_RED, "Shape #%lld", id);
+            ImGui::TextColored(TELOS_IMGUI_RED, "Shape #%lld (%s)", id, shapeName.c_str());
             ImGui::TextColored(TELOS_IMGUI_WHITE, "Time added: %.3fs", timeSpawned);
             ImGui::TextColored(TELOS_IMGUI_WHITE, "Center: (%f, %f)", center.x, center.y);
             ImGui::TextColored(TELOS_IMGUI_BLUE, "Velocity: (%f, %f) px/s", vel.x * ENGINE_POLLING_RATE, vel.y * ENGINE_POLLING_RATE);

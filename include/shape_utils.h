@@ -2,6 +2,7 @@
 #include "shape.h"
 #include <string>
 #include "point_cloud_convex.h"
+#include <unordered_map>
 
 // Utilities class for various operations on shapes, e.g. converting a unique shape data structure into the principle point cloud,
 // calculating the centroid of various shapes, checking if a shape is convex, etc
@@ -29,4 +30,5 @@ public:
 
 public:
     static std::vector<Point> generateArbPoly2D(const std::string &s);
+    static const std::unordered_map<int, std::string> shapeNames;
 };
