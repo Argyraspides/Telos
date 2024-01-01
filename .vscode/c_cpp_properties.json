@@ -9,6 +9,7 @@
             "includePath": [
                 "${workspaceFolder}/lib/SDL2/include/**",
                 "${workspaceFolder}/lib/imgui/**",
+                "${workspaceFolder}/lib/SDL2_gfx-1.0.4/**",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/lib/emsdk/upstream/emscripten/cache/sysroot/include/**"
             ]

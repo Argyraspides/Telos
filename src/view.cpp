@@ -1,5 +1,6 @@
 #include "view.h"
 #include "telos_imgui_colors.h"
+#include "SDL2_gfxPrimitives.h"
 #include "shape_utils.h"
 #include "model.h"
 #include "BUILD_EMCC.h"
@@ -339,7 +340,6 @@ void View::UI_ConstructMenuModule()
     ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed velocities: (%.3f, %.3f) px/s", m_controller->RetrieveModel_GetMaxVelocity().x, m_controller->RetrieveModel_GetMaxVelocity().y);
     ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed rotational velocity: %.3f rad/s", m_controller->RetrieveModel_GetMaxRotVelocity());
     ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
-    
 
     ImGui::NewLine();
 
@@ -431,16 +431,25 @@ void View::UI_ShapeInfo()
 
 void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
 {
-    SDL_SetRenderDrawColor(renderer, currentShapeColor.x * pixelLimit, currentShapeColor.y * pixelLimit, currentShapeColor.z * pixelLimit, currentShapeColor.w * pixelLimit);
 
-    for (size_t i = 0; i < points.size() - 1; ++i)
+    Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
+    Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
+    Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
+    Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
+
+    Sint16 *vx = new Sint16[points.size()];
+    Sint16 *vy = new Sint16[points.size()];
+
+    for (int i = 0; i < points.size(); i++)
     {
-        SDL_RenderDrawLine(renderer, static_cast<int>(points[i].x), static_cast<int>(points[i].y),
-                           static_cast<int>(points[i + 1].x), static_cast<int>(points[i + 1].y));
+        vx[i] = points[i].x;
+        vy[i] = points[i].y;
     }
 
-    SDL_RenderDrawLine(renderer, static_cast<int>(points.back().x), static_cast<int>(points.back().y),
-                       static_cast<int>(points.front().x), static_cast<int>(points.front().y));
+    filledPolygonRGBA(renderer, vx, vy, points.size(), r, g, b, a);
+
+    delete[] vx;
+    delete[] vy;
 }
 
 void View::Render_Model(SDL_Renderer *renderer)
