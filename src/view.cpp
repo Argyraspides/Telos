@@ -60,13 +60,14 @@ void View::Render()
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
     // Color is #1e1e1e
-    ImVec4 clear_color = ImVec4(30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f);
 
     pthread_t inputThreadId;
     pthread_create(&inputThreadId, nullptr, &View::threadEntry, this);
 
     const std::chrono::milliseconds frameDuration(1000 / VIEW_POLLING_RATE);
     auto startTime = std::chrono::high_resolution_clock::now();
+
+    clearColor = TELOS_IMGUI_DARKGRAY;
 
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
@@ -121,7 +122,7 @@ void View::Render()
             // Rendering
             ImGui::Render();
             SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-            SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
+            SDL_SetRenderDrawColor(renderer, (Uint8)(clearColor.x * 255), (Uint8)(clearColor.y * 255), (Uint8)(clearColor.z * 255), (Uint8)(clearColor.w * 255));
             SDL_RenderClear(renderer);
 
             // RENDER OBJECTS HERE ***************
@@ -235,10 +236,16 @@ void View::UI_Interactive_AddRegularPolygonButton()
 
     if (ImGui::Button("Add RP"))
     {
-        PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides));
+        PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), this->m_controller->RetrieveModel_GetCurrentTime());
         // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
         // on the order of once per second, so we divide the values by the engines polling rate.
         // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
+
+        // It shouldn't really be the views job to determine what is a maximum input -- that should be decided for the engine.
+        // Think of a better solution in future.
+
+        UI_HandleMaxInputs(xVel, yVel, rot);
+
         regularPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         regularPoly.m_rot = rot / ENGINE_POLLING_RATE;
         regularPoly.m_mass = mass;
@@ -264,7 +271,9 @@ void View::UI_Interactive_AddRectangleButton()
 
     if (ImGui::Button("Add Rect"))
     {
-        PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h));
+        UI_HandleMaxInputs(xVel, yVel, rot);
+
+        PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), this->m_controller->RetrieveModel_GetCurrentTime());
         Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
         Rectangle.m_mass = mass;
@@ -289,14 +298,15 @@ void View::UI_Interactive_AddArbPolygonInput()
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
     ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
-    ImGui::TextColored(invalidInputTxtColor, "Invalid input!");
 
     if (ImGui::Button("Add AS"))
     {
         std::vector<Point> pts = Utils::generateArbPoly2D(std::string(inputBuf));
         if (pts.size() > 1)
         {
-            PointCloudShape_Cvx arbPoly(pts);
+            UI_HandleMaxInputs(xVel, yVel, rot);
+
+            PointCloudShape_Cvx arbPoly(pts, this->m_controller->RetrieveModel_GetCurrentTime());
             arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
             arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
             arbPoly.m_mass = mass;
@@ -305,12 +315,16 @@ void View::UI_Interactive_AddArbPolygonInput()
             this->m_controller->UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
 
             invalidInputTxtColor = TELOS_IMGUI_CLEAR;
+            DBL_MAX;
         }
         else
         {
             invalidInputTxtColor = TELOS_IMGUI_RED;
         }
     }
+
+    ImGui::TextColored(invalidInputTxtColor, "Invalid input!");
+
 }
 
 void View::UI_ConstructMenuModule()
@@ -319,9 +333,24 @@ void View::UI_ConstructMenuModule()
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
     ImGui::SetWindowSize(ImVec2(windowWidth, ImGui::GetIO().DisplaySize.y));
+
+    ImGui::TextColored(TELOS_IMGUI_WHITE, "Engine time step: %.3fs", m_controller->RetrieveModel_GetTimeStep());
+    ImGui::TextColored(TELOS_IMGUI_WHITE, "Time elapsed: %.3fs", m_controller->RetrieveModel_GetCurrentTime());
+    ImGui::NewLine();
+
     UI_Interactive_CommonShapeSubMenu();
     UI_ShapeInfo();
     ImGui::End();
+}
+
+void View::UI_HandleMaxInputs(float &xVel, float &yVel, float &rot)
+{
+    if (xVel > m_controller->RetrieveModel_GetMaxVelocity().x)
+        xVel = m_controller->RetrieveModel_GetMaxVelocity().x;
+    if (yVel > m_controller->RetrieveModel_GetMaxVelocity().y)
+        yVel = m_controller->RetrieveModel_GetMaxVelocity().y;
+    if (rot > m_controller->RetrieveModel_GetMaxRotVelocity())
+        rot = m_controller->RetrieveModel_GetMaxRotVelocity();
 }
 
 void View::UI_Update()
@@ -357,15 +386,19 @@ void View::UI_ShapeInfo()
         {
             const Point &center = shape->m_center;
             const Point &vel = shape->m_vel;
+            const double rot = shape->m_rot;
             const double mass = shape->m_mass;
             const long long id = shape->m_shapeID;
             const double rotInert = shape->m_rotInert;
             const double ek = Utils::getTranslationalKineticEnergy(*shape);
             const double ekrot = Utils::getRotationalKineticEnergy(*shape);
+            const double timeSpawned = shape->m_timeSpawned;
 
             ImGui::TextColored(TELOS_IMGUI_RED, "Shape #%lld", id);
+            ImGui::TextColored(TELOS_IMGUI_WHITE, "Time added: %.3fs", timeSpawned);
             ImGui::TextColored(TELOS_IMGUI_WHITE, "Center: (%f, %f)", center.x, center.y);
-            ImGui::TextColored(TELOS_IMGUI_BLUE, "Velocity: (%f, %f) px/s", vel.x, vel.y);
+            ImGui::TextColored(TELOS_IMGUI_BLUE, "Velocity: (%f, %f) px/s", vel.x * ENGINE_POLLING_RATE, vel.y * ENGINE_POLLING_RATE);
+            ImGui::TextColored(TELOS_IMGUI_LIGHTGRAY2, "Rotational Velocity: %f rad/s", rot * ENGINE_POLLING_RATE);
             ImGui::TextColored(TELOS_IMGUI_GREEN, "Mass: %f kg", mass);
             ImGui::TextColored(TELOS_IMGUI_PURPLE, "Rotational Inertia: %f ML^2", rotInert);
             ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Rotational Kinetic Energy: %f J", ekrot);
@@ -463,12 +496,14 @@ void View::SDL_DragShape(SDL_Event &event)
             if (Utils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
+                this->clearColor = TELOS_IMGUI_LIGHTGRAY;
                 while (true)
                 {
                     SDL_PollEvent(&event);
                     if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
                     {
                         this->m_controller->UnpauseModel();
+                        this->clearColor = TELOS_IMGUI_DARKGRAY;
                         break;
                     }
                     SDL_GetMouseState(&mouseX, &mouseY);
@@ -502,6 +537,17 @@ void View::SDL_Pause(SDL_Event &event)
 {
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
     {
-        this->m_controller->PauseUnpauseModel();
+        if (!enginePaused)
+        {
+            this->clearColor = TELOS_IMGUI_LIGHTGRAY;
+            this->m_controller->PauseModel();
+            enginePaused = true;
+        }
+        else
+        {
+            this->clearColor = TELOS_IMGUI_DARKGRAY;
+            this->m_controller->UnpauseModel();
+            enginePaused = false;
+        }
     }
 }

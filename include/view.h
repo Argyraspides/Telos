@@ -58,6 +58,7 @@ private:
 
     void UI_Tutorial();
     void UI_ShapeInfo();
+    void UI_HandleMaxInputs(float &xVel, float &yVel, float &rot);
 
     void UI_ConstructMenuModule();
 
@@ -86,7 +87,9 @@ private:
     bool done = false;
     bool inputDone = false;
     bool renderDone = false;
+    bool enginePaused = false;
     static int ImGuiID;
 
     static ImVec4 currentShapeColor;
+    ImVec4 clearColor;
 };

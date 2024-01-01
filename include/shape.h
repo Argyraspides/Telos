@@ -68,4 +68,5 @@ public:
     Point m_center;          // CENTER OF SHAPE
     Point m_vel;             // VELOCITY
     double m_mass;            // MASS
+    double m_timeSpawned;   
 };

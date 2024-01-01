@@ -12,3 +12,6 @@ auto TELOS_IMGUI_BLUE = ImVec4(0.0f / pixelLimit, 85.0f / pixelLimit, 255.0f / p
 auto TELOS_IMGUI_YELLOW = ImVec4(241.0f / pixelLimit, 255.0f / pixelLimit, 0.0f / pixelLimit, 1.0f);
 auto TELOS_IMGUI_PURPLE = ImVec4(192.0f / pixelLimit, 0.0f / pixelLimit, 255.0f / pixelLimit, 1.0f);
 auto TELOS_IMGUI_LIGHTBLUE = ImVec4(0.0f / pixelLimit, 190.0f / pixelLimit, 255.0f / pixelLimit, 1.0f);
+auto TELOS_IMGUI_DARKGRAY = ImVec4(30.0f / pixelLimit, 30.0f / pixelLimit, 30.0f / pixelLimit, 30.0f / pixelLimit);
+auto TELOS_IMGUI_LIGHTGRAY = ImVec4(90.0f / pixelLimit, 90.0f / pixelLimit, 90.0f / pixelLimit, 90.0f / pixelLimit);
+auto TELOS_IMGUI_LIGHTGRAY2 = ImVec4(180.0f / pixelLimit, 180.0f / pixelLimit, 180.0f / pixelLimit, 180.0f / pixelLimit);

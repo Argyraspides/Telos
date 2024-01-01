@@ -88,6 +88,26 @@ const int Controller::RetrieveModel_GetShapeCount()
     return this->model->m_shapeList.size();
 }
 
+const Point Controller::RetrieveModel_GetMaxVelocity()
+{
+    return this->model->m_maxVel;
+}
+
+const double Controller::RetrieveModel_GetMaxRotVelocity()
+{
+    return this->model->m_rotMax;
+}
+
+const double Controller::RetrieveModel_GetTimeStep()
+{
+    return this->model->m_timeStep;
+}
+
+const double Controller::RetrieveModel_GetCurrentTime()
+{
+    return this->model->m_time;
+}
+
 void Controller::ShutModel()
 {
     this->model->m_isRunning = false;

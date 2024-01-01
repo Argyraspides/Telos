@@ -22,4 +22,9 @@ public:
 
     const std::vector<std::shared_ptr<Shape>> &RetrieveModel_ReadShapes(); // RETRIEVES LIST OF SHAPES FROM THE MODEL AS READ-ONLY
     const int RetrieveModel_GetShapeCount();                               // RETURNS NUMBER OF SHAPES FROM THE MODEL
+    const Point RetrieveModel_GetMaxVelocity();
+    const double RetrieveModel_GetMaxRotVelocity();
+    const double RetrieveModel_GetTimeStep();
+    const double RetrieveModel_GetCurrentTime();
+
 };

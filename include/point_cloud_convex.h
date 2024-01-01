@@ -8,7 +8,7 @@ class PointCloudShape_Cvx : public Shape
 {
 
 public:
-    PointCloudShape_Cvx(const std::vector<Point> &points);
+    PointCloudShape_Cvx(const std::vector<Point> &points, double timeSpawned);
     PointCloudShape_Cvx();
 
 public:
