@@ -65,6 +65,10 @@ void View::Render()
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
+    ImGuiStyle &style = ImGui::GetStyle();
+    ImVec4 separatorColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    style.Colors[ImGuiCol_Separator] = separatorColor;
+
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
@@ -491,8 +495,9 @@ void View::UI_ShapeInfo()
             ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Rotational Kinetic Energy: %f J", ekrot);
             ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Translational Kinetic Energy: %f J", ek);
             ImGui::TextColored(TELOS_IMGUI_LIGHTBLUE, "Total Kinetic Energy: %f J", ek + ekrot);
-
-            ImGui::Text("\n");
+            ImGui::NewLine();
+            ImGui::Separator();
+            ImGui::NewLine();
         }
     }
 }
