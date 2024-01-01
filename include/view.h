@@ -58,6 +58,7 @@ private:
     void UI_Interactive_AddArbPolygonInput();
 
     void UI_Tutorial();
+    void UI_ModelInfo();
     void UI_ShapeInfo();
     void UI_HandleMaxInputs(float &xVel, float &yVel, float &rot);
 

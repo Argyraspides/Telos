@@ -342,17 +342,10 @@ void View::UI_ConstructMenuModule()
     ImGui::SetWindowPos(ImVec2(0, 0));
     ImGui::SetWindowSize(ImVec2(windowWidth, ImGui::GetIO().DisplaySize.y));
 
-    ImGui::TextColored(TELOS_IMGUI_WHITE, "Engine time step: %.3fs", m_controller->RetrieveModel_GetTimeStep());
-    ImGui::TextColored(TELOS_IMGUI_WHITE, "Time elapsed: %.3fs", m_controller->RetrieveModel_GetCurrentTime());
-    ImGui::NewLine();
-    ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed velocities: (%.3f, %.3f) px/s", m_controller->RetrieveModel_GetMaxVelocity().x, m_controller->RetrieveModel_GetMaxVelocity().y);
-    ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed rotational velocity: %.3f rad/s", m_controller->RetrieveModel_GetMaxRotVelocity());
-    ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
-
-    ImGui::NewLine();
-
+    UI_ModelInfo();
     UI_Interactive_CommonShapeSubMenu();
     UI_ShapeInfo();
+
     ImGui::End();
 }
 
@@ -364,6 +357,22 @@ void View::UI_HandleMaxInputs(float &xVel, float &yVel, float &rot)
         yVel = m_controller->RetrieveModel_GetMaxVelocity().y;
     if (rot > m_controller->RetrieveModel_GetMaxRotVelocity())
         rot = m_controller->RetrieveModel_GetMaxRotVelocity();
+}
+
+void View::UI_ModelInfo()
+{
+
+    if (ImGui::CollapsingHeader("Engine Parameters", ImGuiTreeNodeFlags_CollapsingHeader))
+    {
+        ImGui::TextColored(TELOS_IMGUI_WHITE, "Engine time step: %.3fs", m_controller->RetrieveModel_GetTimeStep());
+        ImGui::TextColored(TELOS_IMGUI_WHITE, "Time elapsed: %.3fs", m_controller->RetrieveModel_GetCurrentTime());
+        ImGui::NewLine();
+        ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed velocities: (%.3f, %.3f) px/s", m_controller->RetrieveModel_GetMaxVelocity().x, m_controller->RetrieveModel_GetMaxVelocity().y);
+        ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed rotational velocity: %.3f rad/s", m_controller->RetrieveModel_GetMaxRotVelocity());
+        ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
+        ImGui::NewLine();
+        ImGui::ColorEdit3("Background Color", (float*)&clearColor);
+    }
 }
 
 void View::UI_Update()
@@ -389,11 +398,11 @@ void View::UI_Tutorial()
             "Esc: pauses the engine\n"
             "Left click hold: drag shapes around\n"
             "Right click: deletes a shape\n"
-            "Left and right arrows: moves the engine backward/forward by one time step\n";
+            "Left and right arrows: move backward/forward by one time step\n";
 
         ImGui::SetNextWindowPos(ImVec2(center.x, center.y), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Tutorial", &showTutorial); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text(tutText);
+        ImGui::Begin("Tutorial", &showTutorial);
+        ImGui::Text("%s", tutText);
 
         if (ImGui::Button("Close"))
             showTutorial = false;
@@ -452,8 +461,6 @@ void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> poi
     }
 
     filledPolygonRGBA(renderer, m_vx, m_vy, points.size(), r, g, b, a);
-
-    
 }
 
 void View::Render_Model(SDL_Renderer *renderer)
