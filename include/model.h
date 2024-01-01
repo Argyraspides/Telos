@@ -115,7 +115,7 @@ public:
     bool m_isPaused;                    // ENGINE PAUSE CONDITIONAL
     SHAPE_TYPE_IDENTIFIERS m_shapeType; // CURRENT TYPE OF SHAPE THAT THE ENGINE IS DEALING WITH, E.G. POINT CLOUD SHAPES
 
-    void updatePCSL(); // UPDATES THE POINT CLOUD SHAPE LIST (PCSL)
+    void updatePCSL(int timeDirection); // UPDATES THE POINT CLOUD SHAPE LIST (PCSL)
 
     bool isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2);                // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
     CollisionInfo_PCSCVX isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED AND RETURNS COLLISION INFORMATION

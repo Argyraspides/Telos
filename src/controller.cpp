@@ -76,6 +76,22 @@ void Controller::UpdateModel_RemoveShape(long long shapeID)
 {
 }
 
+void Controller::UpdateModel_ForwardTick()
+{
+    if (this->model->m_isPaused)
+    {
+        this->model->updatePCSL(TIME_DIRECTION::FORWARD);
+    }
+}
+
+void Controller::UpdateModel_BackwardTick()
+{
+    if (this->model->m_isPaused)
+    {
+        this->model->updatePCSL(TIME_DIRECTION::BACKWARD);
+    }
+}
+
 const std::vector<std::shared_ptr<Shape>> &Controller::RetrieveModel_ReadShapes()
 {
     // We don't need to lock the mutex as this is read-only

@@ -324,7 +324,6 @@ void View::UI_Interactive_AddArbPolygonInput()
     }
 
     ImGui::TextColored(invalidInputTxtColor, "Invalid input!");
-
 }
 
 void View::UI_ConstructMenuModule()
@@ -364,12 +363,23 @@ void View::UI_Tutorial()
 
     if (showTutorial)
     {
+        static const char *tutText =
+            "Welcome to Telos! A 2D rigidbody physics engine\n\n"
+
+            "While largely incomplete, with many features to come,\n"
+            "the engine is functional and you may play around with\n"
+            "it as development progresses.\n\n"
+
+            "Controls:\n\n"
+
+            "Esc: pauses the engine\n"
+            "Left click hold: drag shapes around\n"
+            "Right click: deletes a shape\n"
+            "Left and right arrows: moves the engine backward/forward by one time step\n";
+
         ImGui::SetNextWindowPos(ImVec2(center.x, center.y), ImGuiCond_FirstUseEver);
         ImGui::Begin("Tutorial", &showTutorial); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("Welcome to Telos! A 2D rigidbody physics engine\n\n");
-        ImGui::Text("While largely incomplete, with many features to come,\nthe engine is functional and you may play around with \nit as development progresses\n\n");
-        ImGui::Text("Controls:\n");
-        ImGui::Text("Esc: Pause the engine\nLeft click hold: Drag shapes around\nRight click: Delete a shape\n\nEnjoy!");
+        ImGui::Text(tutText);
 
         if (ImGui::Button("Close"))
             showTutorial = false;
@@ -480,6 +490,7 @@ void View::SDL_ViewportHandler(SDL_Event &event)
     SDL_DragShape(event);
     SDL_RemoveShape(event);
     SDL_Pause(event);
+    SDL_TickModel(event);
 }
 
 void View::SDL_DragShape(SDL_Event &event)
@@ -549,5 +560,17 @@ void View::SDL_Pause(SDL_Event &event)
             this->m_controller->UnpauseModel();
             enginePaused = false;
         }
+    }
+}
+
+void View::SDL_TickModel(SDL_Event &event)
+{
+    if (event.type == SDL_KEYDOWN && (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d))
+    {
+        this->m_controller->UpdateModel_ForwardTick();
+    }
+    else if (event.type == SDL_KEYDOWN && (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a))
+    {
+        this->m_controller->UpdateModel_BackwardTick();
     }
 }

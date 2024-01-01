@@ -40,8 +40,7 @@ void Model::run()
             if (elapsed >= frameDuration && !m_isPaused)
             {
                 // Update all shapes including their positions, resolve their collisions, etc
-                updatePCSL();
-                m_time += m_timeStep;
+                updatePCSL(TIME_DIRECTION::FORWARD);
                 startTime = std::chrono::high_resolution_clock::now();
             }
         }
@@ -55,15 +54,17 @@ void Model::run()
     }
 }
 // Update Point Cloud Shape List
-void Model::updatePCSL()
+void Model::updatePCSL(int timeDirection)
 {
     // Translate the shapes
     // Calling "getPCSCVXShapeList()" locks access to the shape list.
+    m_time += (m_timeStep * timeDirection);
+
     int size = this->getPCSCVXShapeList().size();
 
     for (int i = 0; i < size; i++)
     {
-        this->m_PCSCVX_shapeList[i]->updateShape(m_timeStep, TIME_DIRECTION::FORWARD);
+        this->m_PCSCVX_shapeList[i]->updateShape(m_timeStep, timeDirection);
     }
 
     for (int i = 0; i < size - 1; i++)

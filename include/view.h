@@ -70,6 +70,7 @@ private:
     void SDL_DragShape(SDL_Event &event);       // ALLOWS USER TO DRAG SHAPES AROUND THE VIEWPORT
     void SDL_RemoveShape(SDL_Event &event);     // ALLOWS USER TO REMOVE SHAPES FROM THE WORLD
     void SDL_Pause(SDL_Event &event);           // ALLOWS USER TO PAUSE THE MODEL
+    void SDL_TickModel(SDL_Event &event);
 
 private:
     Controller *m_controller; // CONTROLLER INTERFACE TO MANIPULATE AND/OR RETRIEVE DATA FROM THE MODEL
