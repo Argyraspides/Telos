@@ -129,6 +129,11 @@ const double Controller::RetrieveModel_GetMaxEnergyViolation()
     return this->model->m_ENERGY_THRESHOLD;
 }
 
+const int Controller::RetrieveModel_GetMaxPCSPoints()
+{
+    return this->model->m_maxPCSPoints;
+}
+
 void Controller::ShutModel()
 {
     this->model->m_isRunning = false;

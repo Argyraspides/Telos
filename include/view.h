@@ -27,6 +27,7 @@ class View
 
 public:
     View(Controller *controller);
+    ~View();
     static void *threadEntry(void *instance)
     {
         reinterpret_cast<View *>(instance)->EventHandlingLoop();
@@ -93,4 +94,7 @@ private:
 
     static ImVec4 currentShapeColor;
     ImVec4 clearColor;
+
+    Sint16 *m_vx;
+    Sint16 *m_vy;
 };

@@ -22,6 +22,14 @@ ImVec4 View::currentShapeColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 View::View(Controller *controller)
 {
     this->m_controller = controller;
+    this->m_vx = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
+    this->m_vy = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
+}
+
+View::~View()
+{
+    delete[] m_vx;
+    delete[] m_vy;
 }
 
 // **************************************************************************************************************************************************************************
@@ -437,19 +445,15 @@ void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> poi
     Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
     Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
 
-    Sint16 *vx = new Sint16[points.size()];
-    Sint16 *vy = new Sint16[points.size()];
-
     for (int i = 0; i < points.size(); i++)
     {
-        vx[i] = points[i].x;
-        vy[i] = points[i].y;
+        m_vx[i] = points[i].x;
+        m_vy[i] = points[i].y;
     }
 
-    filledPolygonRGBA(renderer, vx, vy, points.size(), r, g, b, a);
+    filledPolygonRGBA(renderer, m_vx, m_vy, points.size(), r, g, b, a);
 
-    delete[] vx;
-    delete[] vy;
+    
 }
 
 void View::Render_Model(SDL_Renderer *renderer)

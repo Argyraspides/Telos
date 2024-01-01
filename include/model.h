@@ -137,4 +137,5 @@ public:
 
     Point m_maxVel = {2500.0, 2500.0};
     const double m_rotMax = 10.0f;
+    const int m_maxPCSPoints = 100;
 };

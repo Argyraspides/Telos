@@ -30,4 +30,5 @@ public:
     const double RetrieveModel_GetTimeStep();
     const double RetrieveModel_GetCurrentTime();
     const double RetrieveModel_GetMaxEnergyViolation();
+    const int RetrieveModel_GetMaxPCSPoints();
 };
