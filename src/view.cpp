@@ -102,10 +102,10 @@ void View::Render()
                     done = true;
                     this->m_controller->ShutModel();
                 }
-                renderDone = true;
                 if (inputDone)
                     GetFrameEvents().clear();
             }
+            renderDone = true;
 
             // Start the Dear ImGui frame
             ImGui_ImplSDLRenderer2_NewFrame();
@@ -291,7 +291,6 @@ void View::UI_Interactive_AddArbPolygonInput()
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
     ImGui::TextColored(invalidInputTxtColor, "Invalid input!");
 
-
     if (ImGui::Button("Add AS"))
     {
         std::vector<Point> pts = Utils::generateArbPoly2D(std::string(inputBuf));
@@ -428,12 +427,6 @@ void View::EventHandlingLoop()
     {
         auto endTime = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            GetFrameEvents().push_back(event);
-        }
-
         inputDone = false;
         if (elapsed >= frameDuration)
         {
