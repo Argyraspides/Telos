@@ -22,14 +22,14 @@ ImVec4 View::currentShapeColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 View::View(Controller *controller)
 {
     this->m_controller = controller;
-    this->m_vx = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
-    this->m_vy = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
+    this->m_PCSPointsX = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
+    this->m_PCSPointsY = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
 }
 
 View::~View()
 {
-    delete[] m_vx;
-    delete[] m_vy;
+    delete[] m_PCSPointsX;
+    delete[] m_PCSPointsY;
 }
 
 // **************************************************************************************************************************************************************************
@@ -125,6 +125,7 @@ void View::Render()
             // RENDER GUI HERE ***************
 
             Render_GUI();
+            UI_FPS(io);
 
             // RENDER GUI HERE ***************
 
@@ -255,6 +256,14 @@ void View::UI_Interactive_AddRegularPolygonButton()
 
         UI_HandleMaxInputs(xVel, yVel, rot);
 
+        Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
+        Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
+        Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
+        Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
+
+        std::array<Uint8, 4> color = {r, g, b, a};
+        m_PCSColors.push_back(color);
+
         regularPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         regularPoly.m_rot = rot / ENGINE_POLLING_RATE;
         regularPoly.m_mass = mass;
@@ -281,6 +290,14 @@ void View::UI_Interactive_AddRectangleButton()
     if (ImGui::Button("Add Rect"))
     {
         UI_HandleMaxInputs(xVel, yVel, rot);
+
+        Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
+        Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
+        Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
+        Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
+
+        std::array<Uint8, 4> color = {r, g, b, a};
+        m_PCSColors.push_back(color);
 
         PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), this->m_controller->RetrieveModel_GetCurrentTime());
         Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
@@ -314,6 +331,14 @@ void View::UI_Interactive_AddArbPolygonInput()
         if (pts.size() > 1)
         {
             UI_HandleMaxInputs(xVel, yVel, rot);
+
+            Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
+            Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
+            Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
+            Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
+
+            std::array<Uint8, 4> color = {r, g, b, a};
+            m_PCSColors.push_back(color);
 
             PointCloudShape_Cvx arbPoly(pts, this->m_controller->RetrieveModel_GetCurrentTime());
             arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
@@ -371,12 +396,34 @@ void View::UI_ModelInfo()
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed rotational velocity: %.3f rad/s", m_controller->RetrieveModel_GetMaxRotVelocity());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
         ImGui::NewLine();
-        ImGui::ColorEdit3("Background Color", (float*)&clearColor);
+        ImGui::ColorEdit3("Background Color", (float *)&clearColor);
     }
 }
 
 void View::UI_Update()
 {
+}
+
+void View::UI_FPS(ImGuiIO &io)
+{
+
+    static bool showFps = true;
+
+    if (showFps)
+    {
+        ImGui::SetNextWindowPos(ImVec2(SCREEN_WIDTH - 90, 0), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(90, 50), ImGuiCond_Always);
+
+        ImGui::Begin("Info", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+        ImVec2 textSize = ImGui::CalcTextSize("999.9 fps");
+        ImVec2 textPosition = ImVec2((ImGui::GetWindowWidth() - textSize.x) * 0.5f, (ImGui::GetWindowHeight() - textSize.y) * 0.5f);
+        ImGui::SetCursorPos(textPosition);
+
+        ImGui::Text("%.1f FPS", io.Framerate);
+
+        ImGui::End();
+    }
 }
 
 void View::UI_Tutorial()
@@ -389,16 +436,16 @@ void View::UI_Tutorial()
         static const char *tutText =
             "Welcome to Telos! A 2D rigidbody physics engine\n\n"
 
-            "While largely incomplete, with many features to come,\n"
+            "While still incomplete, with many features to come,\n"
             "the engine is functional and you may play around with\n"
             "it as development progresses.\n\n"
 
             "Controls:\n\n"
 
-            "Esc: pauses the engine\n"
-            "Left click hold: drag shapes around\n"
-            "Right click: deletes a shape\n"
-            "Left and right arrows: move backward/forward by one time step\n";
+            "Esc: Pause\n"
+            "Left click hold: Drag shapes around\n"
+            "Right click: Delete a shape\n"
+            "Left and right arrows: move backward/forward by one time step (you must pause first)\n";
 
         ImGui::SetNextWindowPos(ImVec2(center.x, center.y), ImGuiCond_FirstUseEver);
         ImGui::Begin("Tutorial", &showTutorial);
@@ -446,21 +493,16 @@ void View::UI_ShapeInfo()
 // **************************************************************************************************************************************************************************
 // RENDERING
 
-void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points)
+void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-
-    Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
-    Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
-    Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
-    Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
 
     for (int i = 0; i < points.size(); i++)
     {
-        m_vx[i] = points[i].x;
-        m_vy[i] = points[i].y;
+        m_PCSPointsX[i] = points[i].x;
+        m_PCSPointsY[i] = points[i].y;
     }
 
-    filledPolygonRGBA(renderer, m_vx, m_vy, points.size(), r, g, b, a);
+    filledPolygonRGBA(renderer, m_PCSPointsX, m_PCSPointsY, points.size(), r, g, b, a);
 }
 
 void View::Render_Model(SDL_Renderer *renderer)
@@ -474,7 +516,7 @@ void View::Render_Model(SDL_Renderer *renderer)
         {
             Render_PointCloudShape(
                 renderer,
-                Utils::convertToPointCloud(shapeList[i]));
+                Utils::convertToPointCloud(shapeList[i]), m_PCSColors[i][0], m_PCSColors[i][1], m_PCSColors[i][2], m_PCSColors[i][3]);
         }
     }
 }
@@ -563,6 +605,7 @@ void View::SDL_RemoveShape(SDL_Event &event)
         {
             if (Utils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
+                m_PCSColors.erase(m_PCSColors.begin() + shapePtr->getShapeID());
                 this->m_controller->UpdateModel_RemoveShape(shapePtr);
                 break;
             }

@@ -9,6 +9,7 @@
 #include "model.h"
 #include "application_params.h"
 #include <vector>
+#include <array>
 #include <SDL.h>
 
 #if !SDL_VERSION_ATLEAST(2, 0, 17)
@@ -36,9 +37,9 @@ public:
     void Render(); // SETS UP SDL2, DEAR IMGUI, AND BEGINS THE RENDER & INPUT LOOPS
 
 private:
-    void Render_Model(SDL_Renderer *renderer);                                      // RENDERS THE CONTENTS OF THE PHYSICS ENGINE
-    void Render_GUI();                                                              // RENDERS IMGUI COMPONENTS
-    void Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points); // RENDERS A SHAPE OF TYPE POINT CLOUD
+    void Render_Model(SDL_Renderer *renderer);                                                                          // RENDERS THE CONTENTS OF THE PHYSICS ENGINE
+    void Render_GUI();                                                                                                  // RENDERS IMGUI COMPONENTS
+    void Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points, Uint8 r, Uint8 g, Uint8 b, Uint8 a); // RENDERS A SHAPE OF TYPE POINT CLOUD
 
     // CLEANUP METHODS
 private:
@@ -60,6 +61,7 @@ private:
     void UI_Tutorial();
     void UI_ModelInfo();
     void UI_ShapeInfo();
+    void UI_FPS(ImGuiIO &io);
     void UI_HandleMaxInputs(float &xVel, float &yVel, float &rot);
 
     void UI_ConstructMenuModule();
@@ -87,15 +89,16 @@ private:
         return frame_events;
     }
 
-    bool done = false;
-    bool inputDone = false;
-    bool renderDone = false;
-    bool enginePaused = false;
-    static int ImGuiID;
+    bool done = false;         // Is the entire application done?
+    bool inputDone = false;    // Are the SDL viewport related control handlers done?
+    bool renderDone = false;   // Is the ImGui and model rendering portion done?
+    bool enginePaused = false; // Is the model currently paused?
+    static int ImGuiID;        // Next available ID of an ImGui element
 
-    static ImVec4 currentShapeColor;
-    ImVec4 clearColor;
+    static ImVec4 currentShapeColor; // Currently selected color of the next shape to be added
+    ImVec4 clearColor;               // Currently selected color of the background
 
-    Sint16 *m_vx;
-    Sint16 *m_vy;
+    Sint16 *m_PCSPointsX; // Points of a polygon represented as a point cloud in a poniter for rendering with SDL_gfx
+    Sint16 *m_PCSPointsY;
+    std::vector<std::array<Uint8, 4>> m_PCSColors; // Colors of the polygons that have been added
 };
