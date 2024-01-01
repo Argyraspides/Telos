@@ -29,4 +29,5 @@ public:
     const double RetrieveModel_GetMaxRotVelocity();
     const double RetrieveModel_GetTimeStep();
     const double RetrieveModel_GetCurrentTime();
+    const double RetrieveModel_GetMaxEnergyViolation();
 };

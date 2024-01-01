@@ -124,6 +124,11 @@ const double Controller::RetrieveModel_GetCurrentTime()
     return this->model->m_time;
 }
 
+const double Controller::RetrieveModel_GetMaxEnergyViolation()
+{
+    return this->model->m_ENERGY_THRESHOLD;
+}
+
 void Controller::ShutModel()
 {
     this->model->m_isRunning = false;
