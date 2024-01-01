@@ -22,10 +22,13 @@ If you are using VSCode to check out the project, I have included the .vscode fo
   - Already included in this repo. EMscripten is a toolchain used to compile C++ to JS and ultimately [WebAssembly](https://developer.mozilla.org/en-US/docs/WebAssembly) (.wasm).
 - ### [ImGui](https://github.com/ocornut/imgui)
   - Already included in this repo. ImGui is a GUI library for C++.
+- ### [CMake](https://cmake.org/)
+  - A powerful build tool for building C/C++ programs. You must install this yourself.
 ## Building & Running (Debian Linux)
-First ensure you have OpenGL and essential build tools installed by running:
+First ensure you have OpenGL, CMake and essential build tools installed by running:
 ```
 sudo apt-get update && sudo apt-get install build-essential
+sudo apt install cmake
 sudo apt install freeglut3-dev
 ```
 To build and run in a web browser, simply run in the ``lib`` folder:
