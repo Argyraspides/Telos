@@ -283,7 +283,7 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 
     double diff = ekTotF - ekTot;
 
-    if (fabs(diff) > m_ENERGY_THRESHOLD)
+    if (fabs(diff) > m_ENERGY_THRESHOLD && m_collisionElasticity == 1.0f)
     {
         std::cerr << "WARNING! ENERGY NOT CONSERVED AFTER SHAPE COLLISION! NET CHANGE (FINAL - INITIAL): " << diff << "\n";
     }
@@ -375,7 +375,7 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
     wci.shape->m_rot = wci.shape->m_rot - ((Math::crossProd3D(r_ap, impulse).z) / i_a);
     double endE = wci.shape->getE();
 
-    if (fabs(endE - initE) > m_ENERGY_THRESHOLD)
+    if (fabs(endE - initE) > m_ENERGY_THRESHOLD && m_collisionElasticity == 1.0f)
     {
         std::cerr << "WARNING! ENERGY NOT CONSERVED AFTER WALL COLLISION! NET CHANGE (FINAL - INITIAL): " << (endE - initE) << "\n";
     }
