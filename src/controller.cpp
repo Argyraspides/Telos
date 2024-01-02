@@ -44,17 +44,19 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset
 
 MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double radius, int sides, double xVel, double yVel, double rot, double mass)
 {
-    MODEL_MODIFICATION_RESULT s;
-    if(sides < 3)
+    if (sides < 3)
     {
-        s.currentStatus = s.PCS_ADD_FAIL_INSUFFICIENT_POINTS;
-        return s;
+        return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS);
     }
-    if(sides > m_model->m_maxPCSPoints)
+    if (sides > m_model->m_maxPCSPoints)
     {
-        s.currentStatus = s.PCS_ADD_FAIL_EXCEEDED_MAX_POINTS;
-        return s;
+        return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS);
     }
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax))
+    {
+        return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
+    }
+
     PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), RetrieveModel_GetCurrentTime());
     // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
     // on the order of once per second, so we divide the values by the engines polling rate.
@@ -66,12 +68,16 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double ra
     std::shared_ptr<Shape> polyGeneric = std::make_shared<PointCloudShape_Cvx>(regularPoly);
     UpdateModel_AddShape(polyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
 
-    s.currentStatus = s.PCS_ADD_SUCCESS;
-    return s;
+    return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_SUCCESS);
 }
 
-void Controller::UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass)
+MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass)
 {
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax))
+    {
+        return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
+    }
+
     PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), RetrieveModel_GetCurrentTime());
     Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
     Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
@@ -79,10 +85,17 @@ void Controller::UpdateModel_AddShape_Rect(double w, double h, double xVel, doub
 
     std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
     UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+
+    return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_SUCCESS);
 }
 
 MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr[], double xVel, double yVel, double rot, double mass)
 {
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax))
+    {
+        return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
+    }
+
     std::vector<Point> pts = Utils::generateArbPoly2D(std::string(ptsPtr));
     if (pts.size() >= 3 && pts.size() <= RetrieveModel_GetMaxPCSPoints())
     {
@@ -93,15 +106,13 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr
 
         std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
         UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
-
-        MODEL_MODIFICATION_RESULT s;
-        s.currentStatus = s.PCS_ADD_SUCCESS;
-        return s;
+    }
+    else
+    {
+        return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT);
     }
 
-    MODEL_MODIFICATION_RESULT s;
-    s.currentStatus = s.PCS_ADD_FAIL_INSUFFICIENT_POINTS;
-    return s;
+    return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_SUCCESS);
 }
 
 void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)

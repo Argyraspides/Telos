@@ -7,10 +7,17 @@ struct MODEL_MODIFICATION_RESULT
 {
     int currentStatus;
 
-    const int PCS_ADD_FAIL_INSUFFICIENT_POINTS = -1;
-    const int PCS_ADD_FAIL_EXCEEDED_MAX_POINTS = -2;
+    static const int PCS_ADD_FAIL_INSUFFICIENT_POINTS = -1;
+    static const int PCS_ADD_FAIL_EXCEEDED_MAX_POINTS = -2;
+    static const int PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS = -3;
+    static const int PCS_ADD_FAIL_INVALID_POINT_INPUT = -4;
     /*************************************************************/
-    const int PCS_ADD_SUCCESS = 0;
+    static const int PCS_ADD_SUCCESS = 0;
+
+    MODEL_MODIFICATION_RESULT(int res)
+    {
+        currentStatus = res;
+    }
 
     bool failed()
     {
@@ -29,7 +36,7 @@ public:
 
     void UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset); // ADDS A SHAPE TO THE WORLD
     MODEL_MODIFICATION_RESULT UpdateModel_AddShape_RegularPoly(double radius, int sides, double xVel, double yVel, double rot, double mass);
-    void UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass);
+    MODEL_MODIFICATION_RESULT UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass);
     MODEL_MODIFICATION_RESULT UpdateModel_AddShape_Arbitrary(char pts[], double xVel, double yVel, double rot, double mass);
     void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape);            // REMOVES A SHAPE FROM THE WORLD
     void UpdateModel_RemoveShape(long long shapeID);                       // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID
