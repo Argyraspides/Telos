@@ -424,10 +424,14 @@ void View::UI_ModelInfo()
         m_controller->UpdateModel_ChangeElasticity(e);
         m_controller->UpdateModel_ChangeWallElasticity(wallE);
 
+        ImGui::PushStyleColor(ImGuiCol_Button, TELOS_IMGUI_RED);
+        ImGui::NewLine();
         if (ImGui::Button("Delete All Shapes"))
         {
             m_controller->UpdateModel_RemoveAllShapes();
         }
+        ImGui::NewLine();
+        ImGui::PopStyleColor();
     }
 }
 

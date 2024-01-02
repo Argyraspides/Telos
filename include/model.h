@@ -137,7 +137,7 @@ public:
     double m_collisionElasticity = 1.0;
     double m_wallCollisionElasticity = 1.0;
 
-    Point m_maxVel = {2500.0, 2500.0};
+    const Point m_maxVel = {2500.0, 2500.0};
     const double m_rotMax = 10.0f;
     const int m_maxPCSPoints = 100;
     const double m_minCollisionElasticity = 0.0;
