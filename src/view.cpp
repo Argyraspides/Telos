@@ -17,7 +17,7 @@
 #endif
 
 int View::ImGuiID = 1;
-ImVec4 View::currentShapeColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+ImVec4 View::m_currentShapeColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 View::View(Controller *controller)
 {
@@ -72,7 +72,6 @@ void View::Render()
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
-    // Color is #1e1e1e
 
     pthread_t inputThreadId;
     pthread_create(&inputThreadId, nullptr, &View::threadEntry, this);
@@ -80,7 +79,7 @@ void View::Render()
     const std::chrono::milliseconds frameDuration(1000 / VIEW_POLLING_RATE);
     auto startTime = std::chrono::high_resolution_clock::now();
 
-    clearColor = TELOS_IMGUI_DARKGRAY;
+    m_clearColor = TELOS_IMGUI_DARKGRAY;
 
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
@@ -102,7 +101,7 @@ void View::Render()
             {
                 GetFrameEvents().push_back(event);
             }
-            renderDone = false;
+            m_renderDone = false;
             for (SDL_Event &_event : GetFrameEvents())
             {
                 ImGui_ImplSDL2_ProcessEvent(&_event);
@@ -116,10 +115,10 @@ void View::Render()
                     done = true;
                     this->m_controller->ShutModel();
                 }
-                if (inputDone)
+                if (m_inputDone)
                     GetFrameEvents().clear();
             }
-            renderDone = true;
+            m_renderDone = true;
 
             // Start the Dear ImGui frame
             ImGui_ImplSDLRenderer2_NewFrame();
@@ -136,7 +135,7 @@ void View::Render()
             // Rendering
             ImGui::Render();
             SDL_RenderSetScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-            SDL_SetRenderDrawColor(renderer, (Uint8)(clearColor.x * 255), (Uint8)(clearColor.y * 255), (Uint8)(clearColor.z * 255), (Uint8)(clearColor.w * 255));
+            SDL_SetRenderDrawColor(renderer, (Uint8)(m_clearColor.x * 255), (Uint8)(m_clearColor.y * 255), (Uint8)(m_clearColor.z * 255), (Uint8)(m_clearColor.w * 255));
             SDL_RenderClear(renderer);
 
             // RENDER OBJECTS HERE ***************
@@ -212,7 +211,7 @@ void View::UI_Interactive_CommonShapeSubMenu()
 
     if (ImGui::CollapsingHeader("Add Common Shapes", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::ColorEdit3("Shape Color", (float *)&currentShapeColor);
+        ImGui::ColorEdit3("Shape Color", (float *)&m_currentShapeColor);
 
         ImGui::NewLine();
         ImGui::NewLine();
@@ -262,10 +261,10 @@ void View::UI_Interactive_AddRegularPolygonButton()
         // It shouldn't really be the views job to determine what is a maximum input -- that should be decided for the engine.
         // Think of a better solution in future.
 
-        Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
-        Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
-        Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
-        Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
+        Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
+        Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
+        Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
+        Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
 
         std::array<Uint8, 4> color = {r, g, b, a};
         m_PCSColors.push_back(color);
@@ -297,10 +296,10 @@ void View::UI_Interactive_AddRectangleButton()
     {
         UI_HandleMaxInputs(xVel, yVel, rot);
 
-        Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
-        Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
-        Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
-        Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
+        Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
+        Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
+        Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
+        Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
 
         std::array<Uint8, 4> color = {r, g, b, a};
         m_PCSColors.push_back(color);
@@ -338,10 +337,10 @@ void View::UI_Interactive_AddArbPolygonInput()
         {
             UI_HandleMaxInputs(xVel, yVel, rot);
 
-            Uint8 r = (Uint8)(currentShapeColor.x * pixelLimit);
-            Uint8 g = (Uint8)(currentShapeColor.y * pixelLimit);
-            Uint8 b = (Uint8)(currentShapeColor.z * pixelLimit);
-            Uint8 a = (Uint8)(currentShapeColor.w * pixelLimit);
+            Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
+            Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
+            Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
+            Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
 
             std::array<Uint8, 4> color = {r, g, b, a};
             m_PCSColors.push_back(color);
@@ -368,10 +367,14 @@ void View::UI_Interactive_AddArbPolygonInput()
 
 void View::UI_ConstructMenuModule()
 {
-    static float windowWidth = SCREEN_WIDTH * 0.275;
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
-    ImGui::SetWindowSize(ImVec2(windowWidth, ImGui::GetIO().DisplaySize.y));
+    ImGui::SetWindowSize(ImVec2(m_menuWidth, ImGui::GetIO().DisplaySize.y));
+
+    if (ImGui::IsWindowCollapsed())
+        m_menuOpen = false;
+    else
+        m_menuOpen = true;
 
     UI_ModelInfo();
     UI_Interactive_CommonShapeSubMenu();
@@ -380,6 +383,8 @@ void View::UI_ConstructMenuModule()
     ImGui::End();
 }
 
+// I dont really like this. It shouldn't be the views job to check max inputs, but it seems unavoidable.
+// Its likely best to put this inside the controller module
 void View::UI_HandleMaxInputs(float &xVel, float &yVel, float &rot)
 {
     if (xVel > m_controller->RetrieveModel_GetMaxVelocity().x)
@@ -410,16 +415,16 @@ void View::UI_ModelInfo()
 
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5); // Set the next added elements to this width
 
-        ImGui::ColorEdit3("Background Color", (float *)&clearColor);
+        ImGui::ColorEdit3("Background Color", (float *)&m_clearColor);
         ImGui::SliderFloat("Collision Elasticity", &e, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
         ImGui::SliderFloat("Wall Collision Elasticity", &wallE, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
-       
+
         ImGui::PopItemWidth(); // Restore default item width
 
         m_controller->UpdateModel_ChangeElasticity(e);
         m_controller->UpdateModel_ChangeWallElasticity(wallE);
 
-        if(ImGui::Button("Delete All Shapes"))
+        if (ImGui::Button("Delete All Shapes"))
         {
             m_controller->UpdateModel_RemoveAllShapes();
         }
@@ -558,16 +563,16 @@ void View::SDL_EventHandlingLoop()
     {
         auto endTime = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        inputDone = false;
+        m_inputDone = false;
         if (elapsed >= frameDuration)
         {
             for (SDL_Event &event : GetFrameEvents())
             {
                 SDL_ViewportHandler(event);
-                if (renderDone)
+                if (m_renderDone)
                     GetFrameEvents().clear();
             }
-            inputDone = true;
+            m_inputDone = true;
             startTime = std::chrono::high_resolution_clock::now();
         }
     }
@@ -586,6 +591,9 @@ void View::SDL_DragShape(SDL_Event &event)
     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 
+    if (m_menuOpen && mouseX < m_menuWidth)
+        return;
+
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
     {
         const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
@@ -595,14 +603,14 @@ void View::SDL_DragShape(SDL_Event &event)
             if (Utils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
-                this->clearColor = TELOS_IMGUI_LIGHTGRAY;
+                this->m_clearColor = TELOS_IMGUI_LIGHTGRAY;
                 while (true)
                 {
                     SDL_PollEvent(&event);
                     if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
                     {
                         this->m_controller->UnpauseModel();
-                        this->clearColor = TELOS_IMGUI_DARKGRAY;
+                        this->m_clearColor = TELOS_IMGUI_DARKGRAY;
                         break;
                     }
                     SDL_GetMouseState(&mouseX, &mouseY);
@@ -617,7 +625,8 @@ void View::SDL_RemoveShape(SDL_Event &event)
 {
     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
-
+    if (m_menuOpen && mouseX < m_menuWidth)
+        return;
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
     {
         const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
@@ -637,17 +646,17 @@ void View::SDL_Pause(SDL_Event &event)
 {
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
     {
-        if (!enginePaused)
+        if (!m_modelPaused)
         {
-            this->clearColor = TELOS_IMGUI_LIGHTGRAY;
+            this->m_clearColor = TELOS_IMGUI_LIGHTGRAY;
             this->m_controller->PauseModel();
-            enginePaused = true;
+            m_modelPaused = true;
         }
         else
         {
-            this->clearColor = TELOS_IMGUI_DARKGRAY;
+            this->m_clearColor = TELOS_IMGUI_DARKGRAY;
             this->m_controller->UnpauseModel();
-            enginePaused = false;
+            m_modelPaused = false;
         }
     }
 }
