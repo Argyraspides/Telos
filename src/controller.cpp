@@ -42,8 +42,19 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset
     pthread_mutex_unlock(&m_model->shapeListMutex);
 }
 
-void Controller::UpdateModel_AddShape_RegularPoly(double radius, int sides, double xVel, double yVel, double rot, double mass)
+MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double radius, int sides, double xVel, double yVel, double rot, double mass)
 {
+    MODEL_MODIFICATION_RESULT s;
+    if(sides < 3)
+    {
+        s.currentStatus = s.PCS_ADD_FAIL_INSUFFICIENT_POINTS;
+        return s;
+    }
+    if(sides > m_model->m_maxPCSPoints)
+    {
+        s.currentStatus = s.PCS_ADD_FAIL_EXCEEDED_MAX_POINTS;
+        return s;
+    }
     PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), RetrieveModel_GetCurrentTime());
     // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
     // on the order of once per second, so we divide the values by the engines polling rate.
@@ -54,6 +65,9 @@ void Controller::UpdateModel_AddShape_RegularPoly(double radius, int sides, doub
     regularPoly.m_mass = mass;
     std::shared_ptr<Shape> polyGeneric = std::make_shared<PointCloudShape_Cvx>(regularPoly);
     UpdateModel_AddShape(polyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+
+    s.currentStatus = s.PCS_ADD_SUCCESS;
+    return s;
 }
 
 void Controller::UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass)
@@ -67,7 +81,7 @@ void Controller::UpdateModel_AddShape_Rect(double w, double h, double xVel, doub
     UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
 }
 
-MODEL_MODIFICATION_STATUS Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr[], double xVel, double yVel, double rot, double mass)
+MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr[], double xVel, double yVel, double rot, double mass)
 {
     std::vector<Point> pts = Utils::generateArbPoly2D(std::string(ptsPtr));
     if (pts.size() >= 3 && pts.size() <= RetrieveModel_GetMaxPCSPoints())
@@ -80,12 +94,12 @@ MODEL_MODIFICATION_STATUS Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr
         std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
         UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
 
-        MODEL_MODIFICATION_STATUS s;
+        MODEL_MODIFICATION_RESULT s;
         s.currentStatus = s.PCS_ADD_SUCCESS;
         return s;
     }
 
-    MODEL_MODIFICATION_STATUS s;
+    MODEL_MODIFICATION_RESULT s;
     s.currentStatus = s.PCS_ADD_FAIL_INSUFFICIENT_POINTS;
     return s;
 }

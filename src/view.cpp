@@ -239,6 +239,8 @@ void View::UI_Interactive_AddRegularPolygonButton()
     static float yVel = 250.0f;
     static float rot = 0.0f;
     static float mass = 1.0f;
+    static ImVec4 errorColor = TELOS_IMGUI_CLEAR;
+    static std::string errorText;
 
     ImGui::InputFloat(("Radius##ID" + std::to_string(UI_FetchID())).c_str(), &radius);
     ImGui::InputInt(("Sides##ID" + std::to_string(UI_FetchID())).c_str(), &sides);
@@ -250,17 +252,34 @@ void View::UI_Interactive_AddRegularPolygonButton()
     if (ImGui::Button("Add RP"))
     {
         UI_HandleMaxInputs(xVel, yVel, rot);
-        if (sides > m_controller->RetrieveModel_GetMaxPCSPoints())
-            sides = m_controller->RetrieveModel_GetMaxPCSPoints();
+
+        MODEL_MODIFICATION_RESULT s = m_controller->UpdateModel_AddShape_RegularPoly(radius, sides, xVel, yVel, rot, mass);
+
+        if (s.currentStatus == s.PCS_ADD_FAIL_EXCEEDED_MAX_POINTS)
+        {
+            errorColor = TELOS_IMGUI_RED;
+            errorText = "Exceeded maximum allowed sides";
+            
+        }
+        else if (s.currentStatus == s.PCS_ADD_FAIL_INSUFFICIENT_POINTS)
+        {
+            errorColor = TELOS_IMGUI_RED;
+            errorText = "A polygon can't have less than 3 points!";
+        }
+        else
+        {
+            errorColor = TELOS_IMGUI_CLEAR;
+        }
 
         Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
         Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
         Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
         Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
+
         std::array<Uint8, 4> color = {r, g, b, a};
         m_PCSColors.push_back(color);
-        m_controller->UpdateModel_AddShape_RegularPoly(radius, sides, xVel, yVel, rot, mass);
     }
+    ImGui::TextColored(errorColor, "%s", errorText.c_str());
 }
 
 void View::UI_Interactive_AddRectangleButton()
@@ -318,7 +337,7 @@ void View::UI_Interactive_AddArbPolygonInput()
         Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
         Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
 
-        MODEL_MODIFICATION_STATUS status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
+        MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
 
         if (status.failed())
         {
