@@ -14,6 +14,10 @@ Controller::Controller(Model *model)
 
 void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset)
 {
+
+    if (m_model->m_shapeList.size() >= m_model->m_maxObjects)
+        return;
+
     // Determine the type of shape it is
     int id = shape->getShapeTypeID();
     if (id == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
@@ -76,6 +80,44 @@ void Controller::UpdateModel_RemoveShape(long long shapeID)
 {
 }
 
+void Controller::UpdateModel_RemoveAllShapes()
+{
+    std::vector<std::shared_ptr<Shape>> &shapeList = m_model->getShapeList();
+    if (shapeList.size() == 0)
+    {
+        pthread_mutex_unlock(&m_model->shapeListMutex);
+        return;
+    }
+
+    int ShapeTypeID = shapeList[0]->getShapeTypeID();
+    long long shapeID = shapeList[0]->getShapeID();
+
+    if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    {
+        // PCSCVX means "Point Cloud Shape Convex"
+        std::vector<std::shared_ptr<PointCloudShape_Cvx>> &PCSCVXList = m_model->getPCSCVXShapeList();
+
+        // Free the pointers to the shapes and erase them from the vector
+        for (size_t i = 0; i < shapeList.size(); i++)
+        {
+            shapeList[i].reset();
+            PCSCVXList[i].reset();
+        }
+        PCSCVXList.clear();
+        shapeList.clear();
+
+        // Next available shape ID is now reset
+        Shape::ID_CTR = 0;
+
+        // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
+        pthread_mutex_unlock(&m_model->shapeListMutex);
+        pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
+    }
+    else if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
+    {
+    }
+}
+
 void Controller::UpdateModel_ForwardTick()
 {
     if (m_model->m_isPaused)
@@ -95,6 +137,11 @@ void Controller::UpdateModel_BackwardTick()
 void Controller::UpdateModel_ChangeElasticity(double e)
 {
     m_model->m_collisionElasticity = e;
+}
+
+void Controller::UpdateModel_ChangeWallElasticity(double e)
+{
+    m_model->m_wallCollisionElasticity = e;
 }
 
 const std::vector<std::shared_ptr<Shape>> &Controller::RetrieveModel_ReadShapes()
@@ -137,6 +184,22 @@ const double Controller::RetrieveModel_GetMaxEnergyViolation()
 const int Controller::RetrieveModel_GetMaxPCSPoints()
 {
     return m_model->m_maxPCSPoints;
+}
+
+const double Controller::RetrieveModel_GetMinElasticity()
+{
+    return m_model->m_minCollisionElasticity;
+}
+
+const double Controller::RetrieveModel_GetMaxElasticity()
+{
+    return m_model->m_maxCollisionElasticity;
+}
+
+const int Controller::RetrieveModel_GetMaxObjects()
+{
+    return m_model->m_maxObjects;
+    ;
 }
 
 void Controller::ShutModel()

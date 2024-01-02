@@ -1,7 +1,6 @@
 #include "shape.h"
 #include "engine_math.h"
 
-#define MOVE_THRESH 1
 long long Shape::ID_CTR = 0;
 
 Shape::Shape(int shapeTypeID, int bodyTypeID)

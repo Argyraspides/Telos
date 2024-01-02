@@ -393,24 +393,37 @@ void View::UI_HandleMaxInputs(float &xVel, float &yVel, float &rot)
 void View::UI_ModelInfo()
 {
     static float e = 1.0f;
+    static float wallE = 1.0f; // WWWWAAAAAALLLLLL-E
     if (ImGui::CollapsingHeader("Engine Parameters", ImGuiTreeNodeFlags_CollapsingHeader))
     {
         ImGui::TextColored(TELOS_IMGUI_WHITE, "Engine time step: %.3fs", m_controller->RetrieveModel_GetTimeStep());
         ImGui::TextColored(TELOS_IMGUI_WHITE, "Time elapsed: %.3fs", m_controller->RetrieveModel_GetCurrentTime());
+
         ImGui::NewLine();
+
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed velocities: (%.3f, %.3f) px/s", m_controller->RetrieveModel_GetMaxVelocity().x, m_controller->RetrieveModel_GetMaxVelocity().y);
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed rotational velocity: %.3f rad/s", m_controller->RetrieveModel_GetMaxRotVelocity());
+        ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed shapes: %i", m_controller->RetrieveModel_GetMaxObjects());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum shape vertices: %i", m_controller->RetrieveModel_GetMaxPCSPoints());
         ImGui::NewLine();
-        ImGui::ColorEdit3("Background Color", (float *)&clearColor);
-        ImGui::SliderFloat("Collision Elasticity", &e, 0.0f, 1.0f);
-        m_controller->UpdateModel_ChangeElasticity(e);
-    }
-}
 
-void View::UI_Update()
-{
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5); // Set the next added elements to this width
+
+        ImGui::ColorEdit3("Background Color", (float *)&clearColor);
+        ImGui::SliderFloat("Collision Elasticity", &e, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
+        ImGui::SliderFloat("Wall Collision Elasticity", &wallE, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
+       
+        ImGui::PopItemWidth(); // Restore default item width
+
+        m_controller->UpdateModel_ChangeElasticity(e);
+        m_controller->UpdateModel_ChangeWallElasticity(wallE);
+
+        if(ImGui::Button("Delete All Shapes"))
+        {
+            m_controller->UpdateModel_RemoveAllShapes();
+        }
+    }
 }
 
 void View::UI_FPS(ImGuiIO &io)
@@ -422,16 +435,11 @@ void View::UI_FPS(ImGuiIO &io)
     {
         ImGui::SetNextWindowPos(ImVec2(SCREEN_WIDTH - 90, 0), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(90, 50), ImGuiCond_Always);
-
         ImGui::Begin("Info", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
         ImVec2 textSize = ImGui::CalcTextSize("999.9 fps");
         ImVec2 textPosition = ImVec2((ImGui::GetWindowWidth() - textSize.x) * 0.5f, (ImGui::GetWindowHeight() - textSize.y) * 0.5f);
         ImGui::SetCursorPos(textPosition);
-
-        //
         ImGui::Text("%.1f FPS", io.Framerate);
-
         ImGui::End();
     }
 }
@@ -542,7 +550,7 @@ void View::Render_GUI()
 // **************************************************************************************************************************************************************************
 // INPUT HANDLING
 
-void View::EventHandlingLoop()
+void View::SDL_EventHandlingLoop()
 {
     const std::chrono::milliseconds frameDuration(1000 / VIEW_INPUT_POLLING_RATE);
     auto startTime = std::chrono::high_resolution_clock::now();

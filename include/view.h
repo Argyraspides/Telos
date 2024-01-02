@@ -31,7 +31,7 @@ public:
     ~View();
     static void *threadEntry(void *instance)
     {
-        reinterpret_cast<View *>(instance)->EventHandlingLoop();
+        reinterpret_cast<View *>(instance)->SDL_EventHandlingLoop();
         return nullptr;
     }
     void Render(); // SETS UP SDL2, DEAR IMGUI, AND BEGINS THE RENDER & INPUT LOOPS
@@ -63,13 +63,10 @@ private:
     void UI_ShapeInfo();
     void UI_FPS(ImGuiIO &io);
     void UI_HandleMaxInputs(float &xVel, float &yVel, float &rot);
-
     void UI_ConstructMenuModule();
 
-    void UI_Update(); // UPDATES ALL THE UI CONTENTS
-
 private:
-    void EventHandlingLoop();
+    void SDL_EventHandlingLoop();
     void SDL_ViewportHandler(SDL_Event &event); // HANDLES INPUT ON THE VIEWPORT (I.E. THE AREA THINGS ARE RENDERED)
     void SDL_DragShape(SDL_Event &event);       // ALLOWS USER TO DRAG SHAPES AROUND THE VIEWPORT
     void SDL_RemoveShape(SDL_Event &event);     // ALLOWS USER TO REMOVE SHAPES FROM THE WORLD

@@ -15,9 +15,11 @@ public:
     void UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset); // ADDS A SHAPE TO THE WORLD
     void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape);            // REMOVES A SHAPE FROM THE WORLD
     void UpdateModel_RemoveShape(long long shapeID);                       // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID
+    void UpdateModel_RemoveAllShapes();                       // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID
     void UpdateModel_ForwardTick();
     void UpdateModel_BackwardTick();
     void UpdateModel_ChangeElasticity(double e);
+    void UpdateModel_ChangeWallElasticity(double e);
 
     void ShutModel();         // SHUTS OFF THE MODEL
     void PauseUnpauseModel(); // FLIPS THE MODELS PAUSE STATE
@@ -32,4 +34,7 @@ public:
     const double RetrieveModel_GetCurrentTime();
     const double RetrieveModel_GetMaxEnergyViolation();
     const int RetrieveModel_GetMaxPCSPoints();
+    const double RetrieveModel_GetMinElasticity();
+    const double RetrieveModel_GetMaxElasticity();
+    const int RetrieveModel_GetMaxObjects();
 };
