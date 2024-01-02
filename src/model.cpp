@@ -56,19 +56,14 @@ void Model::run()
 // Update Point Cloud Shape List
 void Model::updatePCSL(int timeDirection)
 {
-    // Translate the shapes
-    // Calling "getPCSCVXShapeList()" locks access to the shape list.
     m_time += (m_timeStep * timeDirection);
 
+    // Calling "getPCSCVXShapeList()" locks access to the shape list.
     int size = getPCSCVXShapeList().size();
 
     for (int i = 0; i < size; i++)
     {
         m_PCSCVX_shapeList[i]->updateShape(m_timeStep, timeDirection);
-    }
-
-    for (int i = 0; i < size - 1; i++)
-    {
         for (int j = i + 1; j < size; j++)
         {
             CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*m_PCSCVX_shapeList[i], *m_PCSCVX_shapeList[j]);
