@@ -128,7 +128,7 @@ void View::Render()
             // RENDER GUI HERE ***************
 
             Render_GUI();
-            UI_FPS(io);
+            UI_CornerInfo(io);
 
             // RENDER GUI HERE ***************
 
@@ -331,7 +331,8 @@ void View::UI_Interactive_AddRectangleButton()
 void View::UI_Interactive_AddArbPolygonInput()
 {
     ImGui::Text("Arbitrary Shape");
-    static char inputBuf[256] = "(0,0),(200,100),(400,300),(500,500),(300,700),(100,600)";
+    // 4500 = ( {4 digits}.{16 digits} , {4 digits}.{16 digits} ) x 100 + 99 + extra just in case (justin beiber haha)
+    static char inputBuf[4500] = "(0,0),(200,100),(400,300),(500,500),(300,700),(100,600)";
     static float xVel = 69.0f;
     static float yVel = 69.0f;
     static float rot = 1.0f;
@@ -378,7 +379,7 @@ void View::UI_Interactive_AddArbPolygonInput()
         }
     }
 
-    ImGui::TextColored(invalidInputTxtColor, errorText.c_str());
+    ImGui::TextColored(invalidInputTxtColor, "%s", errorText.c_str());
 }
 
 void View::UI_ConstructMenuModule()
@@ -451,7 +452,7 @@ void View::UI_ModelInfo()
     }
 }
 
-void View::UI_FPS(ImGuiIO &io)
+void View::UI_CornerInfo(ImGuiIO &io)
 {
 
     static bool showFps = true;
@@ -465,6 +466,18 @@ void View::UI_FPS(ImGuiIO &io)
         ImVec2 textPosition = ImVec2((ImGui::GetWindowWidth() - textSize.x) * 0.5f, (ImGui::GetWindowHeight() - textSize.y) * 0.5f);
         ImGui::SetCursorPos(textPosition);
         ImGui::Text("%.1f FPS", io.Framerate);
+        ImGui::End();
+    }
+
+    if (m_modelPaused)
+    {
+        ImGui::SetNextWindowPos(ImVec2(SCREEN_WIDTH - 90, 50), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(90, 50), ImGuiCond_Always);
+        ImGui::Begin("Paused", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+        ImVec2 textSize = ImGui::CalcTextSize("PAUSED");
+        ImVec2 textPosition = ImVec2((ImGui::GetWindowWidth() - textSize.x) * 0.5f, (ImGui::GetWindowHeight() - textSize.y) * 0.5f);
+        ImGui::SetCursorPos(textPosition);
+        ImGui::Text("PAUSED");
         ImGui::End();
     }
 }
@@ -623,14 +636,12 @@ void View::SDL_DragShape(SDL_Event &event)
             if (Utils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
-                this->m_clearColor = TELOS_IMGUI_LIGHTGRAY;
                 while (true)
                 {
                     SDL_PollEvent(&event);
                     if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
                     {
                         this->m_controller->UnpauseModel();
-                        this->m_clearColor = TELOS_IMGUI_DARKGRAY;
                         break;
                     }
                     SDL_GetMouseState(&mouseX, &mouseY);
@@ -664,17 +675,16 @@ void View::SDL_RemoveShape(SDL_Event &event)
 
 void View::SDL_Pause(SDL_Event &event)
 {
+    static ImVec4 userBackgroundCol;
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
     {
         if (!m_modelPaused)
         {
-            this->m_clearColor = TELOS_IMGUI_LIGHTGRAY;
             this->m_controller->PauseModel();
             m_modelPaused = true;
         }
         else
         {
-            this->m_clearColor = TELOS_IMGUI_DARKGRAY;
             this->m_controller->UnpauseModel();
             m_modelPaused = false;
         }

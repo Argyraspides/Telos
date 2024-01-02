@@ -61,7 +61,7 @@ private:
     void UI_Tutorial();
     void UI_ModelInfo();
     void UI_ShapeInfo();
-    void UI_FPS(ImGuiIO &io);
+    void UI_CornerInfo(ImGuiIO &io);
     void UI_HandleMaxInputs(float &xVel, float &yVel, float &rot);
 
     bool m_menuOpen = false;                  // Is the menu currently collapsed or open? (This is to make sure inputs are not handled by the engine behind the menu)
