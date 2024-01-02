@@ -20,10 +20,10 @@ PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points, doubl
     m_rotInert = Utils::getRotInertia(m_points);
     m_timeSpawned = timeSpawned;
 
-    if (m_points.size() > Utils::shapeNames.size())
+    if (m_points.size() > Utils::shapeNameCount)
         m_name = "Approximate Circle";
     else
-        m_name = Utils::shapeNames.at(m_points.size());
+        m_name = Utils::shapeNames[points.size()];
 
     for (int i = 0; i < points.size(); i++)
     {

@@ -30,5 +30,6 @@ public:
 
 public:
     static std::vector<Point> generateArbPoly2D(const std::string &s);
-    static const std::unordered_map<int, std::string> shapeNames;
+    static const int shapeNameCount = 70;
+    static const std::string shapeNames[shapeNameCount];
 };
