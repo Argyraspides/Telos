@@ -15,17 +15,9 @@ namespace Math
     static Point instantVelRot2D(const Point &p, const Point &c, double rot);
     static Point intersectionPt(const Line &l1, const Line &l2);
 
-
-
-
-
-
-
-
-    
-
     // Origin of the 3D cartesian space (x, y, and z = 0)
     static Point origin = {0, 0, 0};
+    static Point defaultPt = origin;
 
     // Position of the left, right, top and bottom walls, as well as their directional vectors
     static Line LEFT_WALL = {{0, SCREEN_HEIGHT, 0}, {0, 0, 0}};

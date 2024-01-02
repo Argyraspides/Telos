@@ -63,6 +63,9 @@ private:
     void UI_ShapeInfo();
     void UI_FPS(ImGuiIO &io);
     void UI_HandleMaxInputs(float &xVel, float &yVel, float &rot);
+
+    bool m_menuOpen = false;                  // Is the menu currently collapsed or open? (This is to make sure inputs are not handled by the engine behind the menu)
+    float m_menuWidth = SCREEN_WIDTH * 0.275; // Width of the menu
     void UI_ConstructMenuModule();
 
 private:
@@ -90,10 +93,7 @@ private:
     bool m_inputDone = false;   // Are the SDL viewport related control handlers done?
     bool m_renderDone = false;  // Is the ImGui and model rendering portion done?
     bool m_modelPaused = false; // Is the model currently paused?
-
-    bool m_menuOpen = false; // Is the menu currently collapsed or open? (This is to make sure inputs are not handled by the engine behind the menu)
-    float m_menuWidth = SCREEN_WIDTH * 0.275; // Width of the menu
-    static int ImGuiID; // Next available ID of an ImGui element
+    static int ImGuiID;         // Next available ID of an ImGui element
 
     static ImVec4 m_currentShapeColor; // Currently selected color of the next shape to be added
     ImVec4 m_clearColor;               // Currently selected color of the background

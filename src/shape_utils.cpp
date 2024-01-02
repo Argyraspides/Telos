@@ -1,4 +1,5 @@
 #include "shape_utils.h"
+#include "engine_math.h"
 #include <algorithm>
 #include <iostream>
 
@@ -79,6 +80,7 @@ const std::string Utils::shapeNames[] =
 // For any shape, resolves what kind of shape it is and then translates it into a point cloud for rendering
 std::vector<Point> Utils::convertToPointCloud(const std::shared_ptr<Shape> &shape)
 {
+    if(shape == nullptr) return {Math::defaultPt};
     int shapeTypeID = shape->getShapeTypeID();
     if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
     {

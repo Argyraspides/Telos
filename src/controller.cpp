@@ -32,12 +32,13 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset
         m_model->getShapeList().push_back(shape);
 
         // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
-        pthread_mutex_unlock(&m_model->shapeListMutex);
         pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
     }
     else if (id == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
     }
+
+    pthread_mutex_unlock(&m_model->shapeListMutex);
 }
 
 void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
@@ -67,12 +68,12 @@ void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
         Shape::ID_CTR--;
 
         // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
-        pthread_mutex_unlock(&m_model->shapeListMutex);
         pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
     }
     else if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
     }
+    pthread_mutex_unlock(&m_model->shapeListMutex);
 }
 
 // TODO: IMPLEMENT
@@ -110,12 +111,12 @@ void Controller::UpdateModel_RemoveAllShapes()
         Shape::ID_CTR = 0;
 
         // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
-        pthread_mutex_unlock(&m_model->shapeListMutex);
         pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
     }
     else if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
     {
     }
+    pthread_mutex_unlock(&m_model->shapeListMutex);
 }
 
 void Controller::UpdateModel_ForwardTick()
