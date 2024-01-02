@@ -1,4 +1,5 @@
 #include "controller.h"
+#include "shape_utils.h"
 #include "view.h"
 #include "model.h"
 #include <cmath>
@@ -39,6 +40,54 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset
     }
 
     pthread_mutex_unlock(&m_model->shapeListMutex);
+}
+
+void Controller::UpdateModel_AddShape_RegularPoly(double radius, int sides, double xVel, double yVel, double rot, double mass)
+{
+    PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), RetrieveModel_GetCurrentTime());
+    // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
+    // on the order of once per second, so we divide the values by the engines polling rate.
+    // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
+
+    regularPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
+    regularPoly.m_rot = rot / ENGINE_POLLING_RATE;
+    regularPoly.m_mass = mass;
+    std::shared_ptr<Shape> polyGeneric = std::make_shared<PointCloudShape_Cvx>(regularPoly);
+    UpdateModel_AddShape(polyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+}
+
+void Controller::UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass)
+{
+    PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), RetrieveModel_GetCurrentTime());
+    Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
+    Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
+    Rectangle.m_mass = mass;
+
+    std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
+    UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+}
+
+MODEL_MODIFICATION_STATUS Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr[], double xVel, double yVel, double rot, double mass)
+{
+    std::vector<Point> pts = Utils::generateArbPoly2D(std::string(ptsPtr));
+    if (pts.size() >= 3 && pts.size() <= RetrieveModel_GetMaxPCSPoints())
+    {
+        PointCloudShape_Cvx arbPoly(pts, RetrieveModel_GetCurrentTime());
+        arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
+        arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
+        arbPoly.m_mass = mass;
+
+        std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
+        UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+
+        MODEL_MODIFICATION_STATUS s;
+        s.currentStatus = s.PCS_ADD_SUCCESS;
+        return s;
+    }
+
+    MODEL_MODIFICATION_STATUS s;
+    s.currentStatus = s.PCS_ADD_FAIL_INSUFFICIENT_POINTS;
+    return s;
 }
 
 void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)

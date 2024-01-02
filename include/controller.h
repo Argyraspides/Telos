@@ -3,6 +3,19 @@
 #include "shape.h"
 #include "model.h"
 
+struct MODEL_MODIFICATION_STATUS
+{
+    int currentStatus;
+
+    const int PCS_ADD_FAIL_INSUFFICIENT_POINTS = -1;
+    const int PCS_ADD_SUCCESS = 0;
+
+    bool failed()
+    {
+        return (currentStatus < 0);
+    }
+};
+
 class Controller
 {
 
@@ -13,6 +26,9 @@ public:
     Controller(Model *model);
 
     void UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset); // ADDS A SHAPE TO THE WORLD
+    void UpdateModel_AddShape_RegularPoly(double radius, int sides, double xVel, double yVel, double rot, double mass);
+    void UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass);
+    MODEL_MODIFICATION_STATUS UpdateModel_AddShape_Arbitrary(char pts[], double xVel, double yVel, double rot, double mass);
     void UpdateModel_RemoveShape(std::shared_ptr<Shape> shape);            // REMOVES A SHAPE FROM THE WORLD
     void UpdateModel_RemoveShape(long long shapeID);                       // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID
     void UpdateModel_RemoveAllShapes();                       // REMOVES A SHAPE FROM THE WORLD BASED ON ITS ID

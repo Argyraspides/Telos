@@ -234,14 +234,14 @@ void View::UI_Interactive_AddRegularPolygonButton()
 {
     ImGui::Text("Regular Polygon");
     static float radius = 50;
-    static float sides = 5;
+    static int sides = 5;
     static float xVel = 750.0f;
     static float yVel = 250.0f;
     static float rot = 0.0f;
     static float mass = 1.0f;
 
     ImGui::InputFloat(("Radius##ID" + std::to_string(UI_FetchID())).c_str(), &radius);
-    ImGui::InputFloat(("Sides##ID" + std::to_string(UI_FetchID())).c_str(), &sides);
+    ImGui::InputInt(("Sides##ID" + std::to_string(UI_FetchID())).c_str(), &sides);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
     ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
@@ -253,27 +253,13 @@ void View::UI_Interactive_AddRegularPolygonButton()
         if (sides > m_controller->RetrieveModel_GetMaxPCSPoints())
             sides = m_controller->RetrieveModel_GetMaxPCSPoints();
 
-        PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), this->m_controller->RetrieveModel_GetCurrentTime());
-        // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
-        // on the order of once per second, so we divide the values by the engines polling rate.
-        // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
-
-        // It shouldn't really be the views job to determine what is a maximum input -- that should be decided for the engine.
-        // Think of a better solution in future.
-
         Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
         Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
         Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
         Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
-
         std::array<Uint8, 4> color = {r, g, b, a};
         m_PCSColors.push_back(color);
-
-        regularPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
-        regularPoly.m_rot = rot / ENGINE_POLLING_RATE;
-        regularPoly.m_mass = mass;
-        std::shared_ptr<Shape> polyGeneric = std::make_shared<PointCloudShape_Cvx>(regularPoly);
-        this->m_controller->UpdateModel_AddShape(polyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+        m_controller->UpdateModel_AddShape_RegularPoly(radius, sides, xVel, yVel, rot, mass);
     }
 }
 
@@ -303,14 +289,7 @@ void View::UI_Interactive_AddRectangleButton()
 
         std::array<Uint8, 4> color = {r, g, b, a};
         m_PCSColors.push_back(color);
-
-        PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), this->m_controller->RetrieveModel_GetCurrentTime());
-        Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
-        Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
-        Rectangle.m_mass = mass;
-
-        std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
-        this->m_controller->UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
+        m_controller->UpdateModel_AddShape_Rect(w, h, xVel, yVel, rot, mass);
     }
 }
 
@@ -332,33 +311,24 @@ void View::UI_Interactive_AddArbPolygonInput()
 
     if (ImGui::Button("Add AS"))
     {
-        std::vector<Point> pts = Utils::generateArbPoly2D(std::string(inputBuf));
-        if (pts.size() > 1 && pts.size() <= m_controller->RetrieveModel_GetMaxPCSPoints())
+        UI_HandleMaxInputs(xVel, yVel, rot);
+
+        Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
+        Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
+        Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
+        Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
+
+        MODEL_MODIFICATION_STATUS status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
+
+        if (status.failed())
         {
-            UI_HandleMaxInputs(xVel, yVel, rot);
-
-            Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
-            Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
-            Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
-            Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
-
-            std::array<Uint8, 4> color = {r, g, b, a};
-            m_PCSColors.push_back(color);
-
-            PointCloudShape_Cvx arbPoly(pts, this->m_controller->RetrieveModel_GetCurrentTime());
-            arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
-            arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
-            arbPoly.m_mass = mass;
-
-            std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
-            this->m_controller->UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
-
-            invalidInputTxtColor = TELOS_IMGUI_CLEAR;
-            DBL_MAX;
+            invalidInputTxtColor = TELOS_IMGUI_RED;
         }
         else
         {
-            invalidInputTxtColor = TELOS_IMGUI_RED;
+            invalidInputTxtColor = TELOS_IMGUI_CLEAR;
+            std::array<Uint8, 4> color = {r, g, b, a};
+            m_PCSColors.push_back(color);
         }
     }
 
