@@ -7,7 +7,7 @@
 <img src="https://github.com/Argyraspides/Sarissa/assets/95353936/6e619ad7-d610-431d-9c0f-76ac519d074b" width="auto" height="100"></img>  
 
 
-This is the source code for a highly improved version of my previous physics engine, which will also be able to run on any modern browser through the Emscripten toolchain (compilation into WebAssembly).
+This is the source code for a highly improved version of my previous physics engine, which is also able to run on any modern browser through the Emscripten toolchain (compilation into WebAssembly).
 It uses the SDL2 graphics library for graphics output and ImGui for the UI. Upon completion, you may use the engine in its full glory on my website [here](https://gaugamela.me/telos). The engine is currently on the site
 in an unfinished state, if you'd like to check it out.
 
