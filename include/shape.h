@@ -51,6 +51,10 @@ public:
     {
     }
 
+    virtual void setShapeVel(const Point &p)
+    {
+    }
+
     virtual void rotShape(const double &rad, const Point &pivot)
     {
     }
@@ -61,14 +65,14 @@ public:
 
 public:
     static long long ID_CTR; // NEXT AVAILABLE ID OF SHAPE
-    int m_shapeTypeID;       // TYPE OF SHAPE (E.G. POINT CLOUD)
+    int m_shapeTypeID;       // TYPE OF SHAPE (E.G. RIGID BODY, SOFT BODY)
     int m_bodyTypeID;        // TYPE OF BODY (E.G. RIGID BODY)
     long long m_shapeID;     // UNIQUE IDENTIFIER FOR AN INDIVIDUAL SHAPE
-    double m_rot;             // ROTATION (RADIANS)
-    double m_rotInert;        // ROTATIONAL INERTIA
+    double m_rot;            // ROTATION (RADIANS)
+    double m_rotInert;       // ROTATIONAL INERTIA
     Point m_center;          // CENTER OF SHAPE
     Point m_vel;             // VELOCITY
-    double m_mass;            // MASS
-    double m_timeSpawned;   
+    double m_mass;           // MASS
+    double m_timeSpawned;
     std::string m_name;
 };

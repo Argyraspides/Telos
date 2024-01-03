@@ -1,5 +1,6 @@
 #include "model.h"
 #include "engine_math.h"
+#include "shape_utils.h"
 #include "application_params.h"
 #include <chrono>
 #include <iostream>
@@ -61,17 +62,19 @@ void Model::updatePCSL(int timeDirection)
     // Calling "getPCSCVXShapeList()" locks access to the shape list.
     int size = getPCSCVXShapeList().size();
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < m_PCSCVX_shapeList.size(); i++)
     {
-        m_PCSCVX_shapeList[i]->updateShape(m_timeStep, timeDirection);
-        for (int j = i + 1; j < size; j++)
+        m_PCSCVX_shapeList[i]->updateShape(m_timeStep, TIME_DIRECTION::FORWARD);
+    }
+
+    auto collidingPairs = isContactBroad();
+    for (std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &> pair : collidingPairs)
+    {
+        CollisionInfo_PCSCVX c = isContactPCSCVX_CL(pair.first, pair.second);
+        if (c.hasCollided)
         {
-            CollisionInfo_PCSCVX c = isContactPCSCVX_CL(*m_PCSCVX_shapeList[i], *m_PCSCVX_shapeList[j]);
-            if (c.hasCollided)
-            {
-                resolveCollisionOverlapPCSCVX(c);
-                resolveCollisionPCSCVX(c);
-            }
+            resolveCollisionOverlapPCSCVX(c);
+            resolveCollisionPCSCVX(c);
         }
     }
 
@@ -280,7 +283,7 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 
     if (fabs(diff) > m_ENERGY_THRESHOLD && m_collisionElasticity == 1.0)
     {
-        std::cerr << "WARNING! ENERGY NOT CONSERVED AFTER SHAPE COLLISION! NET CHANGE (FINAL - INITIAL): " << diff << "\n";
+        std::cout << "WARNING! ENERGY NOT CONSERVED AFTER SHAPE COLLISION! NET CHANGE (FINAL - INITIAL): " << diff << "\n";
     }
 }
 
@@ -371,7 +374,7 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
 
     if (fabs(endE - initE) > m_ENERGY_THRESHOLD && m_wallCollisionElasticity == 1.0)
     {
-        std::cerr << "WARNING! ENERGY NOT CONSERVED AFTER WALL COLLISION! NET CHANGE (FINAL - INITIAL): " << (endE - initE) << "\n";
+        std::cout << "WARNING! ENERGY NOT CONSERVED AFTER WALL COLLISION! NET CHANGE (FINAL - INITIAL): " << (endE - initE) << "\n";
     }
 }
 
@@ -381,9 +384,45 @@ std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isCo
     // Aspect ratios are universally in favor of a larger width. It is for this reason we will use the X-axis
     // to sweep as it provides a greater liklihood of eliminating shapes that won't collide.
 
-    std::vector<std::pair<double, PointCloudShape_Cvx &>> intervals;
+    std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> collidingPairs;
+    collidingPairs.reserve(m_PCSCVX_shapeList.size() * 2);
 
-    return {};
+    static auto lambda = [](const Point &a, const Point &b)
+    { return a.x < b.x; };
+
+    static auto pairLambda = [](const std::pair<double, int> &p1, const std::pair<double, int> &p2)
+    { return p1.first < p2.first; };
+
+    std::vector<std::pair<double, int>> intervals;
+    intervals.reserve(m_PCSCVX_shapeList.size() * 2);
+
+    for (int i = 0; i < m_PCSCVX_shapeList.size(); i++)
+    {
+        auto min = std::min_element(m_PCSCVX_shapeList[i]->m_points.begin(), m_PCSCVX_shapeList[i]->m_points.end(), lambda);
+        auto max = std::max_element(m_PCSCVX_shapeList[i]->m_points.begin(), m_PCSCVX_shapeList[i]->m_points.end(), lambda);
+        intervals.push_back({min->x, i});
+        intervals.push_back({max->x, i});
+    }
+
+    std::sort(intervals.begin(), intervals.end(), pairLambda);
+
+    for (int i = 0; i < intervals.size(); i++)
+    {
+        for (int j = i + 1; j < intervals.size(); j++)
+        {
+            if (intervals[j].second == intervals[i].second)
+            {
+                intervals.erase(intervals.begin() + j);
+                break;
+            }
+            else
+            {
+                collidingPairs.push_back({*m_PCSCVX_shapeList[intervals[i].second], *m_PCSCVX_shapeList[intervals[j].second]});
+            }
+        }
+    }
+
+    return collidingPairs;
 }
 
 WallCollisionInfo_PCSCVX Model::isContactWallLinear(PointCloudShape_Cvx &s1)

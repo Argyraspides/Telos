@@ -400,18 +400,6 @@ void View::UI_ConstructMenuModule()
     ImGui::End();
 }
 
-// I dont really like this. It shouldn't be the views job to check max inputs, but it seems unavoidable.
-// Its likely best to put this inside the controller module
-void View::UI_HandleMaxInputs(float &xVel, float &yVel, float &rot)
-{
-    if (xVel > m_controller->RetrieveModel_GetMaxVelocity().x)
-        xVel = m_controller->RetrieveModel_GetMaxVelocity().x;
-    if (yVel > m_controller->RetrieveModel_GetMaxVelocity().y)
-        yVel = m_controller->RetrieveModel_GetMaxVelocity().y;
-    if (rot > m_controller->RetrieveModel_GetMaxRotVelocity())
-        rot = m_controller->RetrieveModel_GetMaxRotVelocity();
-}
-
 void View::UI_ModelInfo()
 {
     static float e = 1.0f;
@@ -477,7 +465,7 @@ void View::UI_CornerInfo(ImGuiIO &io)
         ImVec2 textSize = ImGui::CalcTextSize("PAUSED");
         ImVec2 textPosition = ImVec2((ImGui::GetWindowWidth() - textSize.x) * 0.5f, (ImGui::GetWindowHeight() - textSize.y) * 0.5f);
         ImGui::SetCursorPos(textPosition);
-        ImGui::Text("PAUSED");
+        ImGui::TextColored(TELOS_IMGUI_RED, "PAUSED");
         ImGui::End();
     }
 }
@@ -551,7 +539,7 @@ void View::UI_ShapeInfo()
 // **************************************************************************************************************************************************************************
 // RENDERING
 
-void View::Render_PointCloudShape(SDL_Renderer *renderer, std::vector<Point> points, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+void View::Render_Polygon(SDL_Renderer *renderer, const std::vector<Point> &points, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
 
     for (int i = 0; i < points.size(); i++)
@@ -572,7 +560,7 @@ void View::Render_Model(SDL_Renderer *renderer)
 
         for (size_t i = 0; i < shapeCount; i++)
         {
-            Render_PointCloudShape(
+            Render_Polygon(
                 renderer,
                 Utils::convertToPointCloud(shapeList[i]), m_PCSColors[i][0], m_PCSColors[i][1], m_PCSColors[i][2], m_PCSColors[i][3]);
         }
@@ -636,12 +624,12 @@ void View::SDL_DragShape(SDL_Event &event)
             if (Utils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
             {
                 this->m_controller->PauseModel();
+                m_modelPaused = true;
                 while (true)
                 {
                     SDL_PollEvent(&event);
                     if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
                     {
-                        this->m_controller->UnpauseModel();
                         break;
                     }
                     SDL_GetMouseState(&mouseX, &mouseY);
@@ -690,6 +678,7 @@ void View::SDL_Pause(SDL_Event &event)
         }
     }
 }
+
 
 void View::SDL_TickModel(SDL_Event &event)
 {

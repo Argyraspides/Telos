@@ -121,3 +121,8 @@ void PointCloudShape_Cvx::rotShape(const double &rad, const Point &pivot)
         v = shift + m_center;
     }
 }
+
+void PointCloudShape_Cvx::setShapeVel(const Point &p)
+{
+    m_vel = p;
+}

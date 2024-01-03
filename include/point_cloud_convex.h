@@ -23,6 +23,7 @@ public:
     void updateShape(const double &timeStep, const int &timeDir) override;
     void setShapePos(const Point &p) override;
     void rotShape(const double &rad, const Point &pivot) override;
+    void setShapeVel(const Point &p) override;
 
 public:
     std::vector<Point> m_points; // POINT CLOUD THAT REPRESENTS THE SHAPE
