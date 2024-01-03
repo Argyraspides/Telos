@@ -1,6 +1,7 @@
 #pragma once
 #include "shape.h"
 #include "point_cloud_convex.h"
+#include "engine_math.h"
 #include <mutex>
 #include <memory>
 
@@ -55,7 +56,8 @@ enum WALL_SIDE
     LEFT_RIGHT = 6
 };
 
-enum TIME_DIRECTION {
+enum TIME_DIRECTION
+{
     STILL = 0,
     FORWARD = 1,
     BACKWARD = -1
@@ -64,26 +66,76 @@ enum TIME_DIRECTION {
 struct WallCollisionInfo_PCSCVX
 {
 
-    WallCollisionInfo_PCSCVX(bool collided, int wallSide, PointCloudShape_Cvx *shape, Point collisionPoint)
+    WallCollisionInfo_PCSCVX(bool collided, bool multiWall, int wallSide, PointCloudShape_Cvx *shape, Point collisionPoint, Point secondCollisionPoint = {0, 0, 0}, int secondWallside = -1)
     {
-        this->collided = collided;
-        this->wallSide = wallSide;
-        this->shape = shape;
-        this->collisionPoint = collisionPoint;
+        this->m_collided = collided;
+        this->m_multiWall = multiWall;
+        this->m_wallSide = wallSide;
+        this->m_shape = shape;
+        this->m_collisionPoint = collisionPoint;
+        this->m_secondCollisionPoint = secondCollisionPoint;
+        this->m_secondWallSide = secondWallside;
+        setCollisionNormal();
     }
 
     WallCollisionInfo_PCSCVX(bool collided)
     {
-        this->collided = false;
+        this->m_collided = false;
     }
 
-    bool collided = false;
+    void setCollisionNormal()
+    {
+        if (m_multiWall)
+        {
+            Point colsVec = m_collisionPoint - m_secondCollisionPoint;
+            m_collisionNormal = Math::getNormal2D(colsVec);
+
+            bool bl = (m_wallSide == WALL_SIDE::BOTTOM && m_secondWallSide == WALL_SIDE::LEFT) || (m_wallSide == WALL_SIDE::LEFT && m_secondWallSide == WALL_SIDE::BOTTOM);
+            bool tl = (m_wallSide == WALL_SIDE::TOP && m_secondWallSide == WALL_SIDE::LEFT) || (m_wallSide == WALL_SIDE::LEFT && m_secondWallSide == WALL_SIDE::TOP);
+            bool tr = (m_wallSide == WALL_SIDE::TOP && m_secondWallSide == WALL_SIDE::RIGHT) || (m_wallSide == WALL_SIDE::RIGHT && m_secondWallSide == WALL_SIDE::TOP);
+
+            if (bl)
+            {
+                m_collisionNormal.x = abs(m_collisionNormal.x);
+                m_collisionNormal.y = -abs(m_collisionNormal.y);
+            }
+            else if (tl)
+            {
+                m_collisionNormal.x = abs(m_collisionNormal.x);
+                m_collisionNormal.y = abs(m_collisionNormal.y);
+            }
+            else if (tr)
+            {
+                m_collisionNormal.x = -abs(m_collisionNormal.x);
+                m_collisionNormal.y = abs(m_collisionNormal.y);
+            }
+            else
+            {
+                m_collisionNormal.x = -abs(m_collisionNormal.x);
+                m_collisionNormal.y = -abs(m_collisionNormal.y);
+            }
+
+            m_collisionNormal.normalize();
+        }
+        else
+        {
+            m_collisionNormal = Math::WALL_VECS[m_wallSide];
+        }
+    }
+
+    bool m_collided = false;
+    bool m_multiWall = false;
     // Which side of the wall it collided with
-    int wallSide;
+    // Optional: if the shape collided with two sides of a wall simultaneously
+
+    int m_wallSide;
+    int m_secondWallSide;
     // The shape that collided with the wall
-    PointCloudShape_Cvx *shape;
+    PointCloudShape_Cvx *m_shape;
     // Point of collision
-    Point collisionPoint;
+    Point m_collisionPoint;
+    Point m_secondCollisionPoint;
+    Point m_collisionNormal;
 };
 
 class Model
@@ -143,5 +195,4 @@ public:
     const double m_minCollisionElasticity = 0.0;
     const double m_maxCollisionElasticity = 1.0;
     const int m_maxObjects = 50;
-
 };

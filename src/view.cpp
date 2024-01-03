@@ -434,6 +434,7 @@ void View::UI_ModelInfo()
         if (ImGui::Button("Delete All Shapes"))
         {
             m_controller->UpdateModel_RemoveAllShapes();
+            m_PCSColors.clear();
         }
         ImGui::NewLine();
         ImGui::PopStyleColor();
@@ -653,7 +654,7 @@ void View::SDL_RemoveShape(SDL_Event &event)
         {
             if (Utils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
-                m_PCSColors.erase(m_PCSColors.begin() + shapePtr->getShapeID());
+                m_PCSColors.erase(m_PCSColors.begin() + (int)shapePtr->getShapeID());
                 this->m_controller->UpdateModel_RemoveShape(shapePtr);
                 break;
             }
