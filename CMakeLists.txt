@@ -63,7 +63,7 @@ if(MY_COMPILER STREQUAL "emcc")
     # must be preloaded in order for us to access them, hence --preload-file
     # -O2 is the compiler optimization. For the web, we want our WASM and JS files to be as small as possible, but also balance for 
     # performance, -O2 is a good tradeoff from -O3 for this reason 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s WASM=1 -s USE_SDL=2 -pthread -s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/assets/Roboto@assets/Roboto -O2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s WASM=1 -s USE_SDL=2 -pthread -s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency -s TOTAL_MEMORY=128MB --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/assets/Roboto@assets/Roboto -O3")
 
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/SDL2")
     target_link_libraries(${PROJECT_NAME} "imgui" "SDL2GFX")

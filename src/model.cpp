@@ -321,27 +321,12 @@ void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX &
     else
     {
 
-        Line slidingLine;
-
-        // Gradient is the rise/run of the shapes velocity vector
-        double gradient = wallCollisionInfo.m_shape->m_vel.y / wallCollisionInfo.m_shape->m_vel.x;
-        // Collision point is just the point of the shape that came into contact with the wall
-        Point collisionPoint = wallCollisionInfo.m_collisionPoint;
-        // The equation of the line we want to slide the shape back along is the line with our calculated gradient, which passes through the collision point
-        // If the velocity of the shape is only up or down the line is simply vertical
-        if (wallCollisionInfo.m_shape->m_vel.x == 0 && wallCollisionInfo.m_shape->m_vel.y != 0)
-        {
-            slidingLine = Line(collisionPoint.x);
-        }
-        else
-        {
-            slidingLine = Line(gradient, collisionPoint);
-        }
-        // Obtain where this line intersects with the wall
-        Point wallIntersection = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.m_wallSide]);
-        // Change the position of the shape by the slideDelta
-        Point slideDelta = (wallIntersection - collisionPoint) * m_SEPARATION_SAFETY_FACTOR;
-        wallCollisionInfo.m_shape->moveShape(slideDelta);
+        Point slideVec = wallCollisionInfo.m_shape->m_center - wallCollisionInfo.m_collisionPoint;
+        slideVec.normalize();
+        Line slidingLine(wallCollisionInfo.m_shape->m_center, wallCollisionInfo.m_collisionPoint);
+        Point wallIntsct = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.m_wallSide]);
+        double slideDist = Math::dist(wallIntsct, wallCollisionInfo.m_collisionPoint);
+        wallCollisionInfo.m_shape->moveShape(slideVec * slideDist);
     }
 }
 

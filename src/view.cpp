@@ -506,7 +506,7 @@ void View::UI_ShapeInfo()
 {
     if (ImGui::CollapsingHeader("Shape Info", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        std::vector<std::shared_ptr<Shape>> shapeList = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>>& shapeList = this->m_controller->RetrieveModel_ReadShapes();
         for (const auto &shape : shapeList)
         {
             const Point &center = shape->m_center;
