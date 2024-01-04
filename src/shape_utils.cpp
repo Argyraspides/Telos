@@ -238,7 +238,7 @@ double Utils::getTotalKineticEnergy(const Shape &s)
 }
 
 // Obtain the rotational inertia, "I", of an arbitrary polygon
-double Utils::getRotInertia(const std::vector<Point> &points)
+double Utils::getRotInertia(const std::vector<Point> &points, const double &mass)
 {
 
     double j_x = 0, j_y = 0;
@@ -265,8 +265,9 @@ double Utils::getRotInertia(const std::vector<Point> &points)
     }
 
     double oneTwelfth = 1.0f / 12.0f;
-    j_x *= oneTwelfth;
-    j_y *= oneTwelfth;
+
+    j_x *= oneTwelfth * mass;
+    j_y *= oneTwelfth * mass;
 
     return (j_x + j_y);
 }

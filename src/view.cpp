@@ -1,9 +1,9 @@
 #include "view.h"
-#include "telos_imgui_colors.h"
 #include "SDL2_gfxPrimitives.h"
 #include "shape_utils.h"
 #include "model.h"
 #include "BUILD_EMCC.h"
+#include "telos_imgui_colors.h"
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -246,7 +246,7 @@ void View::UI_Interactive_AddRegularPolygonButton()
     ImGui::InputInt(("Sides##ID" + std::to_string(UI_FetchID())).c_str(), &sides);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
-    ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+    ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 
     if (ImGui::Button("Add RP"))
@@ -254,33 +254,15 @@ void View::UI_Interactive_AddRegularPolygonButton()
 
         MODEL_MODIFICATION_RESULT s = m_controller->UpdateModel_AddShape_RegularPoly(radius, sides, xVel, yVel, rot, mass);
 
-        if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS)
+        if (!UI_ModelModError(s, errorText, errorColor))
         {
-            errorColor = TELOS_IMGUI_RED;
-            errorText = "Exceeded maximum allowed sides";
+            Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
+            Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
+            Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
+            Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
+            std::array<Uint8, 4> color = {r, g, b, a};
+            m_PCSColors.push_back(color);
         }
-        else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS)
-        {
-            errorColor = TELOS_IMGUI_RED;
-            errorText = "A polygon can't have less than 3 points!";
-        }
-        else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS)
-        {
-            errorColor = TELOS_IMGUI_RED;
-            errorText = "Exceeded max translational and/or rotational velocity";
-        }
-        else
-        {
-            errorColor = TELOS_IMGUI_CLEAR;
-        }
-
-        Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
-        Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
-        Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
-        Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
-
-        std::array<Uint8, 4> color = {r, g, b, a};
-        m_PCSColors.push_back(color);
     }
     ImGui::TextColored(errorColor, "%s", errorText.c_str());
 }
@@ -297,7 +279,7 @@ void View::UI_Interactive_AddRectangleButton()
     ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
-    ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+    ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
     static ImVec4 errorColor;
     static std::string errorText;
@@ -306,13 +288,7 @@ void View::UI_Interactive_AddRectangleButton()
     {
 
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Rect(w, h, xVel, yVel, rot, mass);
-
-        if (status.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS)
-        {
-            errorColor = TELOS_IMGUI_RED;
-            errorText = "Exceeded max translational and/or rotational velocity";
-        }
-        else
+        if (!UI_ModelModError(status, errorText, errorColor))
         {
             errorColor = TELOS_IMGUI_CLEAR;
             Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
@@ -343,30 +319,14 @@ void View::UI_Interactive_AddArbPolygonInput()
     ImGui::InputText(("Points##ID" + std::to_string(UI_FetchID())).c_str(), inputBuf, sizeof(inputBuf));
     ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
     ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
-    ImGui::InputFloat(("Rotation##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+    ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 
     if (ImGui::Button("Add AS"))
     {
 
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
-
-        if (status.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT)
-        {
-            invalidInputTxtColor = TELOS_IMGUI_RED;
-            errorText = "Invalid point input";
-        }
-        else if (status.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS)
-        {
-            invalidInputTxtColor = TELOS_IMGUI_RED;
-            errorText = "Exceeded max translational and/or rotational velocity";
-        }
-        else if (status.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS)
-        {
-            invalidInputTxtColor = TELOS_IMGUI_RED;
-            errorText = "Exceeded max points";
-        }
-        else
+        if(!UI_ModelModError(status, errorText, invalidInputTxtColor))
         {
             Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
             Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
@@ -413,6 +373,7 @@ void View::UI_ModelInfo()
 
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed velocities: (%.3f, %.3f) px/s", m_controller->RetrieveModel_GetMaxVelocity().x, m_controller->RetrieveModel_GetMaxVelocity().y);
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed rotational velocity: %.3f rad/s", m_controller->RetrieveModel_GetMaxRotVelocity());
+        ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed mass: %.3f kg", m_controller->RetrieveModel_GetMaxMass());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed shapes: %i", m_controller->RetrieveModel_GetMaxObjects());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum shape vertices: %i", m_controller->RetrieveModel_GetMaxPCSPoints());
@@ -506,7 +467,7 @@ void View::UI_ShapeInfo()
 {
     if (ImGui::CollapsingHeader("Shape Info", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        const std::vector<std::shared_ptr<Shape>>& shapeList = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>> &shapeList = this->m_controller->RetrieveModel_ReadShapes();
         for (const auto &shape : shapeList)
         {
             const Point &center = shape->m_center;
@@ -641,6 +602,41 @@ void View::SDL_DragShape(SDL_Event &event)
     }
 }
 
+bool View::UI_ModelModError(const MODEL_MODIFICATION_RESULT &s, std::string &errorText, ImVec4 &textColor)
+{
+
+    if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS)
+    {
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Exceeded maximum allowed sides";
+        return true;
+    }
+    else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS)
+    {
+        textColor = TELOS_IMGUI_RED;
+        errorText = "A polygon can't have less than 3 points!";
+        return true;
+    }
+
+    else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS)
+    {
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Exceeded max/min velocity(ies) and/or mass";
+        return true;
+    }
+    else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT)
+    {
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Invalid point input";
+    }
+    else
+    {
+        textColor = TELOS_IMGUI_CLEAR;
+        errorText = "";
+    }
+    return false;
+}
+
 void View::SDL_RemoveShape(SDL_Event &event)
 {
     int mouseX, mouseY;
@@ -679,7 +675,6 @@ void View::SDL_Pause(SDL_Event &event)
         }
     }
 }
-
 
 void View::SDL_TickModel(SDL_Event &event)
 {

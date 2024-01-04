@@ -72,5 +72,6 @@ public:
     const double RetrieveModel_GetMinElasticity();                         // GET THE MINIMUM ALLOWED COLLISION ELASTICITY
     const double RetrieveModel_GetMaxElasticity();                         // GET THE MAXIMUM ALLOWED COLLISION ELASTICITY
     const int RetrieveModel_GetMaxObjects();                               // GET THE MAXIMUM ALLOWED OBJECTS THAT THE ENGINE CAN HANDLE
+    const double RetrieveModel_GetMaxMass();                                  // GET THE MAXIMUM ALLOWED MASS OF AN OBJECT
     // ****************************************************************************************************************************************
 };

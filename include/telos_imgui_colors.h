@@ -1,7 +1,6 @@
 #pragma once
 #include "imgui.h"
 
-
 // Colors with a higher number (e.g. LIGHTGRAY2, LIGHTGRAY3) are lighter, and vice versa
 
 

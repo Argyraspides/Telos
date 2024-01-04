@@ -52,12 +52,12 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double ra
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS);
     }
-    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax))
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
 
-    PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), RetrieveModel_GetCurrentTime());
+    PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), {xVel, yVel}, rot, mass, RetrieveModel_GetCurrentTime());
     // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
     // on the order of once per second, so we divide the values by the engines polling rate.
     // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
@@ -73,12 +73,12 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double ra
 
 MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass)
 {
-    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax))
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
 
-    PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), RetrieveModel_GetCurrentTime());
+    PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), {xVel, yVel}, rot, mass, RetrieveModel_GetCurrentTime());
     Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
     Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
     Rectangle.m_mass = mass;
@@ -91,7 +91,8 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Rect(double w, double
 
 MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr[], double xVel, double yVel, double rot, double mass)
 {
-    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax))
+
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
@@ -99,7 +100,7 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr
     std::vector<Point> pts = Utils::generateArbPoly2D(std::string(ptsPtr));
     if (pts.size() >= 3 && pts.size() <= RetrieveModel_GetMaxPCSPoints())
     {
-        PointCloudShape_Cvx arbPoly(pts, RetrieveModel_GetCurrentTime());
+        PointCloudShape_Cvx arbPoly(pts, {xVel, yVel}, rot, mass, RetrieveModel_GetCurrentTime());
         arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
         arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
         arbPoly.m_mass = mass;
@@ -275,6 +276,11 @@ const int Controller::RetrieveModel_GetMaxObjects()
 {
     return m_model->m_maxObjects;
     ;
+}
+
+const double Controller::RetrieveModel_GetMaxMass()
+{
+    return m_model->m_maxMass;
 }
 
 void Controller::ShutModel()

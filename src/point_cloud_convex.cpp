@@ -7,17 +7,20 @@
 PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     m_center = Utils::getCentroid(m_points);
-    m_rotInert = Utils::getRotInertia(m_points);
+    m_rotInert = Utils::getRotInertia(m_points, m_mass);
 }
 
-PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points, double timeSpawned) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
+PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points, Point vel, double rot, double mass, double timeSpawned) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     m_points = points;
+    m_vel = vel;
+    m_rot = rot;
+    m_mass = mass;
     m_initPoints = points;
     m_center = Utils::getCentroid(m_points);
     m_initPos = m_center;
     m_time = 0.0f;
-    m_rotInert = Utils::getRotInertia(m_points);
+    m_rotInert = Utils::getRotInertia(m_points, m_mass);
     m_timeSpawned = timeSpawned;
 
     if (m_points.size() > Utils::shapeNameCount)

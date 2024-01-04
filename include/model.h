@@ -195,4 +195,5 @@ public:
     const double m_minCollisionElasticity = 0.0;
     const double m_maxCollisionElasticity = 1.0;
     const int m_maxObjects = 50;
+    const double m_maxMass = 200.0;
 };

@@ -66,6 +66,7 @@ private:
     void UI_ModelInfo();             // ENGINE PARAMETERS
     void UI_ShapeInfo();             // INFORMATION ABOUT CURRENT SHAPES ADDED TO THE SCENE
     void UI_CornerInfo(ImGuiIO &io); // FPS AND PAUSE INDICATOR
+    bool UI_ModelModError(const MODEL_MODIFICATION_RESULT &result, std::string &errorText, ImVec4& colorText);
 
     bool m_menuOpen = false;                  // Is the menu currently collapsed or open? (This is to make sure inputs are not handled by the engine behind the menu)
     float m_menuWidth = SCREEN_WIDTH * 0.275; // Width of the menu
