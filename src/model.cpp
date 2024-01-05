@@ -7,7 +7,8 @@
 
 Model::Model()
 {
-    m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX;
+    m_shapeType = SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE;
+    m_bodyType = BODY_TYPE_IDENTIFIERS::RIGID_BODY;
 
     pthread_mutex_init(&shapeListMutex, nullptr);
     pthread_mutex_init(&PCSCVXShapeListMutex, nullptr);
@@ -26,9 +27,11 @@ void Model::run()
 {
     m_isRunning = true;
     m_isPaused = false;
-    if (m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    if (m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE && m_bodyType == BODY_TYPE_IDENTIFIERS::RIGID_BODY)
     {
         // Control the loop to execute at the desired frequency
+        m_currentUpdateFunc = &Model::updatePCSCVXList;
+        (this->*m_currentUpdateFunc)(TIME_DIRECTION::FORWARD);
         const std::chrono::milliseconds frameDuration((long)(m_timeStep * 1000));
         auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -40,13 +43,12 @@ void Model::run()
             if (elapsed >= frameDuration && !m_isPaused)
             {
                 // Update all shapes including their positions, resolve their collisions, etc
-                updatePCSL(TIME_DIRECTION::FORWARD);
+                updatePCSCVXList(TIME_DIRECTION::FORWARD);
                 startTime = std::chrono::high_resolution_clock::now();
             }
         }
     }
-
-    else if (m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
+    else if (m_shapeType == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE && m_bodyType == BODY_TYPE_IDENTIFIERS::PARTICLE)
     {
         while (m_isRunning)
         {
@@ -54,7 +56,7 @@ void Model::run()
     }
 }
 // Update Point Cloud Shape List
-void Model::updatePCSL(int timeDirection)
+void Model::updatePCSCVXList(int timeDirection)
 {
     m_time += (m_timeStep * timeDirection);
 
@@ -66,7 +68,7 @@ void Model::updatePCSL(int timeDirection)
         m_PCSCVX_shapeList[i]->updateShape(m_timeStep, timeDirection);
     }
 
-    auto collidingPairs = isContactBroad();
+    auto collidingPairs = isContactBroadPCSVX();
     for (std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &> pair : collidingPairs)
     {
         CollisionInfo_PCSCVX c = isContactPCSCVX_CL(pair.first, pair.second);
@@ -79,10 +81,16 @@ void Model::updatePCSL(int timeDirection)
 
     for (int i = 0; i < size; i++)
     {
-        WallCollisionInfo_PCSCVX wci = isContactWallLinear(*m_PCSCVX_shapeList[i]);
-        if (wci.m_collided)
+        bool col = QuickIsContactWall(*m_PCSCVX_shapeList[i]);
+        if (col)
         {
-            resolveOverlapCollisionPCSCVX_Wall_Linear(wci);
+            // Resolve the collision overlap taking into account both rotation and translation
+            resolveCollisionOverlapPCSCVX_Wall_Rot(*m_PCSCVX_shapeList[i]);
+            // Find the collision point
+            WallCollisionInfo_PCSCVX wci = isContactWall(*m_PCSCVX_shapeList[i]);
+            // Pull away from the wall to avoid the shape getting stuck
+            resolveCollisionOverlapPCSCVX_Wall(wci);
+            // Resolve the wall collision 
             resolveCollisionPCSCVX_Wall(wci);
         }
     }
@@ -289,44 +297,86 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 void Model::resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 {
     Point separation = (collisionInfo.penetrationVector * collisionInfo.penetrationDepth); //* m_SEPARATION_SAFETY_FACTOR;
-    collisionInfo.s1->moveShape(separation * -1);
+
+    // Prefer to move the shape with lower mass
+    if (collisionInfo.s1->m_mass > collisionInfo.s2->m_mass)
+    {
+        collisionInfo.s2->moveShape(separation);
+    }
+    else
+    {
+        collisionInfo.s1->moveShape(separation * -1);
+    }
+}
+
+void Model::resolveCollisionOverlapPCSCVX_Rot(CollisionInfo_PCSCVX &collisionInfo)
+{
 }
 
 // Resolves initial collision by separating the object from the wall. Works by finding the distance between the point that collided
 // into the wall and the wall itself along the objects velocity vector, and slides the shape back along this vector. Multi wall collisions,
 // I.e. a shape that collides on two walls at once (e.g. a slanted rectangle touching the top and left hand side) are handled as well.
 // Shapes that collide with opposite walls are not handled and hence the response won't be accurate.
-void Model::resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX &wallCollisionInfo)
+void Model::resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
 {
     Point collisionPoint[2];
-    collisionPoint[0] = wallCollisionInfo.m_collisionPoint;
-    if (wallCollisionInfo.m_multiWall)
+    collisionPoint[0] = wci.m_collisionPoint;
+    if (wci.m_multiWall)
     {
-        Point slideVec = wallCollisionInfo.m_collisionNormal;
+        Point slideVec = wci.m_collisionNormal;
 
-        Line l1((slideVec.y / slideVec.x), wallCollisionInfo.m_collisionPoint);
-        Line l2((slideVec.y / slideVec.x), wallCollisionInfo.m_secondCollisionPoint);
+        Line l1((slideVec.y / slideVec.x), wci.m_collisionPoint);
+        Line l2((slideVec.y / slideVec.x), wci.m_secondCollisionPoint);
 
-        Point instc1 = Math::intersectionPt(l1, Math::WALLS[wallCollisionInfo.m_wallSide]);
-        Point instc2 = Math::intersectionPt(l2, Math::WALLS[wallCollisionInfo.m_secondWallSide]);
+        Point instc1 = Math::intersectionPt(l1, Math::WALLS[wci.m_wallSide]);
+        Point instc2 = Math::intersectionPt(l2, Math::WALLS[wci.m_secondWallSide]);
 
-        double dist1 = Math::dist(wallCollisionInfo.m_collisionPoint, instc1);
-        double dist2 = Math::dist(wallCollisionInfo.m_secondCollisionPoint, instc2);
+        double dist1 = Math::dist(wci.m_collisionPoint, instc1);
+        double dist2 = Math::dist(wci.m_secondCollisionPoint, instc2);
 
         double slideDist = std::max(dist1, dist2);
 
         slideVec = slideVec * slideDist;
-        wallCollisionInfo.m_shape->moveShape(slideVec);
+        wci.m_shape->moveShape(slideVec);
     }
     else
     {
-
-        Point slideVec = wallCollisionInfo.m_shape->m_center - wallCollisionInfo.m_collisionPoint;
+        Point slideVec = wci.m_shape->m_center - wci.m_collisionPoint;
         slideVec.normalize();
-        Line slidingLine(wallCollisionInfo.m_shape->m_center, wallCollisionInfo.m_collisionPoint);
-        Point wallIntsct = Math::intersectionPt(slidingLine, Math::WALLS[wallCollisionInfo.m_wallSide]);
-        double slideDist = Math::dist(wallIntsct, wallCollisionInfo.m_collisionPoint);
-        wallCollisionInfo.m_shape->moveShape(slideVec * slideDist);
+        Line slidingLine(wci.m_shape->m_center, wci.m_collisionPoint);
+        Point wallIntsct = Math::intersectionPt(slidingLine, Math::WALLS[wci.m_wallSide]);
+        double slideDist = Math::dist(wallIntsct, wci.m_collisionPoint);
+        wci.m_shape->moveShape(slideVec * slideDist);
+    }
+}
+
+
+// Performs a binary search to converge towards when exactly the collision occured, and moves 
+// the shape back in time by the calculated amount. The shape is then pulled toward the wall so that there is a 
+// tiny bit of overlap such that a collision point can be found
+void Model::resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1)
+{
+    double timeStep = m_timeStep / 2.0;
+    int stepDirection = TIME_DIRECTION::BACKWARD;
+
+    for (int i = 0; i < m_wallOverlapResolution; i++)
+    {
+        s1.updateShape(timeStep, stepDirection);
+
+        if (QuickIsContactWall(s1))
+        {
+            stepDirection = TIME_DIRECTION::BACKWARD;
+        }
+        else
+        {
+            stepDirection = TIME_DIRECTION::FORWARD;
+        }
+        timeStep /= 2.0;
+    }
+
+    if (!QuickIsContactWall(s1))
+    {
+        s1.updateShape(timeStep * 2.0, TIME_DIRECTION::FORWARD);
     }
 }
 
@@ -369,8 +419,8 @@ void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
     }
 }
 
-// Returns shape ID's of potentially colliding shapes. Simple sweep and prune algorithm
-std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isContactBroad()
+// Returns pairs of potentially colliding shapes. Simple sweep and prune algorithm
+std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isContactBroadPCSVX()
 {
     // Aspect ratios are universally in favor of a larger width. It is for this reason we will use the X-axis
     // to sweep as it provides a greater liklihood of eliminating shapes that won't collide.
@@ -416,7 +466,7 @@ std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> Model::isCo
     return collidingPairs;
 }
 
-WallCollisionInfo_PCSCVX Model::isContactWallLinear(PointCloudShape_Cvx &s1)
+WallCollisionInfo_PCSCVX Model::isContactWall(PointCloudShape_Cvx &s1)
 {
     // Check if any of the vertices go beyond the walls.
     bool leftCol = false, rightCol = false, bottomCol = false, topCol = false;
@@ -487,4 +537,22 @@ WallCollisionInfo_PCSCVX Model::isContactWallLinear(PointCloudShape_Cvx &s1)
         }
     }
     return WallCollisionInfo_PCSCVX(true, false, colPoints[0].second, &s1, closestPoint);
+}
+
+// Tells if a shape has collided with the wall without computing any collision information.
+bool Model::QuickIsContactWall(PointCloudShape_Cvx &s1)
+{
+    bool leftCol, rightCol, bottomCol, topCol;
+    for (int i = 0; i < s1.m_points.size(); i++)
+    {
+        leftCol = s1.m_points[i].x <= 0;
+        rightCol = s1.m_points[i].x >= SCREEN_WIDTH;
+
+        bottomCol = s1.m_points[i].y >= SCREEN_HEIGHT;
+        topCol = s1.m_points[i].y <= 0;
+
+        if (topCol || bottomCol || rightCol || leftCol)
+            return true;
+    }
+    return false;
 }

@@ -143,6 +143,7 @@ class Model
 public:
     Model();
     ~Model();
+    void run(); // BEGINS THE PHYSICS ENGINE PROCESSING
 
     // Emscripten doesn't support std::thread for multithreading, only C-type pthread's. This will essentially be a pointer
     // to the run() function so we can actually pass it into pthread_create() in main.cpp
@@ -153,11 +154,13 @@ public:
     }
 
 public:
-    void run(); // BEGINS THE PHYSICS ENGINE PROCESSING
-
     std::vector<std::shared_ptr<Shape>> m_shapeList;     // LIST OF SHAPES GIVEN AS GENERIC SHAPES AS AN INTERFACE FOR COMMON CONTROLS
     std::vector<std::shared_ptr<Shape>> &getShapeList(); // RETURNS THE LIST OF SHAPES AS GENERIC SHAPES
     pthread_mutex_t shapeListMutex;                      // MUTEX TO LOCK READ/WRITE ACCESS TO THE SHAPES. THIS IS LOCKED IN getShapeList(), AND MUST BE UNLOCKED AFTER CALLING THE FUNCTION
+
+public:
+    // ***********************************************************************************************************************************************************************************************************************************
+    // ***************************************************CONVEX POLYGON RIGIDBODY MODULE*************************************************************************************************************************************************
 
     std::vector<std::shared_ptr<PointCloudShape_Cvx>> m_PCSCVX_shapeList;
     std::vector<std::shared_ptr<PointCloudShape_Cvx>> &getPCSCVXShapeList();
@@ -166,28 +169,31 @@ public:
     bool m_isRunning;                   // ENGINE LOOP CONDITIONAL
     bool m_isPaused;                    // ENGINE PAUSE CONDITIONAL
     SHAPE_TYPE_IDENTIFIERS m_shapeType; // CURRENT TYPE OF SHAPE THAT THE ENGINE IS DEALING WITH, E.G. POINT CLOUD SHAPES
+    BODY_TYPE_IDENTIFIERS m_bodyType;
 
-    void updatePCSL(int timeDirection); // UPDATES THE POINT CLOUD SHAPE LIST (PCSL)
+    void updatePCSCVXList(int timeDirection); // UPDATES THE POINT CLOUD CONVEX SHAPE SLIST
 
     bool isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2);                // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
     CollisionInfo_PCSCVX isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED AND RETURNS COLLISION INFORMATION
 
-    WallCollisionInfo_PCSCVX isContactWallLinear(PointCloudShape_Cvx &s1); // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
-    WallCollisionInfo_PCSCVX isContactWallLinearRot(PointCloudShape_Cvx &s1);
-    std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> isContactBroad(); // BROAD PHASE COLLISION DETECTION. QUICKLY FILTERS OUT SHAPES THAT "OBVIOUSLY" WILL NOT COLLIDE
+    WallCollisionInfo_PCSCVX isContactWall(PointCloudShape_Cvx &s1);                            // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
+    bool QuickIsContactWall(PointCloudShape_Cvx &s1);
+    std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> isContactBroadPCSVX(); // BROAD PHASE COLLISION DETECTION. QUICKLY FILTERS OUT SHAPES THAT "OBVIOUSLY" WILL NOT COLLIDE
 
-    void resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo);                               // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES
-    void resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo);                        // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES (OVERLAP SEPARATION)
-    void resolveOverlapCollisionPCSCVX_Wall_Linear(WallCollisionInfo_PCSCVX &wallCollisionInfo);    // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, ONLY TAKES INTO ACCOUNT TRANSLATION)
-    void resolveOverlapCollisionPCSCVX_Wall_LinearRot(WallCollisionInfo_PCSCVX &wallCollisionInfo); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, TAKES INTO ACCOUNT ROTATION)
-    void resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wallCollisionInfo);                  // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (NORMAL RESOLUTION)
+    void resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo);            // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES
+    void resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo);     // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES (OVERLAP SEPARATION)
+    void resolveCollisionOverlapPCSCVX_Rot(CollisionInfo_PCSCVX &collisionInfo); // RESOLVES COLLISION BETWEEN TWO CONVEX POINT CLOUD SHAPES (OVERLAP SEPARATION) TAKING INTO ACCOUNT BOTH ROTATION AND TRANSLATION
+
+    void resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci);            // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (NORMAL RESOLUTION)
+    void resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci);     // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, ONLY TAKES INTO ACCOUNT TRANSLATION)
+    void resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, TAKES INTO ACCOUNT TRANSLATION AND ROTATION)
+
 public:
-    double m_time = 0.0;
-    double m_timeStep = 1.0 / ENGINE_POLLING_RATE;
     const double m_ENERGY_THRESHOLD = 0.0000000001; // CONSERVATION OF ENERGY CAN BE VIOLATED BY THIS MUCH AS PER THE NATURE OF DOUBLE CALCULATIONS
     const double m_SEPARATION_SAFETY_FACTOR = 1.0;
     double m_collisionElasticity = 1.0;
     double m_wallCollisionElasticity = 1.0;
+    int m_wallOverlapResolution = 15;
 
     const Point m_maxVel = {2500.0, 2500.0};
     const double m_rotMax = 10.0f;
@@ -196,4 +202,12 @@ public:
     const double m_maxCollisionElasticity = 1.0;
     const int m_maxObjects = 50;
     const double m_maxMass = 200.0;
+    // ************************************************************************************************************************************************************************************************************************************
+    // ************************************************************************************************************************************************************************************************************************************
+
+    double m_time = 0.0;
+    double m_timeStep = 1.0 / ENGINE_POLLING_RATE;
+
+    typedef void (Model::*CurrentUpdateFunc)(int);
+    CurrentUpdateFunc m_currentUpdateFunc; // Specifies the current function used to update the engine
 };

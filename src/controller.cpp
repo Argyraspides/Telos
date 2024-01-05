@@ -21,7 +21,7 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset
 
     // Determine the type of shape it is
     int id = shape->getShapeTypeID();
-    if (id == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    if (id == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE)
     {
         // Convert to point cloud shape
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(shape);
@@ -34,9 +34,6 @@ void Controller::UpdateModel_AddShape(std::shared_ptr<Shape> shape, Point offset
 
         // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
         pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
-    }
-    else if (id == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
-    {
     }
 
     pthread_mutex_unlock(&m_model->shapeListMutex);
@@ -57,14 +54,10 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double ra
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
 
-    PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), {xVel, yVel}, rot, mass, RetrieveModel_GetCurrentTime());
     // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
     // on the order of once per second, so we divide the values by the engines polling rate.
     // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
-
-    regularPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
-    regularPoly.m_rot = rot / ENGINE_POLLING_RATE;
-    regularPoly.m_mass = mass;
+    PointCloudShape_Cvx regularPoly(Utils::generateRegularPolygon(radius, sides), {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE}, rot / ENGINE_POLLING_RATE, mass, RetrieveModel_GetCurrentTime());
     std::shared_ptr<Shape> polyGeneric = std::make_shared<PointCloudShape_Cvx>(regularPoly);
     UpdateModel_AddShape(polyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
 
@@ -78,11 +71,7 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Rect(double w, double
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
 
-    PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), {xVel, yVel}, rot, mass, RetrieveModel_GetCurrentTime());
-    Rectangle.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
-    Rectangle.m_rot = rot / ENGINE_POLLING_RATE;
-    Rectangle.m_mass = mass;
-
+    PointCloudShape_Cvx Rectangle(Utils::generateRectangle(w, h), {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE}, rot / ENGINE_POLLING_RATE, mass, RetrieveModel_GetCurrentTime());
     std::shared_ptr<Shape> RectangleGeneric = std::make_shared<PointCloudShape_Cvx>(Rectangle);
     UpdateModel_AddShape(RectangleGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
 
@@ -100,11 +89,7 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr
     std::vector<Point> pts = Utils::generateArbPoly2D(std::string(ptsPtr));
     if (pts.size() >= 3 && pts.size() <= RetrieveModel_GetMaxPCSPoints())
     {
-        PointCloudShape_Cvx arbPoly(pts, {xVel, yVel}, rot, mass, RetrieveModel_GetCurrentTime());
-        arbPoly.m_vel = {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE};
-        arbPoly.m_rot = rot / ENGINE_POLLING_RATE;
-        arbPoly.m_mass = mass;
-
+        PointCloudShape_Cvx arbPoly(pts, {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE}, rot / ENGINE_POLLING_RATE, mass, RetrieveModel_GetCurrentTime());
         std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
         UpdateModel_AddShape(arbPolyGeneric, {SCREEN_WIDTH / 2.0F, SCREEN_HEIGHT / 2.0F});
     }
@@ -121,7 +106,7 @@ void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
     // Determine the type of shape it is
     int ShapeTypeID = shape->getShapeTypeID();
     long long shapeID = shape->getShapeID();
-    if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE)
     {
         std::vector<std::shared_ptr<Shape>> &shapeList = m_model->getShapeList();
         // PCSCVX means "Point Cloud Shape Convex"
@@ -145,13 +130,9 @@ void Controller::UpdateModel_RemoveShape(std::shared_ptr<Shape> shape)
         // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
         pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
     }
-    else if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
-    {
-    }
     pthread_mutex_unlock(&m_model->shapeListMutex);
 }
 
-// TODO: IMPLEMENT
 void Controller::UpdateModel_RemoveShape(long long shapeID)
 {
 }
@@ -168,7 +149,7 @@ void Controller::UpdateModel_RemoveAllShapes()
     int ShapeTypeID = shapeList[0]->getShapeTypeID();
     long long shapeID = shapeList[0]->getShapeID();
 
-    if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE)
     {
         // PCSCVX means "Point Cloud Shape Convex"
         std::vector<std::shared_ptr<PointCloudShape_Cvx>> &PCSCVXList = m_model->getPCSCVXShapeList();
@@ -188,9 +169,6 @@ void Controller::UpdateModel_RemoveAllShapes()
         // getShapeList() and getPCSCVXShapeList() lock the models mutex's for obtaining shape data. We have to unlock them here.
         pthread_mutex_unlock(&m_model->PCSCVXShapeListMutex);
     }
-    else if (ShapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_ARB)
-    {
-    }
     pthread_mutex_unlock(&m_model->shapeListMutex);
 }
 
@@ -198,7 +176,7 @@ void Controller::UpdateModel_ForwardTick()
 {
     if (m_model->m_isPaused)
     {
-        m_model->updatePCSL(TIME_DIRECTION::FORWARD);
+        (m_model->*m_model->m_currentUpdateFunc)(TIME_DIRECTION::FORWARD);
     }
 }
 
@@ -206,7 +184,7 @@ void Controller::UpdateModel_BackwardTick()
 {
     if (m_model->m_isPaused)
     {
-        m_model->updatePCSL(TIME_DIRECTION::BACKWARD);
+        (m_model->*m_model->m_currentUpdateFunc)(TIME_DIRECTION::BACKWARD);
     }
 }
 
@@ -275,7 +253,6 @@ const double Controller::RetrieveModel_GetMaxElasticity()
 const int Controller::RetrieveModel_GetMaxObjects()
 {
     return m_model->m_maxObjects;
-    ;
 }
 
 const double Controller::RetrieveModel_GetMaxMass()

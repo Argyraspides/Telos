@@ -6,7 +6,7 @@
 const std::string Utils::shapeNames[] =
     {
         {"Void"},
-        {"Point"},
+        {"Particle"},
         {"Line Segment"},
         {"Triangle"},
         {"Rectangle"},
@@ -84,7 +84,7 @@ std::vector<Point> Utils::convertToPointCloud(const std::shared_ptr<Shape> &shap
         return { Math::defaultPt };
     }
     int shapeTypeID = shape->getShapeTypeID();
-    if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE)
     {
         // Point cloud shapes are already of type point cloud. Just return points.
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(shape);
@@ -99,7 +99,7 @@ bool Utils::isInside(Point p, const std::shared_ptr<Shape> &s)
 {
 
     int shapeTypeID = s->getShapeTypeID();
-    if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX)
+    if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE)
     {
 
         // // Treating the point as the origin of a cartesian plane, if the polygon takes up all four quadrants, the point lies within the polygon

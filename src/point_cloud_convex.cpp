@@ -4,13 +4,13 @@
 #include "stdexcept"
 #include <algorithm>
 
-PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
+PointCloudShape_Cvx::PointCloudShape_Cvx() : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     m_center = Utils::getCentroid(m_points);
     m_rotInert = Utils::getRotInertia(m_points, m_mass);
 }
 
-PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points, Point vel, double rot, double mass, double timeSpawned) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
+PointCloudShape_Cvx::PointCloudShape_Cvx(const std::vector<Point> &points, Point vel, double rot, double mass, double timeSpawned) : Shape(SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE, BODY_TYPE_IDENTIFIERS::RIGID_BODY)
 {
     m_points = points;
     m_vel = vel;
@@ -87,8 +87,13 @@ void PointCloudShape_Cvx::setShapePos(const Point &p)
 
 void PointCloudShape_Cvx::updateShape(const double &timeStep, const int &timeDir)
 {
-    double sinW = sin(timeDir * m_rot);
-    double cosW = cos(timeDir * m_rot);
+
+    static const double ENGINE_TIME_STEP = (1.0 / ENGINE_POLLING_RATE);
+
+    double timeFrac = timeStep / ENGINE_TIME_STEP;
+
+    double sinW = sin(timeDir * m_rot * timeFrac);
+    double cosW = cos(timeDir * m_rot * timeFrac);
 
     double xDelta, yDelta;
     for (int i = 0; i < m_points.size(); i++)
@@ -100,11 +105,11 @@ void PointCloudShape_Cvx::updateShape(const double &timeStep, const int &timeDir
         xDelta = m_points[i].x - m_center.x;
         yDelta = m_points[i].y - m_center.y;
 
-        m_points[i].x = (xDelta * cosW - yDelta * sinW + m_center.x) + timeDir * m_vel.x;
-        m_points[i].y = (xDelta * sinW + yDelta * cosW + m_center.y) + timeDir * m_vel.y;
+        m_points[i].x = (xDelta * cosW - yDelta * sinW + m_center.x) + timeDir * m_vel.x * timeFrac;
+        m_points[i].y = (xDelta * sinW + yDelta * cosW + m_center.y) + timeDir * m_vel.y * timeFrac;
     }
-    m_center = m_center + m_vel * timeDir;
-    m_time += timeStep * timeDir;
+    m_center = m_center + m_vel * timeDir * timeFrac;
+    m_time += timeStep * timeDir * timeFrac;
 }
 
 void PointCloudShape_Cvx::rotShape(const double &rad, const Point &pivot)

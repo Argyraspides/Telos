@@ -324,7 +324,6 @@ void View::UI_Interactive_AddArbPolygonInput()
 
     if (ImGui::Button("Add AS"))
     {
-
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
         if(!UI_ModelModError(status, errorText, invalidInputTxtColor))
         {
@@ -377,6 +376,7 @@ void View::UI_ModelInfo()
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed shapes: %i", m_controller->RetrieveModel_GetMaxObjects());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum shape vertices: %i", m_controller->RetrieveModel_GetMaxPCSPoints());
+        
         ImGui::NewLine();
 
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5); // Set the next added elements to this width
@@ -449,7 +449,7 @@ void View::UI_Tutorial()
             "Controls:\n\n"
 
             "Esc: Pause\n"
-            "Left click hold: Drag shapes around\n"
+            "Left click hold: Drag shapes around (pauses the engine)\n"
             "Right click: Delete a shape\n"
             "Left and right arrows: move backward/forward by one time step (you must pause first)\n";
 
@@ -608,20 +608,19 @@ bool View::UI_ModelModError(const MODEL_MODIFICATION_RESULT &s, std::string &err
     if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS)
     {
         textColor = TELOS_IMGUI_RED;
-        errorText = "Exceeded maximum allowed sides";
+        errorText = "Exceeded maximum allowed sides\nCheck the engine parameters menu for max values";
         return true;
     }
     else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS)
     {
         textColor = TELOS_IMGUI_RED;
-        errorText = "A polygon can't have less than 3 points!";
+        errorText = "A polygon can't have less than 3 sides!";
         return true;
     }
-
     else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS)
     {
         textColor = TELOS_IMGUI_RED;
-        errorText = "Exceeded max/min velocity(ies) and/or mass";
+        errorText = "Exceeded max/min velocity(ies) and/or mass\nCheck the engine parameters menu for max values";
         return true;
     }
     else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT)

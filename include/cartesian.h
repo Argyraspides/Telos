@@ -3,8 +3,6 @@
 #include <cmath>
 #include "application_params.h"
 
-
-
 struct Point
 {
     double x = 0, y = 0, z = 0;
@@ -55,10 +53,10 @@ struct Point
         double len = sqrt(x * x + y * y + z * z);
         if (len == 0)
             return;
+
         x /= len;
         y /= len;
-        if (z > 0)
-            z /= len;
+        z /= len;
     }
 
     double magnitude() const

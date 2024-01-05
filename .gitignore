@@ -2,4 +2,5 @@
 build/
 debug/
 release/
+lib/export_web.sh
 include/BUILD_EMCC.h

@@ -6,12 +6,9 @@
 
 enum SHAPE_TYPE_IDENTIFIERS
 {
-    // Convex Point Cloud
-    POINT_CLOUD_SHAPE_CVX = 0,
-    // Arbitrary Point Cloud (concave or convex)
-    POINT_CLOUD_SHAPE_ARB = 1,
-    // Axis-Aligned Bounding Box
-    AABB = 2
+    POINT_CLOUD_SHAPE = 0,
+    AABB = 1,
+    BOUNDING_CIRCLE = 2
 };
 
 enum BODY_TYPE_IDENTIFIERS
@@ -28,13 +25,13 @@ public:
     Shape(int shapeTypeID, int bodyTypeID);
 
     // THE TYPE OF SHAPE THAT IT IS E.G. POINT CLOUD (WHICH IS ASSUMED BY DEFAULT)
-    virtual int getShapeTypeID() const
+    virtual const int getShapeTypeID() const
     {
         return this->m_shapeTypeID;
     }
 
     // THE ID OF THE ACTUAL SHAPE IN THE WORLD E.G. SHAPE #1, SHAPE #2 ...
-    virtual long long getShapeID() const
+    virtual const long long getShapeID() const
     {
         return this->m_shapeID;
     }
@@ -73,6 +70,6 @@ public:
     Point m_center;          // CENTER OF SHAPE
     Point m_vel;             // VELOCITY
     double m_mass;           // MASS
-    double m_timeSpawned;
-    std::string m_name;
+    double m_timeSpawned;    // TIME THE SHAPE WAS CREATED
+    std::string m_name;     // NAME OF THE SHAPE E.G. TRIANGLE, CIRCLE, PARTICLE
 };

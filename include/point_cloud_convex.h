@@ -14,7 +14,7 @@ public:
 public:
     std::vector<Point> getPoints() const; // RETURNS POINT CLOUD
     void setPoint(const Point &p, const int &pointNum);
-    int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE_CVX; } // RETURNS THE TYPE OF SHAPE
+    const int getShapeTypeID() const override { return SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE; } // RETURNS THE TYPE OF SHAPE
     double getEkrot();                                                                            // GETS THE ROTATIONAL KINETIC ENERGY OF THE SHAPE
     double getEk();                                                                               // GETS THE KINETIC ENERGY OF THE SHAPE
     double getE();                                                                                // GETS THE TOTAL KINETIC ENERGY OF THE SHAPE

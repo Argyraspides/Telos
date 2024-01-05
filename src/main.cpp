@@ -4,8 +4,6 @@
 
 int main()
 {
-
-    
     // Instantiate the physics engine
     Model m;
     // Run engine in separate thread
@@ -18,4 +16,5 @@ int main()
     v.Render();
 
     pthread_join(modelThreadId, nullptr);
+
 }
