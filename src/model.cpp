@@ -71,11 +71,17 @@ void Model::updatePCSCVXList(int timeDirection)
     auto collidingPairs = isContactBroadPCSVX();
     for (std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &> pair : collidingPairs)
     {
-        CollisionInfo_PCSCVX c = isContactPCSCVX_CL(pair.first, pair.second);
-        if (c.hasCollided)
+        bool col = isContactPCSCVX_SAT(pair.first, pair.second);
+        if (col)
         {
-            resolveCollisionOverlapPCSCVX(c);
-            resolveCollisionPCSCVX(c);
+            // Resolve the collision overlap taking into both rotation and translation
+            resolveCollisionOverlapPCSCVX_Rot(pair.first, pair.second);
+            // Find the collision point, normal, etc
+            CollisionInfo_PCSCVX ci = isContactPCSCVX_CL(pair.first, pair.second);
+            // Pull away the shapes from each other to prevent them getting stuck
+            resolveCollisionOverlapPCSCVX(ci);
+            // Resolve the collision by applying appropriate forces
+            resolveCollisionPCSCVX(ci);
         }
     }
 
@@ -90,7 +96,7 @@ void Model::updatePCSCVXList(int timeDirection)
             WallCollisionInfo_PCSCVX wci = isContactWall(*m_PCSCVX_shapeList[i]);
             // Pull away from the wall to avoid the shape getting stuck
             resolveCollisionOverlapPCSCVX_Wall(wci);
-            // Resolve the wall collision 
+            // Resolve the wall collision
             resolveCollisionPCSCVX_Wall(wci);
         }
     }
@@ -297,20 +303,39 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 void Model::resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 {
     Point separation = (collisionInfo.penetrationVector * collisionInfo.penetrationDepth); //* m_SEPARATION_SAFETY_FACTOR;
-
-    // Prefer to move the shape with lower mass
-    if (collisionInfo.s1->m_mass > collisionInfo.s2->m_mass)
-    {
-        collisionInfo.s2->moveShape(separation);
-    }
-    else
-    {
-        collisionInfo.s1->moveShape(separation * -1);
-    }
+    collisionInfo.s2->moveShape(separation * 0.5);
+    collisionInfo.s1->moveShape(separation * -0.5);
 }
 
-void Model::resolveCollisionOverlapPCSCVX_Rot(CollisionInfo_PCSCVX &collisionInfo)
+// Performs a binary search to converge towards when exactly the collision occured, and moves
+// the shapes back in time by the calculated amount. The shapes are then pulled toward each other sso that there is a
+// tiny bit of overlap such that a collision point can be found
+void Model::resolveCollisionOverlapPCSCVX_Rot(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
 {
+    double timeStep = m_timeStep / 2.0;
+    int stepDirection = TIME_DIRECTION::BACKWARD;
+
+    for (int i = 0; i < m_shapeOverlapResolution; i++)
+    {
+        s1.updateShape(timeStep, stepDirection);
+        s2.updateShape(timeStep, stepDirection);
+
+        if (isContactPCSCVX_SAT(s1, s2))
+        {
+            stepDirection = TIME_DIRECTION::BACKWARD;
+        }
+        else
+        {
+            stepDirection = TIME_DIRECTION::FORWARD;
+        }
+        timeStep /= 2.0;
+    }
+
+    if (!isContactPCSCVX_SAT(s1, s2))
+    {
+        s1.updateShape(timeStep * 2.0, TIME_DIRECTION::FORWARD);
+        s2.updateShape(timeStep * 2.0, TIME_DIRECTION::FORWARD);
+    }
 }
 
 // Resolves initial collision by separating the object from the wall. Works by finding the distance between the point that collided
@@ -350,13 +375,11 @@ void Model::resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
     }
 }
 
-
-// Performs a binary search to converge towards when exactly the collision occured, and moves 
-// the shape back in time by the calculated amount. The shape is then pulled toward the wall so that there is a 
+// Performs a binary search to converge towards when exactly the collision occured, and moves
+// the shape back in time by the calculated amount. The shape is then pulled toward the wall so that there is a
 // tiny bit of overlap such that a collision point can be found
 void Model::resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1)
 {
-    Utils::printAllShapeInfo(s1);
     double timeStep = m_timeStep / 2.0;
     int stepDirection = TIME_DIRECTION::BACKWARD;
 
@@ -378,7 +401,6 @@ void Model::resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1)
     {
         s1.updateShape(timeStep * 2.0, TIME_DIRECTION::FORWARD);
     }
-    Utils::printAllShapeInfo(s1);
 }
 
 void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)

@@ -325,7 +325,7 @@ void View::UI_Interactive_AddArbPolygonInput()
     if (ImGui::Button("Add AS"))
     {
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
-        if(!UI_ModelModError(status, errorText, invalidInputTxtColor))
+        if (!UI_ModelModError(status, errorText, invalidInputTxtColor))
         {
             Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
             Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
@@ -364,6 +364,7 @@ void View::UI_ModelInfo()
     static float e = 1.0f;
     static float wallE = 1.0f; // WWWWAAAAAALLLLLL-E
     static int wallColRes = 5;
+    static int shapeColRes = 5;
     if (ImGui::CollapsingHeader("Engine Parameters", ImGuiTreeNodeFlags_CollapsingHeader))
     {
         ImGui::TextColored(TELOS_IMGUI_WHITE, "Engine time step: %.3fs", m_controller->RetrieveModel_GetTimeStep());
@@ -377,7 +378,7 @@ void View::UI_ModelInfo()
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum allowed shapes: %i", m_controller->RetrieveModel_GetMaxObjects());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum energy conservation violation: %.10f Joules", m_controller->RetrieveModel_GetMaxEnergyViolation());
         ImGui::TextColored(TELOS_IMGUI_RED0, "Maximum shape vertices: %i", m_controller->RetrieveModel_GetMaxPCSPoints());
-        
+
         ImGui::NewLine();
 
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5); // Set the next added elements to this width
@@ -386,11 +387,13 @@ void View::UI_ModelInfo()
         ImGui::SliderFloat("Collision Elasticity", &e, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
         ImGui::SliderFloat("Wall Collision Elasticity", &wallE, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
         ImGui::SliderInt("Wall Collision Resolution", &wallColRes, m_controller->RetrieveModel_GetMinWallOverlapResolution(), m_controller->RetrieveModel_GetMaxWallOverlapResolution());
+        ImGui::SliderInt("Shape Collision Resolution", &shapeColRes, m_controller->RetrieveModel_GetMinShapeOverlapResolution(), m_controller->RetrieveModel_GetMaxShapeOverlapResolution());
         ImGui::PopItemWidth(); // Restore default item width
 
         m_controller->UpdateModel_ChangeElasticity(e);
         m_controller->UpdateModel_ChangeWallElasticity(wallE);
         m_controller->UpdateModel_ChangeWallOverlapResolution(wallColRes);
+        m_controller->UpdateModel_ChangeShapeOverlapResolution(shapeColRes);
 
         ImGui::PushStyleColor(ImGuiCol_Button, TELOS_IMGUI_RED);
         ImGui::NewLine();

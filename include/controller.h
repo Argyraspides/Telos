@@ -70,6 +70,7 @@ public:
     void UpdateModel_ChangeElasticity(double e);     // CHANGES THE ELASTICITY OF OBJECT-OBJECT COLLISIONS
     void UpdateModel_ChangeWallElasticity(double e); // CHANGES THE ELASTICITY OF OBJECT-WALL COLLISIONS
     void UpdateModel_ChangeWallOverlapResolution(int wor);
+    void UpdateModel_ChangeShapeOverlapResolution(int sor);
 
     const Point RetrieveModel_GetMaxVelocity();         // GET THE MAXIMUM ALLOWED VELOCITY OF AN OBJECT
     const double RetrieveModel_GetMaxRotVelocity();     // GET THE MAXIMUM ALLOWED ROTATIONAL VELOCITY OF AN OBJECT (RADIANS/S)
@@ -82,5 +83,7 @@ public:
     const int RetrieveModel_GetWallOverlapResolution();
     const int RetrieveModel_GetMinWallOverlapResolution();
     const int RetrieveModel_GetMaxWallOverlapResolution();
+    const int RetrieveModel_GetMinShapeOverlapResolution();
+    const int RetrieveModel_GetMaxShapeOverlapResolution();
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 };

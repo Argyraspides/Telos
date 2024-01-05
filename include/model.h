@@ -176,17 +176,17 @@ public:
     bool isContactPCSCVX_SAT(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2);                // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED
     CollisionInfo_PCSCVX isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // DETERMINES IF TWO SHAPES OF TYPE POINT CLOUD HAVE COLLIDED AND RETURNS COLLISION INFORMATION
 
-    WallCollisionInfo_PCSCVX isContactWall(PointCloudShape_Cvx &s1);                            // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
+    WallCollisionInfo_PCSCVX isContactWall(PointCloudShape_Cvx &s1); // DETERMINES IF A POINT CLOUD SHAPE HAS COLLIDED WITH THE WALL
     bool QuickIsContactWall(PointCloudShape_Cvx &s1);
     std::vector<std::pair<PointCloudShape_Cvx &, PointCloudShape_Cvx &>> isContactBroadPCSVX(); // BROAD PHASE COLLISION DETECTION. QUICKLY FILTERS OUT SHAPES THAT "OBVIOUSLY" WILL NOT COLLIDE
 
-    void resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo);            // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES
-    void resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo);     // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES (OVERLAP SEPARATION)
-    void resolveCollisionOverlapPCSCVX_Rot(CollisionInfo_PCSCVX &collisionInfo); // RESOLVES COLLISION BETWEEN TWO CONVEX POINT CLOUD SHAPES (OVERLAP SEPARATION) TAKING INTO ACCOUNT BOTH ROTATION AND TRANSLATION
+    void resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo);                         // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES
+    void resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo);                  // RESOLVES COLLISION BETWEEN TWO POINT CLOUD SHAPES (OVERLAP SEPARATION)
+    void resolveCollisionOverlapPCSCVX_Rot(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2); // RESOLVES COLLISION BETWEEN TWO CONVEX POINT CLOUD SHAPES (OVERLAP SEPARATION) TAKING INTO ACCOUNT BOTH ROTATION AND TRANSLATION
 
-    void resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci);            // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (NORMAL RESOLUTION)
-    void resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci);     // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, ONLY TAKES INTO ACCOUNT TRANSLATION)
-    void resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, TAKES INTO ACCOUNT TRANSLATION AND ROTATION)
+    void resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci);        // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (NORMAL RESOLUTION)
+    void resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, ONLY TAKES INTO ACCOUNT TRANSLATION)
+    void resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1);   // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, TAKES INTO ACCOUNT TRANSLATION AND ROTATION)
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -195,21 +195,27 @@ public:
     const double m_SEPARATION_SAFETY_FACTOR = 1.0;
     double m_collisionElasticity = 1.0;
     double m_wallCollisionElasticity = 1.0;
-    int m_wallOverlapResolution = 15;
+    int m_wallOverlapResolution = 10;
+    int m_shapeOverlapResolution = 10;
 
     const Point m_maxVel = {5000.0, 5000.0};
-    const double m_rotMax = 10.0f;
+    const double m_maxRot = 10.0f;
     const int m_maxPCSPoints = 100;
-    const double m_minCollisionElasticity = 0.0;
-    const double m_maxCollisionElasticity = 1.0;
-    const int m_minWallOverlapResolution = 0;
-    const int m_maxWallOverlapResolution = 20;
     const int m_maxObjects = 50;
     const double m_maxMass = 200.0;
-   
+
+    const double m_minCollisionElasticity = 0.0;
+    const double m_maxCollisionElasticity = 1.0;
+
+    const int m_minWallOverlapResolution = 0;
+    const int m_maxWallOverlapResolution = 20;
+
+    const int m_minShapeOverlapResolution = 0;
+    const int m_maxShapeOverlapResolution = 15;
+
     double m_time = 0.0;
     double m_timeStep = 1.0 / ENGINE_POLLING_RATE;
-    
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     typedef void (Model::*CurrentUpdateFunc)(int);

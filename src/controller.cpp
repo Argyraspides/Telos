@@ -49,7 +49,7 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double ra
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS);
     }
-    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_maxRot) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
@@ -66,7 +66,7 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double ra
 
 MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Rect(double w, double h, double xVel, double yVel, double rot, double mass)
 {
-    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_maxRot) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
@@ -81,7 +81,7 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Rect(double w, double
 MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr[], double xVel, double yVel, double rot, double mass)
 {
 
-    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_rotMax) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
+    if (abs(xVel) > abs(m_model->m_maxVel.x) || abs(yVel) > abs(m_model->m_maxVel.y) || abs(rot) > abs(m_model->m_maxRot) || mass <= 0 || abs(mass) > abs(m_model->m_maxMass))
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
@@ -204,6 +204,12 @@ void Controller::UpdateModel_ChangeWallOverlapResolution(int wor)
     this->m_model->m_wallOverlapResolution = wor;
 }
 
+void Controller::UpdateModel_ChangeShapeOverlapResolution(int sor)
+{
+    if(sor < m_model->m_minShapeOverlapResolution || sor > m_model->m_maxShapeOverlapResolution) return;
+    m_model->m_shapeOverlapResolution = sor;
+}
+
 const std::vector<std::shared_ptr<Shape>> &Controller::RetrieveModel_ReadShapes()
 {
     // We don't need to lock the mutex as this is read-only
@@ -223,7 +229,7 @@ const Point Controller::RetrieveModel_GetMaxVelocity()
 
 const double Controller::RetrieveModel_GetMaxRotVelocity()
 {
-    return m_model->m_rotMax;
+    return m_model->m_maxRot;
 }
 
 const double Controller::RetrieveModel_GetTimeStep()
@@ -279,6 +285,16 @@ const int Controller::RetrieveModel_GetMinWallOverlapResolution()
 const int Controller::RetrieveModel_GetMaxWallOverlapResolution()
 {
     return m_model->m_maxWallOverlapResolution;
+}
+
+const int Controller::RetrieveModel_GetMinShapeOverlapResolution()
+{
+    return m_model->m_minShapeOverlapResolution;
+}
+
+const int Controller::RetrieveModel_GetMaxShapeOverlapResolution()
+{
+    return m_model->m_maxShapeOverlapResolution;
 }
 
 void Controller::ShutModel()
