@@ -250,7 +250,6 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
 
 void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 {
-
     if (!collisionInfo.m_collided)
         return;
     double ekTot = collisionInfo.s1->getE() + collisionInfo.s2->getE();
@@ -316,29 +315,43 @@ void Model::resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 // tiny bit of overlap such that a collision point can be found
 void Model::resolveCollisionOverlapPCSCVX_Rot(PointCloudShape_Cvx &s1, PointCloudShape_Cvx &s2)
 {
-    double timeStep = m_timeStep / 2.0;
+    double upper = m_timeStep;
+    double lower = 0;
+    double mid = (upper + lower) / 2.0;
+    double netTime = mid;
+    double away = 0;
+
     int stepDirection = TIME_DIRECTION::BACKWARD;
+    bool currentlySeparate = false;
 
     for (int i = 0; i < m_shapeOverlapResolution; i++)
     {
-        s1.updateShape(timeStep, stepDirection);
-        s2.updateShape(timeStep, stepDirection);
-
+        s1.updateShape(netTime, stepDirection);
+        s2.updateShape(netTime, stepDirection);
+        double tempMid = mid;
         if (isContactPCSCVX_SAT(s1, s2))
         {
             stepDirection = TIME_DIRECTION::BACKWARD;
+            upper /= 2;
+            currentlySeparate = false;
+            away = 0;
         }
         else
         {
             stepDirection = TIME_DIRECTION::FORWARD;
+            lower = mid;
+            currentlySeparate = true;
+            away += netTime;
         }
-        timeStep /= 2.0;
+        tempMid = mid;
+        mid = (upper + lower) / 2.0;
+        netTime = fabs(tempMid - mid);
     }
 
-    if (!isContactPCSCVX_SAT(s1, s2))
+    if (currentlySeparate)
     {
-        s1.updateShape(timeStep * 2.0, TIME_DIRECTION::FORWARD);
-        s2.updateShape(timeStep * 2.0, TIME_DIRECTION::FORWARD);
+        s1.updateShape(away, TIME_DIRECTION::FORWARD);
+        s2.updateShape(away, TIME_DIRECTION::FORWARD);
     }
 }
 
@@ -385,32 +398,50 @@ void Model::resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
 // tiny bit of overlap such that a collision point can be found
 void Model::resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1)
 {
-    double timeStep = m_timeStep / 2.0;
+    double upper = m_timeStep;
+    double lower = 0;
+    double mid = (upper + lower) / 2.0;
+    double netTime = mid;
+    double away = 0;
+
     int stepDirection = TIME_DIRECTION::BACKWARD;
 
-    for (int i = 0; i < m_wallOverlapResolution; i++)
+    bool currentlySeparate = false;
+
+    for (int i = 0; i < m_shapeOverlapResolution; i++)
     {
-        s1.updateShape(timeStep, stepDirection);
+        s1.updateShape(netTime, stepDirection);
+        double tempMid;
         if (QuickIsContactWall(s1))
         {
             stepDirection = TIME_DIRECTION::BACKWARD;
+            upper /= 2;
+            currentlySeparate = false;
+            away = 0;
         }
         else
         {
             stepDirection = TIME_DIRECTION::FORWARD;
+            lower = mid;
+            currentlySeparate = true;
+            away += netTime;
         }
-        timeStep /= 2.0;
+
+        tempMid = mid;
+        mid = (upper + lower) / 2.0;
+        netTime = fabs(tempMid - mid);
     }
 
-    if (!QuickIsContactWall(s1))
+    if (currentlySeparate)
     {
-        s1.updateShape(timeStep * 2.0, TIME_DIRECTION::FORWARD);
+        s1.updateShape(away, TIME_DIRECTION::FORWARD);
     }
 }
 
 void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
 {
-
+    if (!wci.m_collided)
+        return;
     // X and Y components of the velocity of the collision point contributed to by rotation
     Point v_ap_rot = Math::instantVelRot2D(wci.m_collisionPoint, wci.m_shape->m_center, wci.m_shape->m_rot);
     // Velocity of the collision point (shapes velocity + the points instantaneous rotational velocity)

@@ -232,6 +232,8 @@ void View::UI_Interactive_CommonShapeSubMenu()
 
 void View::UI_Interactive_AddRegularPolygonButton()
 {
+    static double t = ImGui::GetTime();
+
     ImGui::Text("Regular Polygon");
     static float radius = 50;
     static int sides = 5;
@@ -249,7 +251,7 @@ void View::UI_Interactive_AddRegularPolygonButton()
     ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 
-    if (ImGui::Button("Add RP"))
+    if (ImGui::Button("Add RP") && (ImGui::GetTime() - t) > buttonSpamLimit)
     {
 
         MODEL_MODIFICATION_RESULT s = m_controller->UpdateModel_AddShape_RegularPoly(radius, sides, xVel, yVel, rot, mass);
@@ -263,6 +265,7 @@ void View::UI_Interactive_AddRegularPolygonButton()
             std::array<Uint8, 4> color = {r, g, b, a};
             m_PCSColors.push_back(color);
         }
+        t = ImGui::GetTime();
     }
     ImGui::TextColored(errorColor, "%s", errorText.c_str());
 }
@@ -283,8 +286,9 @@ void View::UI_Interactive_AddRectangleButton()
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
     static ImVec4 errorColor;
     static std::string errorText;
+    static double t = ImGui::GetTime();
 
-    if (ImGui::Button("Add Rect"))
+    if (ImGui::Button("Add Rect") && (ImGui::GetTime() - t) > buttonSpamLimit)
     {
 
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Rect(w, h, xVel, yVel, rot, mass);
@@ -299,6 +303,7 @@ void View::UI_Interactive_AddRectangleButton()
             std::array<Uint8, 4> color = {r, g, b, a};
             m_PCSColors.push_back(color);
         }
+        t = ImGui::GetTime();
     }
 
     ImGui::TextColored(errorColor, "%s", errorText.c_str());
@@ -306,6 +311,7 @@ void View::UI_Interactive_AddRectangleButton()
 
 void View::UI_Interactive_AddArbPolygonInput()
 {
+    static double t = ImGui::GetTime();
     ImGui::Text("Arbitrary Shape");
     // 4500 = ( {4 digits}.{16 digits} , {4 digits}.{16 digits} ) x 100 + 99 + extra just in case (justin beiber haha)
     static char inputBuf[4500] = "(0,0),(200,100),(400,300),(500,500),(300,700),(100,600)";
@@ -322,7 +328,7 @@ void View::UI_Interactive_AddArbPolygonInput()
     ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 
-    if (ImGui::Button("Add AS"))
+    if (ImGui::Button("Add AS") && (ImGui::GetTime() - t) > buttonSpamLimit)
     {
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
         if (!UI_ModelModError(status, errorText, invalidInputTxtColor))
@@ -336,6 +342,7 @@ void View::UI_Interactive_AddArbPolygonInput()
             std::array<Uint8, 4> color = {r, g, b, a};
             m_PCSColors.push_back(color);
         }
+        t = ImGui::GetTime();
     }
 
     ImGui::TextColored(invalidInputTxtColor, "%s", errorText.c_str());
@@ -363,8 +370,8 @@ void View::UI_ModelInfo()
 {
     static float e = 1.0f;
     static float wallE = 1.0f; // WWWWAAAAAALLLLLL-E
-    static int wallColRes = 5;
-    static int shapeColRes = 5;
+    static int wallColRes = 7;
+    static int shapeColRes = 7;
     if (ImGui::CollapsingHeader("Engine Parameters", ImGuiTreeNodeFlags_CollapsingHeader))
     {
         ImGui::TextColored(TELOS_IMGUI_WHITE, "Engine time step: %.3fs", m_controller->RetrieveModel_GetTimeStep());

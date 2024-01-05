@@ -107,4 +107,5 @@ private:
     bool m_renderDone = false;  // Is the ImGui and model rendering portion done?
     bool m_modelPaused = false; // Is the model currently paused?
     static int ImGuiID;         // Next available ID of an ImGui element
+    double buttonSpamLimit = 0.5;
 };
