@@ -10,7 +10,7 @@ struct CollisionInfo_PCSCVX
 {
     CollisionInfo_PCSCVX(bool hasCollided)
     {
-        this->hasCollided = hasCollided;
+        this->m_collided = hasCollided;
     }
 
     CollisionInfo_PCSCVX(
@@ -23,25 +23,25 @@ struct CollisionInfo_PCSCVX
         PointCloudShape_Cvx *s1,
         PointCloudShape_Cvx *s2)
     {
-        this->hasCollided = hasCollided;
-        this->collisionPoint = collisionPoint;
-        this->penetrationVector = penetrationVector;
-        this->penetrationLine = penetrationLine;
-        this->collisionSurfaceNormal = collisionSurfaceNormal;
-        this->penetrationDepth = penetrationDepth;
+        this->m_collided = hasCollided;
+        this->m_collisionPoint = collisionPoint;
+        this->m_penetrationVector = penetrationVector;
+        this->m_penetrationLine = penetrationLine;
+        this->m_collisionSurfaceNormal = collisionSurfaceNormal;
+        this->m_penetrationDepth = penetrationDepth;
 
         this->s1 = s1;
         this->s2 = s2;
     }
 
-    bool hasCollided;
+    bool m_collided;
     PointCloudShape_Cvx *s1; // The two shapes that have collided. The first one is always the penetrator, the second penetrated.
     PointCloudShape_Cvx *s2;
-    Point collisionPoint;
-    Point penetrationVector; // Penetration vector is always given in the direction of the penetrating shape to the penetrated one
-    Line penetrationLine;
-    Point collisionSurfaceNormal; // Describes the surface line that the collision point contacted
-    double penetrationDepth;
+    Point m_collisionPoint;
+    Point m_penetrationVector; // Penetration vector is always given in the direction of the penetrating shape to the penetrated one
+    Line m_penetrationLine;
+    Point m_collisionSurfaceNormal; // Describes the surface line that the collision point contacted
+    double m_penetrationDepth;
 };
 
 enum WALL_SIDE
@@ -198,7 +198,7 @@ public:
     int m_wallOverlapResolution = 10;
     int m_shapeOverlapResolution = 10;
 
-    const Point m_maxVel = {5000.0, 5000.0};
+    const Point m_maxVel = {2500.0, 2500.0};
     const double m_maxRot = 10.0f;
     const int m_maxPCSPoints = 100;
     const int m_maxObjects = 50;

@@ -251,6 +251,8 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
 void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 {
 
+    if (!collisionInfo.m_collided)
+        return;
     double ekTot = collisionInfo.s1->getE() + collisionInfo.s2->getE();
 
     double m_a = collisionInfo.s1->m_mass;
@@ -262,18 +264,18 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
     double w_a1 = collisionInfo.s1->m_rot;
     double w_b1 = collisionInfo.s2->m_rot;
 
-    Point n = collisionInfo.collisionSurfaceNormal;
+    Point n = collisionInfo.m_collisionSurfaceNormal;
 
-    Point r_ap = collisionInfo.collisionPoint - collisionInfo.s1->m_center;
-    Point r_bp = collisionInfo.collisionPoint - collisionInfo.s2->m_center;
+    Point r_ap = collisionInfo.m_collisionPoint - collisionInfo.s1->m_center;
+    Point r_bp = collisionInfo.m_collisionPoint - collisionInfo.s2->m_center;
 
     Point v_a1 = collisionInfo.s1->m_vel;
     Point v_b1 = collisionInfo.s2->m_vel;
 
-    Point v_ap_rot = Math::instantVelRot2D(collisionInfo.collisionPoint, collisionInfo.s1->m_center, w_a1);
+    Point v_ap_rot = Math::instantVelRot2D(collisionInfo.m_collisionPoint, collisionInfo.s1->m_center, w_a1);
     Point v_ap1 = collisionInfo.s1->m_vel + v_ap_rot;
 
-    Point v_bp_rot = Math::instantVelRot2D(collisionInfo.collisionPoint, collisionInfo.s2->m_center, w_b1);
+    Point v_bp_rot = Math::instantVelRot2D(collisionInfo.m_collisionPoint, collisionInfo.s2->m_center, w_b1);
     Point v_bp1 = collisionInfo.s2->m_vel + v_bp_rot;
 
     Point v_p1 = v_ap1 - v_bp1;
@@ -302,7 +304,9 @@ void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 
 void Model::resolveCollisionOverlapPCSCVX(CollisionInfo_PCSCVX &collisionInfo)
 {
-    Point separation = (collisionInfo.penetrationVector * collisionInfo.penetrationDepth); //* m_SEPARATION_SAFETY_FACTOR;
+    if (!collisionInfo.m_collided)
+        return;
+    Point separation = (collisionInfo.m_penetrationVector * collisionInfo.m_penetrationDepth); //* m_SEPARATION_SAFETY_FACTOR;
     collisionInfo.s2->moveShape(separation * 0.5);
     collisionInfo.s1->moveShape(separation * -0.5);
 }
@@ -344,8 +348,9 @@ void Model::resolveCollisionOverlapPCSCVX_Rot(PointCloudShape_Cvx &s1, PointClou
 // Shapes that collide with opposite walls are not handled and hence the response won't be accurate.
 void Model::resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
 {
-    Point collisionPoint[2];
-    collisionPoint[0] = wci.m_collisionPoint;
+    if (!wci.m_collided)
+        return;
+
     if (wci.m_multiWall)
     {
         Point slideVec = wci.m_collisionNormal;
