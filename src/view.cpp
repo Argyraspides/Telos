@@ -363,6 +363,7 @@ void View::UI_ModelInfo()
 {
     static float e = 1.0f;
     static float wallE = 1.0f; // WWWWAAAAAALLLLLL-E
+    static int wallColRes = 5;
     if (ImGui::CollapsingHeader("Engine Parameters", ImGuiTreeNodeFlags_CollapsingHeader))
     {
         ImGui::TextColored(TELOS_IMGUI_WHITE, "Engine time step: %.3fs", m_controller->RetrieveModel_GetTimeStep());
@@ -384,11 +385,12 @@ void View::UI_ModelInfo()
         ImGui::ColorEdit3("Background Color", (float *)&m_clearColor);
         ImGui::SliderFloat("Collision Elasticity", &e, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
         ImGui::SliderFloat("Wall Collision Elasticity", &wallE, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
-
+        ImGui::SliderInt("Wall Collision Resolution", &wallColRes, m_controller->RetrieveModel_GetMinWallOverlapResolution(), m_controller->RetrieveModel_GetMaxWallOverlapResolution());
         ImGui::PopItemWidth(); // Restore default item width
 
         m_controller->UpdateModel_ChangeElasticity(e);
         m_controller->UpdateModel_ChangeWallElasticity(wallE);
+        m_controller->UpdateModel_ChangeWallOverlapResolution(wallColRes);
 
         ImGui::PushStyleColor(ImGuiCol_Button, TELOS_IMGUI_RED);
         ImGui::NewLine();

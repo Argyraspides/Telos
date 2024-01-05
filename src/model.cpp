@@ -356,13 +356,13 @@ void Model::resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
 // tiny bit of overlap such that a collision point can be found
 void Model::resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1)
 {
+    Utils::printAllShapeInfo(s1);
     double timeStep = m_timeStep / 2.0;
     int stepDirection = TIME_DIRECTION::BACKWARD;
 
     for (int i = 0; i < m_wallOverlapResolution; i++)
     {
         s1.updateShape(timeStep, stepDirection);
-
         if (QuickIsContactWall(s1))
         {
             stepDirection = TIME_DIRECTION::BACKWARD;
@@ -378,6 +378,7 @@ void Model::resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1)
     {
         s1.updateShape(timeStep * 2.0, TIME_DIRECTION::FORWARD);
     }
+    Utils::printAllShapeInfo(s1);
 }
 
 void Model::resolveCollisionPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci)
@@ -472,7 +473,7 @@ WallCollisionInfo_PCSCVX Model::isContactWall(PointCloudShape_Cvx &s1)
     bool leftCol = false, rightCol = false, bottomCol = false, topCol = false;
 
     std::vector<std::pair<Point, int>> colPoints;
-    colPoints.reserve(s1.m_points.size());
+    colPoints.reserve(2);
 
     for (int i = 0; i < s1.m_points.size(); i++)
     {
@@ -521,7 +522,7 @@ WallCollisionInfo_PCSCVX Model::isContactWall(PointCloudShape_Cvx &s1)
         Point avg = (colPoints[0].first + colPoints[1].first) / 2.0;
         return WallCollisionInfo_PCSCVX(true, false, colPoints[0].second, &s1, avg);
     }
-    // GGWP. In this scenario we will just take the point that is furthest away from the wall.
+    // GGWP. The shape has completely gone through the wall, or too many points are clustered on this side. In this scenario we will just take the point that is furthest away from the wall
     double closestPtDotProd = -std::numeric_limits<double>::max();
     double currentDotProd = 0;
     Point closestPoint = 0;

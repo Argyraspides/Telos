@@ -159,8 +159,8 @@ public:
     pthread_mutex_t shapeListMutex;                      // MUTEX TO LOCK READ/WRITE ACCESS TO THE SHAPES. THIS IS LOCKED IN getShapeList(), AND MUST BE UNLOCKED AFTER CALLING THE FUNCTION
 
 public:
-    // ***********************************************************************************************************************************************************************************************************************************
-    // ***************************************************CONVEX POLYGON RIGIDBODY MODULE*************************************************************************************************************************************************
+    //*************************************************** RIDID BODY MECHANICS FUNCTIONS ******************************************************
+    // ****************************************************************************************************************************************
 
     std::vector<std::shared_ptr<PointCloudShape_Cvx>> m_PCSCVX_shapeList;
     std::vector<std::shared_ptr<PointCloudShape_Cvx>> &getPCSCVXShapeList();
@@ -188,6 +188,8 @@ public:
     void resolveCollisionOverlapPCSCVX_Wall(WallCollisionInfo_PCSCVX &wci);     // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, ONLY TAKES INTO ACCOUNT TRANSLATION)
     void resolveCollisionOverlapPCSCVX_Wall_Rot(PointCloudShape_Cvx &s1); // RESOLVES COLLISION BETWEEN POINT CLOUD SHAPE AND THE WALL (OVERLAP SEPARATION ONLY, TAKES INTO ACCOUNT TRANSLATION AND ROTATION)
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 public:
     const double m_ENERGY_THRESHOLD = 0.0000000001; // CONSERVATION OF ENERGY CAN BE VIOLATED BY THIS MUCH AS PER THE NATURE OF DOUBLE CALCULATIONS
     const double m_SEPARATION_SAFETY_FACTOR = 1.0;
@@ -195,18 +197,20 @@ public:
     double m_wallCollisionElasticity = 1.0;
     int m_wallOverlapResolution = 15;
 
-    const Point m_maxVel = {2500.0, 2500.0};
+    const Point m_maxVel = {5000.0, 5000.0};
     const double m_rotMax = 10.0f;
     const int m_maxPCSPoints = 100;
     const double m_minCollisionElasticity = 0.0;
     const double m_maxCollisionElasticity = 1.0;
+    const int m_minWallOverlapResolution = 0;
+    const int m_maxWallOverlapResolution = 20;
     const int m_maxObjects = 50;
     const double m_maxMass = 200.0;
-    // ************************************************************************************************************************************************************************************************************************************
-    // ************************************************************************************************************************************************************************************************************************************
-
+   
     double m_time = 0.0;
     double m_timeStep = 1.0 / ENGINE_POLLING_RATE;
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     typedef void (Model::*CurrentUpdateFunc)(int);
     CurrentUpdateFunc m_currentUpdateFunc; // Specifies the current function used to update the engine

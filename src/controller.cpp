@@ -198,6 +198,12 @@ void Controller::UpdateModel_ChangeWallElasticity(double e)
     m_model->m_wallCollisionElasticity = e;
 }
 
+void Controller::UpdateModel_ChangeWallOverlapResolution(int wor)
+{
+    if(wor < m_model->m_minWallOverlapResolution || wor > m_model->m_maxWallOverlapResolution) return;
+    this->m_model->m_wallOverlapResolution = wor;
+}
+
 const std::vector<std::shared_ptr<Shape>> &Controller::RetrieveModel_ReadShapes()
 {
     // We don't need to lock the mutex as this is read-only
@@ -258,6 +264,21 @@ const int Controller::RetrieveModel_GetMaxObjects()
 const double Controller::RetrieveModel_GetMaxMass()
 {
     return m_model->m_maxMass;
+}
+
+const int Controller::RetrieveModel_GetWallOverlapResolution()
+{
+    return m_model->m_wallOverlapResolution;
+}
+
+const int Controller::RetrieveModel_GetMinWallOverlapResolution()
+{
+    return m_model->m_minWallOverlapResolution;
+}
+
+const int Controller::RetrieveModel_GetMaxWallOverlapResolution()
+{
+    return m_model->m_maxWallOverlapResolution;
 }
 
 void Controller::ShutModel()
