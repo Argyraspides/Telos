@@ -63,6 +63,7 @@ private:
     void UI_Interactive_AddArbPolygonInput();
 
     void UI_Tutorial();              // TUTORIAL AND WELCOME WINDOW
+    void UI_About();
     void UI_ModelInfo();             // ENGINE PARAMETERS
     void UI_ShapeInfo();             // INFORMATION ABOUT CURRENT SHAPES ADDED TO THE SCENE
     void UI_CornerInfo(ImGuiIO &io); // FPS AND PAUSE INDICATOR
