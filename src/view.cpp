@@ -389,17 +389,17 @@ void View::UI_About()
             "can be calculated in a few steps, and we simply apply this impulse (which is nothing more than modifying the velocities "
             "with the impulse parameter) to both the shapes.\n\n"
 
-            "The equation for the resulting translational velocities of the shapes is: ";
+            "The equation for the resulting translational velocities of the shapes is:\n\n";
 
         ImGui::TextWrapped("%s", explanation);
-        ImGui::TextColored(TELOS_IMGUI_RED, "vf = vi + j*n / m");
+        ImGui::TextColored(TELOS_IMGUI_RED, "vf = vi + jn / m\n\n");
 
-        static const char *explanation2 = "\nWhere 'j' is the impulse parameter, 'n' is the normal of the collision surface. The equation for "
-                                          "the resulting rotational velocities is:";
+        static const char *explanation2 = "Where 'j' is the impulse parameter, 'n' is the normal of the collision surface. The equation for "
+                                          "the resulting rotational velocities is:\n\n";
         ImGui::TextWrapped("%s", explanation2);
-        ImGui::TextColored(TELOS_IMGUI_RED, "wf = wi + (r x j*n) / I");
+        ImGui::TextColored(TELOS_IMGUI_RED, "wf = wi + (r x jn) / I\n\n");
 
-        static const char *explanation3 = "\nWhere 'r' is the vector that points from the centroid of the "
+        static const char *explanation3 = "Where 'r' is the vector that points from the centroid of the "
                                           "shapes to the collision point, 'I' the rotational inertia of the shapes, and 'x' the cross product.\n\n\n";
         ImGui::TextWrapped("%s", explanation3);
 
@@ -413,7 +413,7 @@ void View::UI_About()
             "threads (the model runs on one thread, and the view is split into two threads - rendering and user input). If you'd like to "
             "see an architecture diagram, you may see it a the bottom of the front page of the engines source code at:\n\n";
 
-        ImGui::PushItemWidth(ImGui::GetWindowWidth()); 
+        ImGui::PushItemWidth(ImGui::GetWindowWidth());
         ImGui::TextWrapped("%s", paragraphs2);
         char buf[] = "https://github.com/Argyraspides/Telos";
         ImGui::InputText("##ID", buf, 38);
@@ -434,6 +434,8 @@ void View::UI_ConstructMenuModule()
         m_menuOpen = true;
 
     UI_About();
+    
+    ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5);
     UI_ModelInfo();
     UI_Interactive_CommonShapeSubMenu();
     UI_ShapeInfo();
