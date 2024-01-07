@@ -14,6 +14,9 @@ namespace Math
     static double dist(const Point &p1, const Point &p2);
     static Point instantVelRot2D(const Point &p, const Point &c, double rot);
     static Point intersectionPt(const Line &l1, const Line &l2);
+    static int positiveMod(const int &a, const int &b);
+    static bool samePolarity(const double &a, const double &b);
+    static bool samePolarity(const int &a, const int &b);
 
     // Origin of the 3D cartesian space (x, y, and z = 0)
     static Point origin = {0, 0, 0};
@@ -34,6 +37,21 @@ namespace Math
 
     static Line WALLS[4] = {LEFT_WALL, TOP_WALL, RIGHT_WALL, BOTTOM_WALL};
     static Point WALL_VECS[4] = {LEFT_WALL_VEC, TOP_WALL_VEC, RIGHT_WALL_VEC, BOTTOM_WALL_VEC};
+
+    static int positiveMod(const int &a, const int &b)
+    {
+        return (a % b + b) % b;
+    }
+
+    bool samePolarity(const double &a, const double &b)
+    {
+        return std::signbit(a) == std::signbit(b);
+    }
+
+    bool samePolarity(const int &a, const int &b)
+    {
+        return std::signbit(a) == std::signbit(b);
+    }
 
     // Calculates the normal of a vector in 2D space
     static Point getNormal2D(Point p)

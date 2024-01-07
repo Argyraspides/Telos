@@ -234,7 +234,6 @@ void View::UI_Interactive_CommonShapeSubMenu()
 
 void View::UI_Interactive_AddRegularPolygonButton()
 {
-
     ImGui::Text("Regular Polygon");
     static float radius = 50;
     static int sides = 5;

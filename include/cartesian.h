@@ -149,4 +149,14 @@ struct Line
         c = l.c;
         isVertical = l.isVertical;
     }
+
+    double getY(double xVal)
+    {
+        if(!isVertical)
+        {
+            // y = mx + c
+            return m*xVal + c;
+        }
+        return 0;
+    }
 };

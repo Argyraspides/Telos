@@ -181,11 +181,25 @@ Point Utils::getCentroid(const std::vector<Point> &points)
     return Point(sumX / size, sumY / size, sumZ / size);
 }
 
-// TODO: IMPLEMENT
-bool Utils::checkConvex(const std::vector<Point> &points)
+// TODO: DEBUG
+bool Utils::isConvex(const std::vector<Point> &points)
 {
-    for (size_t i = 0; i < points.size(); i++)
+    Point center = getCentroid(points);
+
+    Point edge1 = points[0] - points[1];
+    Point edge2 = points[1] - points[2];
+
+    bool polarity = Math::crossProd2D(edge1, edge2) > 0;
+
+    for (int i = 1; i < points.size(); i++)
     {
+        edge1 = points[i] - points[(i + 1) % points.size()];
+        edge2 = points[(i + 1) % points.size()] - points[(i + 2) % points.size()];
+        bool currentPolarity = Math::crossProd2D(edge1, edge2) > 0;
+        if (currentPolarity != polarity)
+        {
+            return false;
+        }
     }
 
     return true;

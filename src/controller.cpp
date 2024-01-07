@@ -53,7 +53,6 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_RegularPoly(double ra
     {
         return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS);
     }
-
     // Engine polls at 30-60 times per second. Input values should be intuitive to the user and hence
     // on the order of once per second, so we divide the values by the engines polling rate.
     // E.g. instead of x velocity being 8 pixels every 20ms, its 8 pixels every second.
@@ -87,7 +86,7 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr
     }
 
     std::vector<Point> pts = Utils::generateArbPoly2D(std::string(ptsPtr));
-    if (pts.size() >= 3 && pts.size() <= RetrieveModel_GetMaxPCSPoints())
+    if (pts.size() >= 3 && pts.size() <= RetrieveModel_GetMaxPCSPoints() && Utils::isConvex(pts))
     {
         PointCloudShape_Cvx arbPoly(pts, {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE}, rot / ENGINE_POLLING_RATE, mass, RetrieveModel_GetCurrentTime());
         std::shared_ptr<Shape> arbPolyGeneric = std::make_shared<PointCloudShape_Cvx>(arbPoly);
