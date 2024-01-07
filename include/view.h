@@ -77,6 +77,7 @@ private:
     void SDL_EventHandlingLoop();               // HANDLES INPUTS FOR THE VIEWPORT (NOT IMGUI)
     void SDL_ViewportHandler(SDL_Event &event); // HANDLES INPUT ON THE VIEWPORT (I.E. THE AREA THINGS ARE RENDERED)
     void SDL_DragShape(SDL_Event &event);       // ALLOWS USER TO DRAG SHAPES AROUND THE VIEWPORT
+    void SDL_ThrowShape(SDL_Event &event);
     void SDL_RemoveShape(SDL_Event &event);     // ALLOWS USER TO REMOVE SHAPES FROM THE WORLD
     void SDL_Pause(SDL_Event &event);           // ALLOWS USER TO PAUSE THE MODEL
     void SDL_TickModel(SDL_Event &event);       // ALLOWS USER TO MOVE THE MODEL FORWARD OR BACKWARD BY ONE TIME STEP

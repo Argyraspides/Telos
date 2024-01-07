@@ -4,7 +4,11 @@
 #include "model.h"
 #include "BUILD_EMCC.h"
 #include "telos_imgui_colors.h"
+
+#if BUILD_EMCC
 #include "emscripten_browser_clipboard.h"
+#endif
+
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -233,7 +237,6 @@ void View::UI_Interactive_CommonShapeSubMenu()
 
 void View::UI_Interactive_AddRegularPolygonButton()
 {
-    static double t = ImGui::GetTime();
 
     ImGui::Text("Regular Polygon");
     static float radius = 50;
@@ -252,7 +255,7 @@ void View::UI_Interactive_AddRegularPolygonButton()
     ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 
-    if (ImGui::Button("Add RP") && (ImGui::GetTime() - t) > buttonSpamLimit)
+    if (ImGui::Button("Add RP"))
     {
 
         MODEL_MODIFICATION_RESULT s = m_controller->UpdateModel_AddShape_RegularPoly(radius, sides, xVel, yVel, rot, mass);
@@ -266,7 +269,6 @@ void View::UI_Interactive_AddRegularPolygonButton()
             std::array<Uint8, 4> color = {r, g, b, a};
             m_PCSColors.push_back(color);
         }
-        t = ImGui::GetTime();
     }
     ImGui::TextColored(errorColor, "%s", errorText.c_str());
 }
@@ -289,7 +291,7 @@ void View::UI_Interactive_AddRectangleButton()
     static std::string errorText;
     static double t = ImGui::GetTime();
 
-    if (ImGui::Button("Add Rect") && (ImGui::GetTime() - t) > buttonSpamLimit)
+    if (ImGui::Button("Add Rect"))
     {
 
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Rect(w, h, xVel, yVel, rot, mass);
@@ -304,7 +306,6 @@ void View::UI_Interactive_AddRectangleButton()
             std::array<Uint8, 4> color = {r, g, b, a};
             m_PCSColors.push_back(color);
         }
-        t = ImGui::GetTime();
     }
 
     ImGui::TextColored(errorColor, "%s", errorText.c_str());
@@ -312,7 +313,6 @@ void View::UI_Interactive_AddRectangleButton()
 
 void View::UI_Interactive_AddArbPolygonInput()
 {
-    static double t = ImGui::GetTime();
     ImGui::Text("Arbitrary Shape");
     // 4500 = ( {4 digits}.{16 digits} , {4 digits}.{16 digits} ) x 100 + 99 + extra just in case (justin beiber haha)
     static char inputBuf[4500] = "(0,0),(200,100),(400,300),(500,500),(300,700),(100,600)";
@@ -329,7 +329,7 @@ void View::UI_Interactive_AddArbPolygonInput()
     ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
     ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 
-    if (ImGui::Button("Add AS") && (ImGui::GetTime() - t) > buttonSpamLimit)
+    if (ImGui::Button("Add AS"))
     {
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
         if (!UI_ModelModError(status, errorText, invalidInputTxtColor))
@@ -343,7 +343,6 @@ void View::UI_Interactive_AddArbPolygonInput()
             std::array<Uint8, 4> color = {r, g, b, a};
             m_PCSColors.push_back(color);
         }
-        t = ImGui::GetTime();
     }
 
     ImGui::TextColored(invalidInputTxtColor, "%s", errorText.c_str());
@@ -418,12 +417,13 @@ void View::UI_About()
         ImGui::TextWrapped("%s", paragraphs2);
         char buf[] = "https://github.com/Argyraspides/Telos";
         ImGui::InputText("##ID", buf, 38);
-        
+
+#if BUILD_EMCC
         if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftCtrl)) && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)))
         {
             emscripten_browser_clipboard::copy(buf);
         }
-
+#endif
         ImGui::SetWindowFontScale(1.0f);
         ImGui::NewLine();
     }
@@ -547,7 +547,8 @@ void View::UI_Tutorial()
             "Esc: Pause\n"
             "Left click hold: Drag shapes around (pauses the engine)\n"
             "Right click: Delete a shape\n"
-            "Left and right arrows: move backward/forward by one time step (you must pause first)\n";
+            "Left and right arrows: move backward/forward by one time step (you must pause first)\n"
+            "Left shift hold: Hover over a shape and fling it!";
 
         ImGui::SetNextWindowPos(ImVec2(center.x, center.y), ImGuiCond_FirstUseEver);
         ImGui::Begin("Tutorial", &showTutorial);
@@ -660,6 +661,7 @@ void View::SDL_EventHandlingLoop()
 void View::SDL_ViewportHandler(SDL_Event &event)
 {
     SDL_DragShape(event);
+    SDL_ThrowShape(event);
     SDL_RemoveShape(event);
     SDL_Pause(event);
     SDL_TickModel(event);
@@ -692,6 +694,49 @@ void View::SDL_DragShape(SDL_Event &event)
                     }
                     SDL_GetMouseState(&mouseX, &mouseY);
                     shapePtr->setShapePos(Point({(float)mouseX, (float)mouseY, 0}));
+                }
+            }
+        }
+    }
+}
+
+void View::SDL_ThrowShape(SDL_Event &event)
+{
+    int mouseX, mouseY;
+    int initMouseX, initMouseY;
+    SDL_GetMouseState(&initMouseX, &initMouseY);
+
+    if (m_menuOpen && initMouseX < m_menuWidth)
+        return;
+
+    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_LSHIFT)
+    {
+        const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
+        for (std::shared_ptr<Shape> shapePtr : shapePtrs)
+        {
+            if (Utils::isInside({(double)initMouseX, (double)initMouseY}, shapePtr))
+            {
+                this->m_controller->PauseModel();
+                m_modelPaused = true;
+                auto init = std::chrono::high_resolution_clock::now();
+                while (true)
+                {
+                    SDL_PollEvent(&event);
+                    SDL_GetMouseState(&mouseX, &mouseY);
+
+                    if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_LSHIFT)
+                    {
+                        auto end = std::chrono::high_resolution_clock::now();
+
+                        Point vec = {(double)(mouseX - initMouseX), (double)(mouseY - initMouseY), 0};
+                        double scale = std::chrono::duration_cast<std::chrono::milliseconds>(end - init).count() / 10;
+                        vec = vec / scale;
+                        shapePtr->setShapeVel(vec);
+                        this->m_controller->UnpauseModel();
+                        m_modelPaused = false;
+                        break;
+                    }
+                    shapePtr->setShapePos({(double)mouseX, (double)mouseY});
                 }
             }
         }
