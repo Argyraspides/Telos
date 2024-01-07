@@ -242,6 +242,11 @@ const double Controller::RetrieveModel_GetCurrentTime()
     return m_model->m_time;
 }
 
+const bool Controller::CheckModel_IsPaused()
+{
+    return m_model->m_isPaused;
+}
+
 const double Controller::RetrieveModel_GetMaxEnergyViolation()
 {
     return m_model->m_ENERGY_THRESHOLD;

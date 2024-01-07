@@ -59,15 +59,19 @@ private:
     void UI_Interactive_CommonShapeSubMenu(); // SUBMENU FOR ADDING COMMON SHAPES
     void UI_Interactive_AddRegularPolygonButton();
     void UI_Interactive_AddRectangleButton();
+    void UI_DeleteAllShapesBtn();
+
     void UI_Interactive_AddTriangleButton();
     void UI_Interactive_AddArbPolygonInput();
 
-    void UI_Tutorial();              // TUTORIAL AND WELCOME WINDOW
+    void UI_StandardShapeInputs(float &xVel, float &yVel, float &rot, float &mass);
+
+    void UI_Tutorial(); // TUTORIAL AND WELCOME WINDOW
     void UI_About();
     void UI_ModelInfo();             // ENGINE PARAMETERS
     void UI_ShapeInfo();             // INFORMATION ABOUT CURRENT SHAPES ADDED TO THE SCENE
     void UI_CornerInfo(ImGuiIO &io); // FPS AND PAUSE INDICATOR
-    bool UI_ModelModError(const MODEL_MODIFICATION_RESULT &result, std::string &errorText, ImVec4& colorText);
+    bool UI_ModelModError(const MODEL_MODIFICATION_RESULT &result, std::string &errorText, ImVec4 &colorText);
 
     bool m_menuOpen = false;                  // Is the menu currently collapsed or open? (This is to make sure inputs are not handled by the engine behind the menu)
     float m_menuWidth = SCREEN_WIDTH * 0.275; // Width of the menu
@@ -78,14 +82,16 @@ private:
     void SDL_ViewportHandler(SDL_Event &event); // HANDLES INPUT ON THE VIEWPORT (I.E. THE AREA THINGS ARE RENDERED)
     void SDL_DragShape(SDL_Event &event);       // ALLOWS USER TO DRAG SHAPES AROUND THE VIEWPORT
     void SDL_ThrowShape(SDL_Event &event);
-    void SDL_RemoveShape(SDL_Event &event);     // ALLOWS USER TO REMOVE SHAPES FROM THE WORLD
-    void SDL_Pause(SDL_Event &event);           // ALLOWS USER TO PAUSE THE MODEL
-    void SDL_TickModel(SDL_Event &event);       // ALLOWS USER TO MOVE THE MODEL FORWARD OR BACKWARD BY ONE TIME STEP
+    void SDL_RemoveShape(SDL_Event &event); // ALLOWS USER TO REMOVE SHAPES FROM THE WORLD
+    void SDL_Pause(SDL_Event &event);       // ALLOWS USER TO PAUSE THE MODEL
+    void SDL_TickModel(SDL_Event &event);   // ALLOWS USER TO MOVE THE MODEL FORWARD OR BACKWARD BY ONE TIME STEP
 
     static ImVec4 m_currentShapeColor; // Currently selected color of the next shape to be added
     ImVec4 m_clearColor;               // Currently selected color of the background
     Sint16 *m_PCSPointsX;              // Points of a polygon represented as a point cloud in a poniter for rendering with SDL_gfx
     Sint16 *m_PCSPointsY;
+    
+    void AddRenderColor();
     std::vector<std::array<Uint8, 4>> m_PCSColors; // Colors of the polygons that have been added
 
 private:
@@ -109,5 +115,4 @@ private:
     bool m_renderDone = false;  // Is the ImGui and model rendering portion done?
     bool m_modelPaused = false; // Is the model currently paused?
     static int ImGuiID;         // Next available ID of an ImGui element
-    double buttonSpamLimit = 0.5;
 };

@@ -251,8 +251,6 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
             }
         }
     }
-    Utils::printAllShapeInfo(s1);
-    Utils::printAllShapeInfo(s2);
     Point avgColPt = {0,0,0};
     for(int i = 0; i < colPts.size(); i++)
     {
@@ -260,9 +258,6 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
     }
     avgColPt = avgColPt / colPts.size();
     collisionInfo.m_collisionPoint = avgColPt;
-    Utils::printPointInfo(avgColPt);
-    Utils::printPointInfo(collisionInfo.m_penetrationVector);
-    std::cout << collisionInfo.m_penetrationDepth << "\n";
     return collisionInfo;
 }
 

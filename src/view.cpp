@@ -6,6 +6,7 @@
 #include "telos_imgui_colors.h"
 
 #if BUILD_EMCC
+#include <emscripten/emscripten.h>
 #include "emscripten_browser_clipboard.h"
 #endif
 
@@ -17,18 +18,14 @@
 #include <unistd.h>
 #include <filesystem>
 
-#if BUILD_EMCC
-#include <emscripten/emscripten.h>
-#endif
-
 int View::ImGuiID = 1;
 ImVec4 View::m_currentShapeColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 View::View(Controller *controller)
 {
-    this->m_controller = controller;
-    this->m_PCSPointsX = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
-    this->m_PCSPointsY = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
+    m_controller = controller;
+    m_PCSPointsX = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
+    m_PCSPointsY = new Sint16[m_controller->RetrieveModel_GetMaxPCSPoints()];
 }
 
 View::~View()
@@ -113,12 +110,12 @@ void View::Render()
                 if (_event.type == SDL_QUIT)
                 {
                     done = true;
-                    this->m_controller->ShutModel();
+                    m_controller->ShutModel();
                 }
                 if (_event.type == SDL_WINDOWEVENT && _event.window.event == SDL_WINDOWEVENT_CLOSE && _event.window.windowID == SDL_GetWindowID(window))
                 {
                     done = true;
-                    this->m_controller->ShutModel();
+                    m_controller->ShutModel();
                 }
                 if (m_inputDone)
                     GetFrameEvents().clear();
@@ -250,27 +247,27 @@ void View::UI_Interactive_AddRegularPolygonButton()
 
     ImGui::InputFloat(("Radius##ID" + std::to_string(UI_FetchID())).c_str(), &radius);
     ImGui::InputInt(("Sides##ID" + std::to_string(UI_FetchID())).c_str(), &sides);
-    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
-    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
-    ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
-    ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
+    UI_StandardShapeInputs(xVel, yVel, rot, mass);
 
     if (ImGui::Button("Add RP"))
     {
-
         MODEL_MODIFICATION_RESULT s = m_controller->UpdateModel_AddShape_RegularPoly(radius, sides, xVel, yVel, rot, mass);
-
         if (!UI_ModelModError(s, errorText, errorColor))
         {
-            Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
-            Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
-            Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
-            Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
-            std::array<Uint8, 4> color = {r, g, b, a};
-            m_PCSColors.push_back(color);
+            AddRenderColor();
         }
     }
     ImGui::TextColored(errorColor, "%s", errorText.c_str());
+}
+
+void View::AddRenderColor()
+{
+    Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
+    Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
+    Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
+    Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
+    std::array<Uint8, 4> color = {r, g, b, a};
+    m_PCSColors.push_back(color);
 }
 
 void View::UI_Interactive_AddRectangleButton()
@@ -281,30 +278,19 @@ void View::UI_Interactive_AddRectangleButton()
     static float yVel = 2500.0f;
     static float rot = 0.5f;
     static float mass = 1.0f;
-    ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
-    ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
-    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
-    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
-    ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
-    ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
     static ImVec4 errorColor;
     static std::string errorText;
-    static double t = ImGui::GetTime();
+
+    ImGui::InputFloat(("Width##ID" + std::to_string(UI_FetchID())).c_str(), &w);
+    ImGui::InputFloat(("Height##ID" + std::to_string(UI_FetchID())).c_str(), &h);
+    UI_StandardShapeInputs(xVel, yVel, rot, mass);
 
     if (ImGui::Button("Add Rect"))
     {
-
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Rect(w, h, xVel, yVel, rot, mass);
         if (!UI_ModelModError(status, errorText, errorColor))
         {
-            errorColor = TELOS_IMGUI_CLEAR;
-            Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
-            Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
-            Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
-            Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
-
-            std::array<Uint8, 4> color = {r, g, b, a};
-            m_PCSColors.push_back(color);
+            AddRenderColor();
         }
     }
 
@@ -324,28 +310,26 @@ void View::UI_Interactive_AddArbPolygonInput()
     static std::string errorText;
 
     ImGui::InputText(("Points##ID" + std::to_string(UI_FetchID())).c_str(), inputBuf, sizeof(inputBuf));
-    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
-    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
-    ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
-    ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
+    UI_StandardShapeInputs(xVel, yVel, rot, mass);
 
     if (ImGui::Button("Add AS"))
     {
         MODEL_MODIFICATION_RESULT status = m_controller->UpdateModel_AddShape_Arbitrary(inputBuf, xVel, yVel, rot, mass);
         if (!UI_ModelModError(status, errorText, invalidInputTxtColor))
         {
-            Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
-            Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
-            Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
-            Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
-
-            invalidInputTxtColor = TELOS_IMGUI_CLEAR;
-            std::array<Uint8, 4> color = {r, g, b, a};
-            m_PCSColors.push_back(color);
+            AddRenderColor();
         }
     }
 
     ImGui::TextColored(invalidInputTxtColor, "%s", errorText.c_str());
+}
+
+void View::UI_StandardShapeInputs(float &xVel, float &yVel, float &rot, float &mass)
+{
+    ImGui::InputFloat(("X Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &xVel);
+    ImGui::InputFloat(("Y Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &yVel);
+    ImGui::InputFloat(("Rotational Velocity##ID" + std::to_string(UI_FetchID())).c_str(), &rot);
+    ImGui::InputFloat(("Mass##ID" + std::to_string(UI_FetchID())).c_str(), &mass);
 }
 
 void View::UI_About()
@@ -434,15 +418,12 @@ void View::UI_ConstructMenuModule()
     ImGui::Begin("Menu");
     ImGui::SetWindowPos(ImVec2(0, 0));
     ImGui::SetWindowSize(ImVec2(m_menuWidth, ImGui::GetIO().DisplaySize.y));
-
-    if (ImGui::IsWindowCollapsed())
-        m_menuOpen = false;
-    else
-        m_menuOpen = true;
+    m_menuOpen = !ImGui::IsWindowCollapsed();
 
     UI_About();
 
     ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5);
+
     UI_ModelInfo();
     UI_Interactive_CommonShapeSubMenu();
     UI_ShapeInfo();
@@ -487,14 +468,21 @@ void View::UI_ModelInfo()
         m_controller->UpdateModel_ChangeShapeOverlapResolution(shapeColRes);
 
         ImGui::PushStyleColor(ImGuiCol_Button, TELOS_IMGUI_RED);
+
         ImGui::NewLine();
-        if (ImGui::Button("Delete All Shapes"))
-        {
-            m_controller->UpdateModel_RemoveAllShapes();
-            m_PCSColors.clear();
-        }
+        UI_DeleteAllShapesBtn();
         ImGui::NewLine();
+
         ImGui::PopStyleColor();
+    }
+}
+
+void View::UI_DeleteAllShapesBtn()
+{
+    if (ImGui::Button("Delete All Shapes"))
+    {
+        m_controller->UpdateModel_RemoveAllShapes();
+        m_PCSColors.clear();
     }
 }
 
@@ -502,7 +490,6 @@ void View::UI_CornerInfo(ImGuiIO &io)
 {
 
     static bool showFps = true;
-
     if (showFps)
     {
         ImGui::SetNextWindowPos(ImVec2(SCREEN_WIDTH - 90, 0), ImGuiCond_Always);
@@ -514,8 +501,7 @@ void View::UI_CornerInfo(ImGuiIO &io)
         ImGui::Text("%.1f FPS", io.Framerate);
         ImGui::End();
     }
-
-    if (m_modelPaused)
+    if (m_controller->CheckModel_IsPaused())
     {
         ImGui::SetNextWindowPos(ImVec2(SCREEN_WIDTH - 90, 50), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(90, 50), ImGuiCond_Always);
@@ -564,7 +550,7 @@ void View::UI_ShapeInfo()
 {
     if (ImGui::CollapsingHeader("Shape Info", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        const std::vector<std::shared_ptr<Shape>> &shapeList = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>> &shapeList = m_controller->RetrieveModel_ReadShapes();
         for (const auto &shape : shapeList)
         {
             const Point &center = shape->m_center;
@@ -600,24 +586,20 @@ void View::UI_ShapeInfo()
 
 void View::Render_Polygon(SDL_Renderer *renderer, const std::vector<Point> &points, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-
     for (int i = 0; i < points.size(); i++)
     {
         m_PCSPointsX[i] = points[i].x;
         m_PCSPointsY[i] = points[i].y;
     }
-
     filledPolygonRGBA(renderer, m_PCSPointsX, m_PCSPointsY, points.size(), r, g, b, a);
 }
 
 void View::Render_Model(SDL_Renderer *renderer)
 {
-    if (this->m_controller != nullptr)
+    if (m_controller != nullptr)
     {
-        const int shapeCount = this->m_controller->RetrieveModel_GetShapeCount();
-        const std::vector<std::shared_ptr<Shape>> &shapeList = this->m_controller->RetrieveModel_ReadShapes();
-
-        for (size_t i = 0; i < shapeCount; i++)
+        const std::vector<std::shared_ptr<Shape>> &shapeList = m_controller->RetrieveModel_ReadShapes();
+        for (int i = 0; i < shapeList.size(); i++)
         {
             Render_Polygon(
                 renderer,
@@ -677,14 +659,13 @@ void View::SDL_DragShape(SDL_Event &event)
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
     {
-        const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>> &shapePtrs = m_controller->RetrieveModel_ReadShapes();
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
 
             if (Utils::isInside({(double)mouseX, (double)mouseY}, shapePtr))
             {
-                this->m_controller->PauseModel();
-                m_modelPaused = true;
+                m_controller->PauseModel();
                 while (true)
                 {
                     SDL_PollEvent(&event);
@@ -711,14 +692,13 @@ void View::SDL_ThrowShape(SDL_Event &event)
 
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_LSHIFT)
     {
-        const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>> &shapePtrs = m_controller->RetrieveModel_ReadShapes();
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
             if (Utils::isInside({(double)initMouseX, (double)initMouseY}, shapePtr))
             {
-                this->m_controller->PauseModel();
-                m_modelPaused = true;
                 auto init = std::chrono::high_resolution_clock::now();
+                m_controller->PauseModel();
                 while (true)
                 {
                     SDL_PollEvent(&event);
@@ -727,16 +707,15 @@ void View::SDL_ThrowShape(SDL_Event &event)
                     if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_LSHIFT)
                     {
                         auto end = std::chrono::high_resolution_clock::now();
-
                         Point vec = {(double)(mouseX - initMouseX), (double)(mouseY - initMouseY), 0};
                         double scale = std::chrono::duration_cast<std::chrono::milliseconds>(end - init).count() / 10;
                         vec = vec / scale;
                         shapePtr->setShapeVel(vec);
-                        this->m_controller->UnpauseModel();
-                        m_modelPaused = false;
                         break;
                     }
+
                     shapePtr->setShapePos({(double)mouseX, (double)mouseY});
+                    m_controller->UnpauseModel();
                 }
             }
         }
@@ -745,36 +724,33 @@ void View::SDL_ThrowShape(SDL_Event &event)
 
 bool View::UI_ModelModError(const MODEL_MODIFICATION_RESULT &s, std::string &errorText, ImVec4 &textColor)
 {
+    switch (s.currentStatus)
+    {
+        case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS:
+            textColor = TELOS_IMGUI_RED;
+            errorText = "Exceeded maximum allowed sides\nCheck the engine parameters menu for max values";
+            return true;
 
-    if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS)
-    {
-        textColor = TELOS_IMGUI_RED;
-        errorText = "Exceeded maximum allowed sides\nCheck the engine parameters menu for max values";
-        return true;
+        case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS:
+            textColor = TELOS_IMGUI_RED;
+            errorText = "A polygon can't have less than 3 sides!";
+            return true;
+
+        case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS:
+            textColor = TELOS_IMGUI_RED;
+            errorText = "Exceeded max/min velocity(ies) and/or mass\nCheck the engine parameters menu for max values";
+            return true;
+
+        case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT:
+            textColor = TELOS_IMGUI_RED;
+            errorText = "Invalid point input";
+            return true;
+
+        default:
+            textColor = TELOS_IMGUI_CLEAR;
+            errorText = "";
+            return false;
     }
-    else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS)
-    {
-        textColor = TELOS_IMGUI_RED;
-        errorText = "A polygon can't have less than 3 sides!";
-        return true;
-    }
-    else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS)
-    {
-        textColor = TELOS_IMGUI_RED;
-        errorText = "Exceeded max/min velocity(ies) and/or mass\nCheck the engine parameters menu for max values";
-        return true;
-    }
-    else if (s.currentStatus == MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT)
-    {
-        textColor = TELOS_IMGUI_RED;
-        errorText = "Invalid point input";
-    }
-    else
-    {
-        textColor = TELOS_IMGUI_CLEAR;
-        errorText = "";
-    }
-    return false;
 }
 
 void View::SDL_RemoveShape(SDL_Event &event)
@@ -785,13 +761,13 @@ void View::SDL_RemoveShape(SDL_Event &event)
         return;
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
     {
-        const std::vector<std::shared_ptr<Shape>> &shapePtrs = this->m_controller->RetrieveModel_ReadShapes();
+        const std::vector<std::shared_ptr<Shape>> &shapePtrs = m_controller->RetrieveModel_ReadShapes();
         for (std::shared_ptr<Shape> shapePtr : shapePtrs)
         {
             if (Utils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
                 m_PCSColors.erase(m_PCSColors.begin() + (int)shapePtr->getShapeID());
-                this->m_controller->UpdateModel_RemoveShape(shapePtr);
+                m_controller->UpdateModel_RemoveShape(shapePtr);
                 break;
             }
         }
@@ -803,15 +779,13 @@ void View::SDL_Pause(SDL_Event &event)
     static ImVec4 userBackgroundCol;
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
     {
-        if (!m_modelPaused)
+        if (!m_controller->CheckModel_IsPaused())
         {
-            this->m_controller->PauseModel();
-            m_modelPaused = true;
+            m_controller->PauseModel();
         }
         else
         {
-            this->m_controller->UnpauseModel();
-            m_modelPaused = false;
+            m_controller->UnpauseModel();
         }
     }
 }
@@ -820,10 +794,10 @@ void View::SDL_TickModel(SDL_Event &event)
 {
     if (event.type == SDL_KEYDOWN && (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d))
     {
-        this->m_controller->UpdateModel_ForwardTick();
+        m_controller->UpdateModel_ForwardTick();
     }
     else if (event.type == SDL_KEYDOWN && (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a))
     {
-        this->m_controller->UpdateModel_BackwardTick();
+        m_controller->UpdateModel_BackwardTick();
     }
 }

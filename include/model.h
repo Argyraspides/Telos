@@ -49,18 +49,6 @@ struct CollisionInfo_PCSCVX
     double m_penetrationDepth;
 };
 
-enum WALL_SIDE
-{
-    LEFT = 0,
-    TOP = 1,
-    RIGHT = 2,
-    BOTTOM = 3,
-
-    NONE = 4,
-    TOP_BOTTOM = 5,
-    LEFT_RIGHT = 6
-};
-
 enum TIME_DIRECTION
 {
     STILL = 0,

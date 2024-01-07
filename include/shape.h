@@ -4,6 +4,18 @@
 #include <string>
 #include "cartesian.h"
 
+enum WALL_SIDE
+{
+    LEFT = 0,
+    TOP = 1,
+    RIGHT = 2,
+    BOTTOM = 3,
+
+    NONE = 4,
+    TOP_BOTTOM = 5,
+    LEFT_RIGHT = 6
+};
+
 enum SHAPE_TYPE_IDENTIFIERS
 {
     POINT_CLOUD_SHAPE = 0,
