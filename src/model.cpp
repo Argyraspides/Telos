@@ -186,6 +186,10 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
     double centerLineBoundsX[2] = {0, 0};
     double centerLineBoundsY[2] = {0, 0};
 
+    std::vector<Point> colPts;
+    Point collisionSurfaceNormal;
+    CollisionInfo_PCSCVX collisionInfo(false);
+
     for (int s = 0; s < 2; s++)
     {
 
@@ -233,19 +237,33 @@ CollisionInfo_PCSCVX Model::isContactPCSCVX_CL(PointCloudShape_Cvx &s1, PointClo
 
                 if (inCenterBoundsX && inCenterBoundsY && inEdgeBoundsX && inEdgeBoundsY)
                 {
-                    Point collisionSurfaceNormal = Math::getNormal2D((_s2->m_points[j] - _s2->m_points[wrap]));
+                    collisionSurfaceNormal = Math::getNormal2D((_s2->m_points[j] - _s2->m_points[wrap]));
                     collisionSurfaceNormal.normalize();
 
                     Point penetrationVector = intersection - _s1->m_center;
                     penetrationVector.normalize();
                     double penetrationDepth = Math::dist(intersection, _s1->m_points[i]);
 
-                    return CollisionInfo_PCSCVX(true, intersection, penetrationVector, centerLine, collisionSurfaceNormal, penetrationDepth, _s1, _s2);
+                    colPts.push_back(intersection);
+
+                    collisionInfo = CollisionInfo_PCSCVX(true, intersection, penetrationVector, centerLine, collisionSurfaceNormal, penetrationDepth, _s1, _s2);
                 }
             }
         }
     }
-    return CollisionInfo_PCSCVX(false);
+    Utils::printAllShapeInfo(s1);
+    Utils::printAllShapeInfo(s2);
+    Point avgColPt = {0,0,0};
+    for(int i = 0; i < colPts.size(); i++)
+    {
+        avgColPt = avgColPt + colPts[i];
+    }
+    avgColPt = avgColPt / colPts.size();
+    collisionInfo.m_collisionPoint = avgColPt;
+    Utils::printPointInfo(avgColPt);
+    Utils::printPointInfo(collisionInfo.m_penetrationVector);
+    std::cout << collisionInfo.m_penetrationDepth << "\n";
+    return collisionInfo;
 }
 
 void Model::resolveCollisionPCSCVX(CollisionInfo_PCSCVX &collisionInfo)

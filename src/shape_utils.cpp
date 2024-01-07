@@ -81,7 +81,7 @@ std::vector<Point> Utils::convertToPointCloud(const std::shared_ptr<Shape> &shap
 {
     if (shape == nullptr)
     {
-        return { Math::defaultPt };
+        return {Math::defaultPt};
     }
     int shapeTypeID = shape->getShapeTypeID();
     if (shapeTypeID == SHAPE_TYPE_IDENTIFIERS::POINT_CLOUD_SHAPE)
@@ -142,27 +142,30 @@ bool Utils::isInside(Point p, const std::shared_ptr<Shape> &s)
 
         std::shared_ptr<PointCloudShape_Cvx> pointCloudShape_Cvx = std::dynamic_pointer_cast<PointCloudShape_Cvx>(s);
         std::vector<Point> shapePoints = pointCloudShape_Cvx->getPoints();
-
-        bool inside = false;
-        for (int i = 0; i < shapePoints.size(); ++i)
-        {
-            const Point &v1 = shapePoints[i];
-            const Point &v2 = shapePoints[(i + 1) % shapePoints.size()];
-
-            if ((v1.y > p.y) != (v2.y > p.y) &&
-                p.x < (v2.x - v1.x) * (p.y - v1.y) / (v2.y - v1.y) + v1.x)
-            {
-                inside = !inside;
-            }
-        }
-
-        return inside;
+        return isInside(p, shapePoints);
     }
 
     std::cerr << "SHAPE TYPE IS INVALID. ERROR IN FUNCTION: " << __func__ << " IN CLASS " << typeid(Utils).name() << std::endl;
     return false;
 }
 
+// Checks if a point is inside of a shape defined as a vector of points using a simple raycast algorithm
+bool Utils::isInside(Point p, const std::vector<Point> &pts)
+{
+    bool inside = false;
+    for (int i = 0; i < pts.size(); ++i)
+    {
+        const Point &v1 = pts[i];
+        const Point &v2 = pts[(i + 1) % pts.size()];
+
+        if ((v1.y > p.y) != (v2.y > p.y) &&
+            p.x < (v2.x - v1.x) * (p.y - v1.y) / (v2.y - v1.y) + v1.x)
+        {
+            inside = !inside;
+        }
+    }
+    return inside;
+}
 // Calculates the centroid of a polygon given its vertices (assumes that the polygon has an even mass distribution)
 Point Utils::getCentroid(const std::vector<Point> &points)
 {

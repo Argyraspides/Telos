@@ -15,6 +15,7 @@ public:
     static double getRotInertia(const std::vector<Point> &points, const double &mass);  // CALCULATES THE ROTATIONAL INTERTIA OF THE SHAPE
     static bool checkConvex(const std::vector<Point> &points);                          // CHECKS IF A SHAPE IS CONVEX
     static bool isInside(Point p, const std::shared_ptr<Shape> &shape);                 // CHECKS IF A POINT IS INSIDE OF A CONVEX POINT CLOUD
+    static bool isInside(Point p, const std::vector<Point> &pts);                 // CHECKS IF A POINT IS INSIDE OF A CONVEX POINT CLOUD
     static void printAllShapeInfo(PointCloudShape_Cvx s);                               // PRINTS SHAPE POINT COORDINATES, CENTER, VELOCITY, ROTATION, MASS
     static void printLineInfo(Line l);
     static void printPointInfo(Point p);

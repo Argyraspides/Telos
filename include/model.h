@@ -13,6 +13,11 @@ struct CollisionInfo_PCSCVX
         this->m_collided = hasCollided;
     }
 
+    CollisionInfo_PCSCVX()
+    {
+        
+    }
+
     CollisionInfo_PCSCVX(
         bool hasCollided,
         Point collisionPoint,

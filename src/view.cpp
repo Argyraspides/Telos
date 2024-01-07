@@ -4,6 +4,7 @@
 #include "model.h"
 #include "BUILD_EMCC.h"
 #include "telos_imgui_colors.h"
+#include "emscripten_browser_clipboard.h"
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -417,6 +418,12 @@ void View::UI_About()
         ImGui::TextWrapped("%s", paragraphs2);
         char buf[] = "https://github.com/Argyraspides/Telos";
         ImGui::InputText("##ID", buf, 38);
+        
+        if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftCtrl)) && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C)))
+        {
+            emscripten_browser_clipboard::copy(buf);
+        }
+
         ImGui::SetWindowFontScale(1.0f);
         ImGui::NewLine();
     }
@@ -434,7 +441,7 @@ void View::UI_ConstructMenuModule()
         m_menuOpen = true;
 
     UI_About();
-    
+
     ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5);
     UI_ModelInfo();
     UI_Interactive_CommonShapeSubMenu();
