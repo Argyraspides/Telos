@@ -4,6 +4,11 @@
 #include <vector>
 #include <array>
 
+enum ANIMATION_TYPE
+{
+    PARTICLE_EXPLOSION = 0
+};
+
 class Animation
 {
 public: 
@@ -11,6 +16,8 @@ public:
     virtual void tick(SDL_Renderer* renderer){};
     double duration;
     double timeElapsed;
+    
+    int animationType;
 };
 
 class ParticleExplosionAnimation : public Animation

@@ -16,6 +16,7 @@ ParticleExplosionAnimation::ParticleExplosionAnimation(Point startPosition, doub
 ParticleExplosionAnimation::ParticleExplosionAnimation(Point startPosition, double duration) : Animation(duration)
 {
     this->duration = duration;
+    this->animationType = ANIMATION_TYPE::PARTICLE_EXPLOSION;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distributionVel(-100, 100);

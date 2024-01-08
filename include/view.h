@@ -98,6 +98,7 @@ private:
     Sint16 *m_PCSPointsX;              // Points of a polygon represented as a point cloud in a poniter for rendering with SDL_gfx
     Sint16 *m_PCSPointsY;
     int m_collisionParticleRadii = 3;
+    int m_collisionParticleAnimationDuration = 5;
     void AddRenderColor();
     std::vector<std::array<Uint8, 4>> m_objectColors; // Colors of the objects that have been added
 

@@ -48,12 +48,12 @@ struct Point
             z * num};
     }
 
-    bool operator!=(const Point &p)
+    bool operator!=(const Point &p) const
     {
         return (x != p.x && y != p.y && z != p.z);
     }
 
-    bool operator==(const Point &p)
+    bool operator==(const Point &p) const
     {
         return (x == p.x && y == p.y && z == p.z);
     }

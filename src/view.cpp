@@ -145,8 +145,9 @@ void View::Render()
 
             Render_Model(renderer);
             CheckModelEvents();
-            
-            if(m_enableAnimations) Render_Animations(renderer);
+
+            if (m_enableAnimations)
+                Render_Animations(renderer);
 
             // RENDER OBJECTS HERE ***************
 
@@ -468,10 +469,11 @@ void View::UI_ModelInfo()
             m_controller->UpdateModel_ChangeWallOverlapResolution(wallColRes);
         if (ImGui::SliderInt("Shape Collision Resolution", &shapeColRes, m_controller->RetrieveModel_GetMinShapeOverlapResolution(), m_controller->RetrieveModel_GetMaxShapeOverlapResolution()))
             m_controller->UpdateModel_ChangeShapeOverlapResolution(shapeColRes);
-        
+
         ImGui::NewLine();
-        
+
         ImGui::SliderInt("Collision Particle Size", &m_collisionParticleRadii, 1, 15);
+        ImGui::SliderInt("Collision Animation Duration", &m_collisionParticleAnimationDuration, 1, 30);
         ImGui::Checkbox("Enable Animations", &m_enableAnimations);
 
         ImGui::PopItemWidth(); // Restore default item width
@@ -623,9 +625,12 @@ void View::CheckModelEvents()
     const std::vector<ModelEvent> &modelEvents = m_controller->RetrieveModel_GetEvents();
     for (int i = 0; i < modelEvents.size(); i++)
     {
-        ParticleExplosionAnimation s(modelEvents[i].collisionLocation, 5);
-        s.particleRadius = m_collisionParticleRadii;
-        animations.push_back(std::make_shared<ParticleExplosionAnimation>(s));
+        if (modelEvents[i].collisionLocation != NULLPOINT)
+        {
+            ParticleExplosionAnimation s(modelEvents[i].collisionLocation, m_collisionParticleAnimationDuration);
+            s.particleRadius = m_collisionParticleRadii;
+            animations.push_back(std::make_shared<ParticleExplosionAnimation>(s));
+        }
     }
     m_controller->UpdateModel_ClearEvents();
 }
