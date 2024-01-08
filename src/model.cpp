@@ -78,6 +78,11 @@ void Model::updatePCSCVXList(int timeDirection)
             resolveCollisionOverlapPCSCVX_Rot(pair.first, pair.second);
             // Find the collision point, normal, etc
             CollisionInfo_PCSCVX ci = isContactPCSCVX_CL(pair.first, pair.second);
+
+            ModelEvent me;
+            me.collisionLocation = ci.m_collisionPoint;
+            m_modelEvents.push_back(me);
+            
             // Pull away the shapes from each other to prevent them getting stuck
             resolveCollisionOverlapPCSCVX(ci);
             // Resolve the collision by applying appropriate forces

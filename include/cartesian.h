@@ -48,6 +48,16 @@ struct Point
             z * num};
     }
 
+    bool operator!=(const Point &p)
+    {
+        return (x != p.x && y != p.y && z != p.z);
+    }
+
+    bool operator==(const Point &p)
+    {
+        return (x == p.x && y == p.y && z == p.z);
+    }
+
     void normalize()
     {
         double len = sqrt(x * x + y * y + z * z);

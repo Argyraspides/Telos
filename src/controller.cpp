@@ -247,6 +247,16 @@ const double Controller::RetrieveModel_GetCurrentTime()
     return m_model->m_time;
 }
 
+const std::vector<ModelEvent>& Controller::RetrieveModel_GetEvents()
+{
+    return m_model->m_modelEvents;
+}
+
+void Controller::UpdateModel_ClearEvents()
+{
+    m_model->m_modelEvents.clear();
+}
+
 const bool Controller::CheckModel_IsPaused()
 {
     return m_model->m_isPaused;

@@ -5,12 +5,14 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
 #include "shape.h"
+#include "telos_sdl2_animations.h"
 #include "point_cloud_convex.h"
 #include "model.h"
 #include "application_params.h"
 #include <vector>
 #include <array>
 #include <SDL.h>
+#include "telos_events.h"
 
 #if !SDL_VERSION_ATLEAST(2, 0, 17)
 #error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
@@ -39,7 +41,12 @@ public:
     void Render(); // SETS UP SDL2, DEAR IMGUI, AND BEGINS THE RENDER & INPUT LOOPS
 
 private:
-    void Render_Model(SDL_Renderer *renderer);                                                                         // RENDERS THE CONTENTS OF THE PHYSICS ENGINE
+    void Render_Model(SDL_Renderer *renderer); // RENDERS THE CONTENTS OF THE PHYSICS ENGINE
+    void CheckModelEvents();
+
+    bool m_enableAnimations = true;
+    std::vector<std::shared_ptr<Animation>> animations;
+    void Render_Animations(SDL_Renderer *renderer);
     void Render_GUI();                                                                                                 // RENDERS IMGUI COMPONENTS
     void Render_Polygon(SDL_Renderer *renderer, const std::vector<Point> &points, Uint8 r, Uint8 g, Uint8 b, Uint8 a); // RENDERS ANY POLYGON
 
@@ -90,7 +97,7 @@ private:
     ImVec4 m_clearColor;               // Currently selected color of the background
     Sint16 *m_PCSPointsX;              // Points of a polygon represented as a point cloud in a poniter for rendering with SDL_gfx
     Sint16 *m_PCSPointsY;
-    
+    int m_collisionParticleRadii = 3;
     void AddRenderColor();
     std::vector<std::array<Uint8, 4>> m_objectColors; // Colors of the objects that have been added
 

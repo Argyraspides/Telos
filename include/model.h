@@ -1,9 +1,11 @@
 #pragma once
 #include "shape.h"
 #include "point_cloud_convex.h"
+#include "telos_events.h"
 #include "engine_math.h"
 #include <mutex>
 #include <memory>
+
 
 // Information required to resolve collisions between convex point cloud polygons
 struct CollisionInfo_PCSCVX
@@ -131,6 +133,7 @@ struct WallCollisionInfo_PCSCVX
     Point m_collisionNormal;
 };
 
+
 class Model
 {
 public:
@@ -154,6 +157,8 @@ public:
 public:
     //*************************************************** RIDID BODY MECHANICS FUNCTIONS ******************************************************
     // ****************************************************************************************************************************************
+
+    std::vector<ModelEvent> m_modelEvents;
 
     std::vector<std::shared_ptr<PointCloudShape_Cvx>> m_PCSCVX_shapeList;
     std::vector<std::shared_ptr<PointCloudShape_Cvx>> &getPCSCVXShapeList();

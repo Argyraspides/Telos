@@ -1,5 +1,6 @@
 #include "view.h"
 #include "SDL2_gfxPrimitives.h"
+#include "telos_sdl2_animations.h"
 #include "shape_utils.h"
 #include "model.h"
 #include "BUILD_EMCC.h"
@@ -143,6 +144,9 @@ void View::Render()
             // RENDER OBJECTS HERE ***************
 
             Render_Model(renderer);
+            CheckModelEvents();
+            
+            if(m_enableAnimations) Render_Animations(renderer);
 
             // RENDER OBJECTS HERE ***************
 
@@ -464,7 +468,12 @@ void View::UI_ModelInfo()
             m_controller->UpdateModel_ChangeWallOverlapResolution(wallColRes);
         if (ImGui::SliderInt("Shape Collision Resolution", &shapeColRes, m_controller->RetrieveModel_GetMinShapeOverlapResolution(), m_controller->RetrieveModel_GetMaxShapeOverlapResolution()))
             m_controller->UpdateModel_ChangeShapeOverlapResolution(shapeColRes);
-       
+        
+        ImGui::NewLine();
+        
+        ImGui::SliderInt("Collision Particle Size", &m_collisionParticleRadii, 1, 15);
+        ImGui::Checkbox("Enable Animations", &m_enableAnimations);
+
         ImGui::PopItemWidth(); // Restore default item width
 
         ImGui::PushStyleColor(ImGuiCol_Button, TELOS_IMGUI_RED);
@@ -522,9 +531,9 @@ void View::UI_Tutorial()
     if (showTutorial)
     {
         static const char *tutText =
-            "Welcome to Telos! A 2D rigidbody physics engine\n\n"
+            "Welcome to Telos! A 2D rigid body physics engine\n\n"
 
-            "While still incomplete, with many features to come,\n"
+            "While still incomplete, with some features to come,\n"
             "the engine is functional and you may play around with\n"
             "it as development progresses.\n\n"
 
@@ -534,7 +543,8 @@ void View::UI_Tutorial()
             "Left click hold: Drag shapes around (pauses the engine)\n"
             "Right click: Delete a shape\n"
             "Left and right arrows: move backward/forward by one time step (you must pause first)\n"
-            "Left shift hold: Hover over a shape and fling it!";
+            "Left shift hold: Hover over a shape and fling it!\n\n"
+            "You can turn off/configure animations in the 'Engine Parameters' menu";
 
         ImGui::SetNextWindowPos(ImVec2(center.x, center.y), ImGuiCond_FirstUseEver);
         ImGui::Begin("Tutorial", &showTutorial);
@@ -604,6 +614,31 @@ void View::Render_Model(SDL_Renderer *renderer)
             Render_Polygon(
                 renderer,
                 Utils::convertToPointCloud(shapeList[i]), m_objectColors[i][0], m_objectColors[i][1], m_objectColors[i][2], m_objectColors[i][3]);
+        }
+    }
+}
+
+void View::CheckModelEvents()
+{
+    const std::vector<ModelEvent> &modelEvents = m_controller->RetrieveModel_GetEvents();
+    for (int i = 0; i < modelEvents.size(); i++)
+    {
+        ParticleExplosionAnimation s(modelEvents[i].collisionLocation, 5);
+        s.particleRadius = m_collisionParticleRadii;
+        animations.push_back(std::make_shared<ParticleExplosionAnimation>(s));
+    }
+    m_controller->UpdateModel_ClearEvents();
+}
+
+void View::Render_Animations(SDL_Renderer *renderer)
+{
+    for (int i = 0; i < animations.size(); i++)
+    {
+        animations[i]->tick(renderer);
+        if (animations[i]->timeElapsed > animations[i]->duration)
+        {
+            animations[i].reset();
+            animations.erase(animations.begin() + i);
         }
     }
 }

@@ -58,6 +58,8 @@ public:
     const int RetrieveModel_GetShapeCount();                               // RETURNS NUMBER OF SHAPES FROM THE MODEL
     const double RetrieveModel_GetTimeStep();                              // GET THE ENGINE TIME STEP (dt)
     const double RetrieveModel_GetCurrentTime();                           // GET THE TOTAL TIME ELAPSED SINCE THE ENGINE BEGAN
+    const std::vector<ModelEvent>& RetrieveModel_GetEvents();
+    void UpdateModel_ClearEvents();
     const bool CheckModel_IsPaused();
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
