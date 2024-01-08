@@ -455,16 +455,17 @@ void View::UI_ModelInfo()
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5); // Set the next added elements to this width
 
         ImGui::ColorEdit3("Background Color", (float *)&m_clearColor);
-        ImGui::SliderFloat("Collision Elasticity", &e, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
-        ImGui::SliderFloat("Wall Collision Elasticity", &wallE, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity());
-        ImGui::SliderInt("Wall Collision Resolution", &wallColRes, m_controller->RetrieveModel_GetMinWallOverlapResolution(), m_controller->RetrieveModel_GetMaxWallOverlapResolution());
-        ImGui::SliderInt("Shape Collision Resolution", &shapeColRes, m_controller->RetrieveModel_GetMinShapeOverlapResolution(), m_controller->RetrieveModel_GetMaxShapeOverlapResolution());
-        ImGui::PopItemWidth(); // Restore default item width
 
-        m_controller->UpdateModel_ChangeElasticity(e);
-        m_controller->UpdateModel_ChangeWallElasticity(wallE);
-        m_controller->UpdateModel_ChangeWallOverlapResolution(wallColRes);
-        m_controller->UpdateModel_ChangeShapeOverlapResolution(shapeColRes);
+        if (ImGui::SliderFloat("Collision Elasticity", &e, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity()))
+            m_controller->UpdateModel_ChangeElasticity(e);
+        if (ImGui::SliderFloat("Wall Collision Elasticity", &wallE, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity()))
+            m_controller->UpdateModel_ChangeWallElasticity(wallE);
+        if (ImGui::SliderInt("Wall Collision Resolution", &wallColRes, m_controller->RetrieveModel_GetMinWallOverlapResolution(), m_controller->RetrieveModel_GetMaxWallOverlapResolution()))
+            m_controller->UpdateModel_ChangeWallOverlapResolution(wallColRes);
+        if (ImGui::SliderInt("Shape Collision Resolution", &shapeColRes, m_controller->RetrieveModel_GetMinShapeOverlapResolution(), m_controller->RetrieveModel_GetMaxShapeOverlapResolution()))
+            m_controller->UpdateModel_ChangeShapeOverlapResolution(shapeColRes);
+       
+        ImGui::PopItemWidth(); // Restore default item width
 
         ImGui::PushStyleColor(ImGuiCol_Button, TELOS_IMGUI_RED);
 
