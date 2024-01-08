@@ -181,9 +181,11 @@ Point Utils::getCentroid(const std::vector<Point> &points)
     return Point(sumX / size, sumY / size, sumZ / size);
 }
 
-// TODO: DEBUG
+// Checks whether or not a polygon is convex
 bool Utils::isConvex(const std::vector<Point> &points)
 {
+    if(points.size() < 3) return false;
+    
     Point center = getCentroid(points);
 
     Point edge1 = points[0] - points[1];

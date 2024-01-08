@@ -92,7 +92,7 @@ private:
     Sint16 *m_PCSPointsY;
     
     void AddRenderColor();
-    std::vector<std::array<Uint8, 4>> m_PCSColors; // Colors of the polygons that have been added
+    std::vector<std::array<Uint8, 4>> m_objectColors; // Colors of the objects that have been added
 
 private:
     Controller *m_controller; // CONTROLLER INTERFACE TO MANIPULATE AND/OR RETRIEVE DATA FROM THE MODEL

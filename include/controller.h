@@ -13,6 +13,7 @@ struct MODEL_MODIFICATION_RESULT
     static const int PCS_ADD_FAIL_EXCEEDED_MAX_POINTS = -2;
     static const int PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS = -3;
     static const int PCS_ADD_FAIL_INVALID_POINT_INPUT = -4;
+    static const int PCS_ADD_FAIL_NOT_CONVEX = -5;
     /*************************************************************/
     static const int PCS_ADD_SUCCESS = 0;
     /*************************************************************/

@@ -266,7 +266,7 @@ void View::AddRenderColor()
     Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
     Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
     std::array<Uint8, 4> color = {r, g, b, a};
-    m_PCSColors.push_back(color);
+    m_objectColors.push_back(color);
 }
 
 void View::UI_Interactive_AddRectangleButton()
@@ -481,7 +481,7 @@ void View::UI_DeleteAllShapesBtn()
     if (ImGui::Button("Delete All Shapes"))
     {
         m_controller->UpdateModel_RemoveAllShapes();
-        m_PCSColors.clear();
+        m_objectColors.clear();
     }
 }
 
@@ -602,7 +602,7 @@ void View::Render_Model(SDL_Renderer *renderer)
         {
             Render_Polygon(
                 renderer,
-                Utils::convertToPointCloud(shapeList[i]), m_PCSColors[i][0], m_PCSColors[i][1], m_PCSColors[i][2], m_PCSColors[i][3]);
+                Utils::convertToPointCloud(shapeList[i]), m_objectColors[i][0], m_objectColors[i][1], m_objectColors[i][2], m_objectColors[i][3]);
         }
     }
 }
@@ -696,8 +696,8 @@ void View::SDL_ThrowShape(SDL_Event &event)
         {
             if (Utils::isInside({(double)initMouseX, (double)initMouseY}, shapePtr))
             {
-                auto init = std::chrono::high_resolution_clock::now();
                 m_controller->PauseModel();
+                shapePtr->setShapeVel({0, 0, 0});
                 while (true)
                 {
                     SDL_PollEvent(&event);
@@ -705,16 +705,12 @@ void View::SDL_ThrowShape(SDL_Event &event)
 
                     if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_LSHIFT)
                     {
-                        auto end = std::chrono::high_resolution_clock::now();
-                        Point vec = {(double)(mouseX - initMouseX), (double)(mouseY - initMouseY), 0};
-                        double scale = std::chrono::duration_cast<std::chrono::milliseconds>(end - init).count() / 10;
-                        vec = vec / scale;
+                        Point vec = {(double)(mouseX - initMouseX) / 10.0, (double)(mouseY - initMouseY) / 10.0, 0};
                         shapePtr->setShapeVel(vec);
+                        m_controller->UnpauseModel();
                         break;
                     }
-
                     shapePtr->setShapePos({(double)mouseX, (double)mouseY});
-                    m_controller->UnpauseModel();
                 }
             }
         }
@@ -725,30 +721,35 @@ bool View::UI_ModelModError(const MODEL_MODIFICATION_RESULT &s, std::string &err
 {
     switch (s.currentStatus)
     {
-        case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS:
-            textColor = TELOS_IMGUI_RED;
-            errorText = "Exceeded maximum allowed sides\nCheck the engine parameters menu for max values";
-            return true;
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Exceeded maximum allowed sides\nCheck the engine parameters menu for max values";
+        return true;
 
-        case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS:
-            textColor = TELOS_IMGUI_RED;
-            errorText = "A polygon can't have less than 3 sides!";
-            return true;
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "A polygon can't have less than 3 sides!";
+        return true;
 
-        case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS:
-            textColor = TELOS_IMGUI_RED;
-            errorText = "Exceeded max/min velocity(ies) and/or mass\nCheck the engine parameters menu for max values";
-            return true;
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Exceeded max/min velocity(ies) and/or mass\nCheck the engine parameters menu for max values";
+        return true;
 
-        case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT:
-            textColor = TELOS_IMGUI_RED;
-            errorText = "Invalid point input";
-            return true;
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Invalid point input";
+        return true;
 
-        default:
-            textColor = TELOS_IMGUI_CLEAR;
-            errorText = "";
-            return false;
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_NOT_CONVEX:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Shape is not convex!";
+        return true;
+
+    default:
+        textColor = TELOS_IMGUI_CLEAR;
+        errorText = "";
+        return false;
     }
 }
 
@@ -765,7 +766,7 @@ void View::SDL_RemoveShape(SDL_Event &event)
         {
             if (Utils::isInside({(float)mouseX, (float)mouseY}, shapePtr))
             {
-                m_PCSColors.erase(m_PCSColors.begin() + (int)shapePtr->getShapeID());
+                m_objectColors.erase(m_objectColors.begin() + (int)shapePtr->getShapeID());
                 m_controller->UpdateModel_RemoveShape(shapePtr);
                 break;
             }

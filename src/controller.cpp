@@ -86,6 +86,12 @@ MODEL_MODIFICATION_RESULT Controller::UpdateModel_AddShape_Arbitrary(char ptsPtr
     }
 
     std::vector<Point> pts = Utils::generateArbPoly2D(std::string(ptsPtr));
+
+    if(!Utils::isConvex(pts))
+    {
+        return MODEL_MODIFICATION_RESULT(MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_NOT_CONVEX);
+    }
+
     if (pts.size() >= 3 && pts.size() <= RetrieveModel_GetMaxPCSPoints() && Utils::isConvex(pts))
     {
         PointCloudShape_Cvx arbPoly(pts, {xVel / ENGINE_POLLING_RATE, yVel / ENGINE_POLLING_RATE}, rot / ENGINE_POLLING_RATE, mass, RetrieveModel_GetCurrentTime());
