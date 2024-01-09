@@ -1,1 +1,1 @@
-#define BUILDING_WITH_EMSCRIPTEN 1
+#define BUILD_EMCC 0
