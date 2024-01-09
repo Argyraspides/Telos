@@ -1,18 +1,16 @@
 #pragma once
 
 #include "imgui.h"
+#include "telos_imgui_colors.h"
 #include "controller.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
-#include "shape.h"
-#include "telos_sdl2_animations.h"
-#include "point_cloud_convex.h"
 #include "model.h"
-#include "application_params.h"
+
 #include <vector>
 #include <array>
 #include <SDL.h>
-#include "telos_events.h"
+#include <pthread.h>
 
 #if !SDL_VERSION_ATLEAST(2, 0, 17)
 #error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
@@ -40,80 +38,20 @@ public:
     }
     void Render(); // SETS UP SDL2, DEAR IMGUI, AND BEGINS THE RENDER & INPUT LOOPS
 
-private:
-    void Render_Model(SDL_Renderer *renderer); // RENDERS THE CONTENTS OF THE PHYSICS ENGINE
-    void CheckModelEvents();                   // CHECKS THE MODEL FOR ANY EVENTS THAT HAVE OCCURED FOR THE PURPOSES OF ANIMATIONS
-
-    bool m_enableAnimations = true;
-    bool m_enableBackgroundAnimations = true;
-    std::vector<std::shared_ptr<Animation>> animations;
-    std::vector<std::shared_ptr<Animation>> backgroundAnimations;
-    void Render_Animations(SDL_Renderer *renderer);
-    void Render_BackgroundAnimations(SDL_Renderer *renderer);
-    void Render_SwapBackgroundAnimation(std::shared_ptr<Animation> animation);
-    void Render_GUI();                                                                                                 // RENDERS IMGUI COMPONENTS
-    void Render_Polygon(SDL_Renderer *renderer, const std::vector<Point> &points, Uint8 r, Uint8 g, Uint8 b, Uint8 a); // RENDERS ANY POLYGON
-
-    // CLEANUP METHODS
-private:
     void CleanupSDL(SDL_Renderer *renderer, SDL_Window *window); // CLEANS UP SDL2 UPON APPLICATION EXIT
     void CleanupImGui();                                         // CLEANS UP IMGUI UPON APPLICATION EXIT
+    ImGuiIO &SetupImGui();                                       // SETS UP IMGUI
 
-private:
-    ImGuiIO &SetupImGui(); // SETS UP IMGUI
+    void SDL_EventHandlingLoop(); // LOOP FOR SDL2 INPUTS (RUNS IN SEPARATE THREAD FROM IMGUI)
+    void SDL_ViewportHandler(SDL_Event &event); // ADD FUNCTIONS INTO THIS FUNCTION THAT HANDLES DIFFERENT INPUTS
 
-    //*************************************************** RIDID BODY MECHANICS UI/RENDERING ***************************************************
-    // ****************************************************************************************************************************************
-
-private:
-    int UI_FetchID();                         // GETS NEXT AVAILABLE ID TO ASSIGN TO AN IMGUI INPUT (TEXTBOX, FLOAT SLIDERS, ETC)
-    void UI_Interactive_CommonShapeSubMenu(); // SUBMENU FOR ADDING COMMON SHAPES
-    void UI_Interactive_AddRegularPolygonButton();
-    void UI_Interactive_AddRectangleButton();
-    void UI_DeleteAllShapesBtn();
-
-    void UI_Interactive_AddTriangleButton();
-    void UI_Interactive_AddArbPolygonInput();
-
-    void UI_StandardShapeInputs(float &xVel, float &yVel, float &rot, float &mass);
-
-    void UI_Tutorial(); // TUTORIAL AND WELCOME WINDOW
-    void UI_About();
-    void UI_ModelInfo();             // ENGINE PARAMETERS
-    void UI_ShapeInfo();             // INFORMATION ABOUT CURRENT SHAPES ADDED TO THE SCENE
-    void UI_CornerInfo(ImGuiIO &io); // FPS AND PAUSE INDICATOR
-    bool UI_ModelModError(const MODEL_MODIFICATION_RESULT &result, std::string &errorText, ImVec4 &colorText);
-
-    bool m_menuOpen = false;                  // Is the menu currently collapsed or open? (This is to make sure inputs are not handled by the engine behind the menu)
-    float m_menuWidth = SCREEN_WIDTH * 0.275; // Width of the menu
-    void UI_ConstructMenuModule();            // CREATES THE ENTIRE MENU
-
-private:
-    void SDL_EventHandlingLoop();               // HANDLES INPUTS FOR THE VIEWPORT (NOT IMGUI)
-    void SDL_ViewportHandler(SDL_Event &event); // HANDLES INPUT ON THE VIEWPORT (I.E. THE AREA THINGS ARE RENDERED)
-    void SDL_DragShape(SDL_Event &event);       // ALLOWS USER TO DRAG SHAPES AROUND THE VIEWPORT
-    void SDL_ThrowShape(SDL_Event &event);
-    void SDL_RemoveShape(SDL_Event &event); // ALLOWS USER TO REMOVE SHAPES FROM THE WORLD
-    void SDL_Pause(SDL_Event &event);       // ALLOWS USER TO PAUSE THE MODEL
-    void SDL_TickModel(SDL_Event &event);   // ALLOWS USER TO MOVE THE MODEL FORWARD OR BACKWARD BY ONE TIME STEP
-
-    static ImVec4 m_currentShapeColor; // Currently selected color of the next shape to be added
-    ImVec4 m_clearColor;               // Currently selected color of the background
-    ImVec4 m_gradientClearColor;
-    Sint16 *m_PCSPointsX; // Points of a polygon represented as a point cloud in a poniter for rendering with SDL_gfx
-    Sint16 *m_PCSPointsY;
-    int m_collisionParticleRadii = 3;
-    int m_collisionParticleAnimationDuration = 5;
-    void AddRenderColor();
-    std::vector<std::array<Uint8, 4>> m_objectColors; // Colors of the objects that have been added
-
-    // ****************************************************************************************************************************************
-    // ****************************************************************************************************************************************
-
-private:
     Controller *m_controller; // CONTROLLER INTERFACE TO MANIPULATE AND/OR RETRIEVE DATA FROM THE MODEL
 
     // SDL BOILERPLATE TO SET UP THE WINDOW AND RENDERER
+    int SCREEN_WIDTH = 1280, SCREEN_HEIGHT = 720;
+    int VIEW_POLLING_RATE = 60;
+    int VIEW_INPUT_POLLING_RATE = 60;
+    ImVec4 m_clearColor = TELOS_IMGUI_DARKGRAY;
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Window *window = SDL_CreateWindow("Telos", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, window_flags);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
@@ -126,9 +64,7 @@ private:
         return frame_events;
     }
 
-    bool done = false;          // Is the entire application done?
-    bool m_inputDone = false;   // Are the SDL viewport related control handlers done?
-    bool m_renderDone = false;  // Is the ImGui and model rendering portion done?
-    bool m_modelPaused = false; // Is the model currently paused?
-    static int ImGuiID;         // Next available ID of an ImGui element
+    bool done = false;         // Is the entire application done?
+    bool m_inputDone = false;  // Are the SDL viewport related control handlers done?
+    bool m_renderDone = false; // Is the ImGui and model rendering portion done?
 };

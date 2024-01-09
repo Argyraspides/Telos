@@ -6,6 +6,7 @@ int main()
 {
     // Instantiate the physics engine
     Model m;
+    
     // Run engine in separate thread
     pthread_t modelThreadId;
     pthread_create(&modelThreadId, nullptr, &Model::threadEntry, &m);
