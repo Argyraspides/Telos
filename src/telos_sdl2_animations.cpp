@@ -1,7 +1,8 @@
 #include "telos_sdl2_animations.h"
+#include "application_params.h"
+
 #include <random>
 #include <chrono>
-#include "application_params.h"
 
 Animation::Animation(double duration)
 {
@@ -20,20 +21,13 @@ ParticleExplosionAnimation::ParticleExplosionAnimation(Point startPosition, doub
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distributionVel(-100, 100);
-    std::uniform_int_distribution<int> distributionColors(0, 255);
 
     for (int i = 0; i < defaultParticleCount; i++)
     {
         particles.push_back(startPosition);
         particleVelocities.push_back({(double)distributionVel(gen), (double)distributionVel(gen), 0});
 
-        int r = distributionColors(gen);
-        int g = distributionColors(gen);
-        int b = distributionColors(gen);
-        int a = 1;
-
-        std::array<int, 4> color = {r, g, b, a};
-
+        SDL_Color color = AnimationUtils::generateRandomSDLColor();
         particleColors.push_back(color);
     }
 }
@@ -43,7 +37,7 @@ void ParticleExplosionAnimation::tick(SDL_Renderer *renderer)
     for (int i = 0; i < particles.size(); i++)
     {
         particles[i] = particles[i] + particleVelocities[i];
-        SDL_SetRenderDrawColor(renderer, particleColors[i][0], particleColors[i][1], particleColors[i][2], particleColors[i][3]);
+        SDL_SetRenderDrawColor(renderer, particleColors[i].r, particleColors[i].g, particleColors[i].b, particleColors[i].a);
         SDL_Rect particle;
         particle.w = particleRadius;
         particle.h = particleRadius;
@@ -52,4 +46,45 @@ void ParticleExplosionAnimation::tick(SDL_Renderer *renderer)
         SDL_RenderFillRect(renderer, &particle);
     }
     timeElapsed += 0.1;
+}
+
+BackgroundGradientAnimation::BackgroundGradientAnimation(double duration) : Animation(duration)
+{
+    this->animationType = ANIMATION_TYPE::WALLPAPER;
+    constructRandomGradient(AnimationUtils::generateRandomSDLColor());
+}
+
+BackgroundGradientAnimation::BackgroundGradientAnimation(double duration, SDL_Color startingColor) : Animation(duration)
+{
+    this->animationType = ANIMATION_TYPE::WALLPAPER;
+    constructRandomGradient(startingColor);
+}
+
+void BackgroundGradientAnimation::constructRandomGradient(SDL_Color c)
+{
+    int iterations = SCREEN_WIDTH / bandWidth;
+    for(int i = 0; i < iterations; i++)
+    {
+        if (c.r - 1 > 0) c.r--;
+        else if(c.g - 1 > 0) c.g--;
+        else if(c.b - 1 > 0) c.b--;
+        bandColors.push_back(c);
+    }
+}
+
+void BackgroundGradientAnimation::tick(SDL_Renderer *renderer)
+{
+    int iterations = SCREEN_WIDTH / bandWidth;
+    for (int i = 0; i < iterations; i++)
+    {
+        SDL_Color color = bandColors[i];
+
+        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+        SDL_Rect band;
+        band.w = bandWidth;
+        band.h = SCREEN_HEIGHT;
+        band.x = i * bandWidth;
+        band.y = 0;
+        SDL_RenderFillRect(renderer, &band);
+    }
 }

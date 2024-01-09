@@ -35,9 +35,6 @@ View::~View()
     delete[] m_PCSPointsY;
 }
 
-// **************************************************************************************************************************************************************************
-// MAIN RENDER FUNCTION
-
 void View::Render()
 {
     // Setup SDL
@@ -83,6 +80,9 @@ void View::Render()
     auto startTime = std::chrono::high_resolution_clock::now();
 
     m_clearColor = TELOS_IMGUI_DARKGRAY;
+    m_gradientClearColor = ImVec4(45.0 / 255.0, 144.0 / 255.0, 149.0 / 255.0, 1.0);
+    BackgroundGradientAnimation bg(1, AnimationUtils::imGuiToSDLColor(m_gradientClearColor));
+    backgroundAnimations.push_back(std::make_shared<BackgroundGradientAnimation>(bg));
 
 #ifdef __EMSCRIPTEN__
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
@@ -143,8 +143,12 @@ void View::Render()
 
             // RENDER OBJECTS HERE ***************
 
-            Render_Model(renderer);
             CheckModelEvents();
+
+            if (m_enableBackgroundAnimations)
+                Render_BackgroundAnimations(renderer);
+
+            Render_Model(renderer);
 
             if (m_enableAnimations)
                 Render_Animations(renderer);
@@ -165,8 +169,61 @@ void View::Render()
     CleanupImGui();
 }
 
-// **************************************************************************************************************************************************************************
-// CLEANUP
+void View::Render_Polygon(SDL_Renderer *renderer, const std::vector<Point> &points, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    for (int i = 0; i < points.size(); i++)
+    {
+        m_PCSPointsX[i] = points[i].x;
+        m_PCSPointsY[i] = points[i].y;
+    }
+    filledPolygonRGBA(renderer, m_PCSPointsX, m_PCSPointsY, points.size(), r, g, b, a);
+}
+
+void View::Render_Model(SDL_Renderer *renderer)
+{
+    if (m_controller != nullptr)
+    {
+        const std::vector<std::shared_ptr<Shape>> &shapeList = m_controller->RetrieveModel_ReadShapes();
+        for (int i = 0; i < shapeList.size(); i++)
+        {
+            Render_Polygon(
+                renderer,
+                Utils::convertToPointCloud(shapeList[i]), m_objectColors[i][0], m_objectColors[i][1], m_objectColors[i][2], m_objectColors[i][3]);
+        }
+    }
+}
+
+void View::Render_Animations(SDL_Renderer *renderer)
+{
+    for (int i = 0; i < animations.size(); i++)
+    {
+        animations[i]->tick(renderer);
+        if (animations[i]->timeElapsed > animations[i]->duration)
+        {
+            animations[i].reset();
+            animations.erase(animations.begin() + i);
+        }
+    }
+}
+
+void View::Render_BackgroundAnimations(SDL_Renderer *renderer)
+{
+    for (int i = 0; i < backgroundAnimations.size(); i++)
+    {
+        backgroundAnimations[i]->tick(renderer);
+        if (backgroundAnimations[i]->timeElapsed > backgroundAnimations[i]->duration)
+        {
+            backgroundAnimations[i].reset();
+            backgroundAnimations.erase(animations.begin() + i);
+        }
+    }
+}
+
+void View::Render_GUI()
+{
+    UI_ConstructMenuModule();
+    UI_Tutorial();
+}
 
 void View::CleanupSDL(SDL_Renderer *renderer, SDL_Window *window)
 {
@@ -204,9 +261,6 @@ ImGuiIO &View::SetupImGui()
 
     return io;
 }
-
-// **************************************************************************************************************************************************************************
-// UI ELEMENTS
 
 int View::UI_FetchID()
 {
@@ -262,16 +316,6 @@ void View::UI_Interactive_AddRegularPolygonButton()
         }
     }
     ImGui::TextColored(errorColor, "%s", errorText.c_str());
-}
-
-void View::AddRenderColor()
-{
-    Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
-    Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
-    Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
-    Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
-    std::array<Uint8, 4> color = {r, g, b, a};
-    m_objectColors.push_back(color);
 }
 
 void View::UI_Interactive_AddRectangleButton()
@@ -420,6 +464,7 @@ void View::UI_About()
 void View::UI_ConstructMenuModule()
 {
     ImGui::Begin("Menu");
+
     ImGui::SetWindowPos(ImVec2(0, 0));
     ImGui::SetWindowSize(ImVec2(m_menuWidth, ImGui::GetIO().DisplaySize.y));
     m_menuOpen = !ImGui::IsWindowCollapsed();
@@ -459,7 +504,19 @@ void View::UI_ModelInfo()
 
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5); // Set the next added elements to this width
 
-        ImGui::ColorEdit3("Background Color", (float *)&m_clearColor);
+        ImGui::ColorEdit3("Static Background Color", (float *)&m_clearColor);
+        if (ImGui::ColorEdit3("Gradient Background Color", (float *)&m_gradientClearColor))
+        {
+            BackgroundGradientAnimation bg(1, AnimationUtils::imGuiToSDLColor(m_gradientClearColor));
+            for (int i = 0; i < backgroundAnimations.size(); i++)
+            {
+                if (backgroundAnimations[i]->animationType == ANIMATION_TYPE::WALLPAPER)
+                {
+                    backgroundAnimations.erase(backgroundAnimations.begin() + i);
+                }
+            }
+            backgroundAnimations.push_back(std::make_shared<BackgroundGradientAnimation>(bg));
+        }
 
         if (ImGui::SliderFloat("Collision Elasticity", &e, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity()))
             m_controller->UpdateModel_ChangeElasticity(e);
@@ -474,14 +531,20 @@ void View::UI_ModelInfo()
 
         ImGui::SliderInt("Collision Particle Size", &m_collisionParticleRadii, 1, 15);
         ImGui::SliderInt("Collision Animation Duration", &m_collisionParticleAnimationDuration, 1, 30);
+        
+        ImGui::NewLine();
+
         ImGui::Checkbox("Enable Animations", &m_enableAnimations);
+        ImGui::Checkbox("Enable Background Animations", &m_enableBackgroundAnimations);
 
         ImGui::PopItemWidth(); // Restore default item width
 
         ImGui::PushStyleColor(ImGuiCol_Button, TELOS_IMGUI_RED);
 
         ImGui::NewLine();
+
         UI_DeleteAllShapesBtn();
+        
         ImGui::NewLine();
 
         ImGui::PopStyleColor();
@@ -593,69 +656,69 @@ void View::UI_ShapeInfo()
     }
 }
 
-// **************************************************************************************************************************************************************************
-// RENDERING
-
-void View::Render_Polygon(SDL_Renderer *renderer, const std::vector<Point> &points, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+bool View::UI_ModelModError(const MODEL_MODIFICATION_RESULT &s, std::string &errorText, ImVec4 &textColor)
 {
-    for (int i = 0; i < points.size(); i++)
+    switch (s.currentStatus)
     {
-        m_PCSPointsX[i] = points[i].x;
-        m_PCSPointsY[i] = points[i].y;
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Exceeded maximum allowed sides\nCheck the engine parameters menu for max values";
+        return true;
+
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "A polygon can't have less than 3 sides!";
+        return true;
+
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Exceeded max/min velocity(ies) and/or mass\nCheck the engine parameters menu for max values";
+        return true;
+
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Invalid point input";
+        return true;
+
+    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_NOT_CONVEX:
+        textColor = TELOS_IMGUI_RED;
+        errorText = "Shape is not convex!";
+        return true;
+
+    default:
+        textColor = TELOS_IMGUI_CLEAR;
+        errorText = "";
+        return false;
     }
-    filledPolygonRGBA(renderer, m_PCSPointsX, m_PCSPointsY, points.size(), r, g, b, a);
 }
 
-void View::Render_Model(SDL_Renderer *renderer)
+void View::AddRenderColor()
 {
-    if (m_controller != nullptr)
-    {
-        const std::vector<std::shared_ptr<Shape>> &shapeList = m_controller->RetrieveModel_ReadShapes();
-        for (int i = 0; i < shapeList.size(); i++)
-        {
-            Render_Polygon(
-                renderer,
-                Utils::convertToPointCloud(shapeList[i]), m_objectColors[i][0], m_objectColors[i][1], m_objectColors[i][2], m_objectColors[i][3]);
-        }
-    }
+    Uint8 r = (Uint8)(m_currentShapeColor.x * pixelLimit);
+    Uint8 g = (Uint8)(m_currentShapeColor.y * pixelLimit);
+    Uint8 b = (Uint8)(m_currentShapeColor.z * pixelLimit);
+    Uint8 a = (Uint8)(m_currentShapeColor.w * pixelLimit);
+    std::array<Uint8, 4> color = {r, g, b, a};
+    m_objectColors.push_back(color);
 }
 
 void View::CheckModelEvents()
 {
-    const std::vector<ModelEvent> &modelEvents = m_controller->RetrieveModel_GetEvents();
-    for (int i = 0; i < modelEvents.size(); i++)
+    if (m_enableAnimations)
     {
-        if (modelEvents[i].collisionLocation != NULLPOINT)
+        const std::vector<ModelEvent> &modelEvents = m_controller->RetrieveModel_GetEvents();
+        for (int i = 0; i < modelEvents.size(); i++)
         {
-            ParticleExplosionAnimation s(modelEvents[i].collisionLocation, m_collisionParticleAnimationDuration);
-            s.particleRadius = m_collisionParticleRadii;
-            animations.push_back(std::make_shared<ParticleExplosionAnimation>(s));
+            if (modelEvents[i].collisionLocation != NULLPOINT)
+            {
+                ParticleExplosionAnimation s(modelEvents[i].collisionLocation, m_collisionParticleAnimationDuration);
+                s.particleRadius = m_collisionParticleRadii;
+                animations.push_back(std::make_shared<ParticleExplosionAnimation>(s));
+            }
         }
     }
     m_controller->UpdateModel_ClearEvents();
 }
-
-void View::Render_Animations(SDL_Renderer *renderer)
-{
-    for (int i = 0; i < animations.size(); i++)
-    {
-        animations[i]->tick(renderer);
-        if (animations[i]->timeElapsed > animations[i]->duration)
-        {
-            animations[i].reset();
-            animations.erase(animations.begin() + i);
-        }
-    }
-}
-
-void View::Render_GUI()
-{
-    UI_ConstructMenuModule();
-    UI_Tutorial();
-}
-
-// **************************************************************************************************************************************************************************
-// INPUT HANDLING
 
 void View::SDL_EventHandlingLoop()
 {
@@ -755,42 +818,6 @@ void View::SDL_ThrowShape(SDL_Event &event)
                 }
             }
         }
-    }
-}
-
-bool View::UI_ModelModError(const MODEL_MODIFICATION_RESULT &s, std::string &errorText, ImVec4 &textColor)
-{
-    switch (s.currentStatus)
-    {
-    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_POINTS:
-        textColor = TELOS_IMGUI_RED;
-        errorText = "Exceeded maximum allowed sides\nCheck the engine parameters menu for max values";
-        return true;
-
-    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INSUFFICIENT_POINTS:
-        textColor = TELOS_IMGUI_RED;
-        errorText = "A polygon can't have less than 3 sides!";
-        return true;
-
-    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_EXCEEDED_MAX_SHAPE_PARAMS:
-        textColor = TELOS_IMGUI_RED;
-        errorText = "Exceeded max/min velocity(ies) and/or mass\nCheck the engine parameters menu for max values";
-        return true;
-
-    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_INVALID_POINT_INPUT:
-        textColor = TELOS_IMGUI_RED;
-        errorText = "Invalid point input";
-        return true;
-
-    case MODEL_MODIFICATION_RESULT::PCS_ADD_FAIL_NOT_CONVEX:
-        textColor = TELOS_IMGUI_RED;
-        errorText = "Shape is not convex!";
-        return true;
-
-    default:
-        textColor = TELOS_IMGUI_CLEAR;
-        errorText = "";
-        return false;
     }
 }
 

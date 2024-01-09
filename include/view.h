@@ -42,11 +42,14 @@ public:
 
 private:
     void Render_Model(SDL_Renderer *renderer); // RENDERS THE CONTENTS OF THE PHYSICS ENGINE
-    void CheckModelEvents();
+    void CheckModelEvents();                   // CHECKS THE MODEL FOR ANY EVENTS THAT HAVE OCCURED FOR THE PURPOSES OF ANIMATIONS
 
     bool m_enableAnimations = true;
+    bool m_enableBackgroundAnimations = true;
     std::vector<std::shared_ptr<Animation>> animations;
+    std::vector<std::shared_ptr<Animation>> backgroundAnimations;
     void Render_Animations(SDL_Renderer *renderer);
+    void Render_BackgroundAnimations(SDL_Renderer *renderer);
     void Render_GUI();                                                                                                 // RENDERS IMGUI COMPONENTS
     void Render_Polygon(SDL_Renderer *renderer, const std::vector<Point> &points, Uint8 r, Uint8 g, Uint8 b, Uint8 a); // RENDERS ANY POLYGON
 
@@ -95,12 +98,16 @@ private:
 
     static ImVec4 m_currentShapeColor; // Currently selected color of the next shape to be added
     ImVec4 m_clearColor;               // Currently selected color of the background
-    Sint16 *m_PCSPointsX;              // Points of a polygon represented as a point cloud in a poniter for rendering with SDL_gfx
+    ImVec4 m_gradientClearColor;
+    Sint16 *m_PCSPointsX; // Points of a polygon represented as a point cloud in a poniter for rendering with SDL_gfx
     Sint16 *m_PCSPointsY;
     int m_collisionParticleRadii = 3;
     int m_collisionParticleAnimationDuration = 5;
     void AddRenderColor();
     std::vector<std::array<Uint8, 4>> m_objectColors; // Colors of the objects that have been added
+
+    // ****************************************************************************************************************************************
+    // ****************************************************************************************************************************************
 
 private:
     Controller *m_controller; // CONTROLLER INTERFACE TO MANIPULATE AND/OR RETRIEVE DATA FROM THE MODEL
