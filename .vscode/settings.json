@@ -96,7 +96,8 @@
         "queue": "cpp",
         "__mutex_base": "cpp",
         "__tree": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "ranges": "cpp"
     },
     "cmake.configureOnOpen": false
 }

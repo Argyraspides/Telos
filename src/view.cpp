@@ -219,6 +219,19 @@ void View::Render_BackgroundAnimations(SDL_Renderer *renderer)
     }
 }
 
+void View::Render_SwapBackgroundAnimation(std::shared_ptr<Animation> backgroundAnimation)
+{
+    for (int i = 0; i < backgroundAnimations.size(); i++)
+    {
+        if (backgroundAnimations[i]->animationType == ANIMATION_TYPE::WALLPAPER)
+        {
+            backgroundAnimations[i].reset();
+            backgroundAnimations.erase(backgroundAnimations.begin() + i);
+        }
+    }
+    backgroundAnimations.push_back(backgroundAnimation);
+}
+
 void View::Render_GUI()
 {
     UI_ConstructMenuModule();
@@ -349,7 +362,7 @@ void View::UI_Interactive_AddArbPolygonInput()
 {
     ImGui::Text("Arbitrary Shape");
     // 4500 = ( {4 digits}.{16 digits} , {4 digits}.{16 digits} ) x 100 + 99 + extra just in case (justin beiber haha)
-    static char inputBuf[4500] = "(0,0),(200,100),(400,300),(500,500),(300,700),(100,600)";
+    static char inputBuf[4500] = "(0,0),(100,50),(200,150),(250,250),(150,350),(50,300)";
     static float xVel = 69.0f;
     static float yVel = 69.0f;
     static float rot = 1.0f;
@@ -508,14 +521,8 @@ void View::UI_ModelInfo()
         if (ImGui::ColorEdit3("Gradient Background Color", (float *)&m_gradientClearColor))
         {
             BackgroundGradientAnimation bg(1, AnimationUtils::imGuiToSDLColor(m_gradientClearColor));
-            for (int i = 0; i < backgroundAnimations.size(); i++)
-            {
-                if (backgroundAnimations[i]->animationType == ANIMATION_TYPE::WALLPAPER)
-                {
-                    backgroundAnimations.erase(backgroundAnimations.begin() + i);
-                }
-            }
-            backgroundAnimations.push_back(std::make_shared<BackgroundGradientAnimation>(bg));
+            std::shared_ptr<Animation> bgPtr = std::make_shared<BackgroundGradientAnimation>(bg);
+            Render_SwapBackgroundAnimation(bgPtr);
         }
 
         if (ImGui::SliderFloat("Collision Elasticity", &e, m_controller->RetrieveModel_GetMinElasticity(), m_controller->RetrieveModel_GetMaxElasticity()))
@@ -531,7 +538,7 @@ void View::UI_ModelInfo()
 
         ImGui::SliderInt("Collision Particle Size", &m_collisionParticleRadii, 1, 15);
         ImGui::SliderInt("Collision Animation Duration", &m_collisionParticleAnimationDuration, 1, 30);
-        
+
         ImGui::NewLine();
 
         ImGui::Checkbox("Enable Animations", &m_enableAnimations);
@@ -544,7 +551,7 @@ void View::UI_ModelInfo()
         ImGui::NewLine();
 
         UI_DeleteAllShapesBtn();
-        
+
         ImGui::NewLine();
 
         ImGui::PopStyleColor();

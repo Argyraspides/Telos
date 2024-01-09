@@ -70,4 +70,4 @@ if(MY_COMPILER STREQUAL "emcc")
 
 elseif((MY_COMPILER STREQUAL "gcc")) 
     target_link_libraries(${PROJECT_NAME} "SDL2" "SDL2GFX" "imgui" "OpenGL::GL" )
-endif()
+endif() 

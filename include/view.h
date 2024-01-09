@@ -50,6 +50,7 @@ private:
     std::vector<std::shared_ptr<Animation>> backgroundAnimations;
     void Render_Animations(SDL_Renderer *renderer);
     void Render_BackgroundAnimations(SDL_Renderer *renderer);
+    void Render_SwapBackgroundAnimation(std::shared_ptr<Animation> animation);
     void Render_GUI();                                                                                                 // RENDERS IMGUI COMPONENTS
     void Render_Polygon(SDL_Renderer *renderer, const std::vector<Point> &points, Uint8 r, Uint8 g, Uint8 b, Uint8 a); // RENDERS ANY POLYGON
 
